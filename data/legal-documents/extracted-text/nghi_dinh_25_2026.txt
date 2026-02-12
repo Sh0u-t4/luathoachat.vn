@@ -1,0 +1,1430 @@
+     1→
+     2→
+     3→CHÍNH PHỦ 
+     4→________
+     5→ 
+     6→ 
+     7→Số: 25/2026/NĐ-CP  
+     8→CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM 
+     9→Độc lập - Tự do - Hạnh phúc 
+    10→_______________________________________
+    11→ 
+    12→Hà Nội, ngày 17 tháng 01 năm 2026   
+    13→ 
+    14→ 
+    15→NGHỊ ĐỊNH 
+    16→Quy định chi tiết và biện pháp để tổ chức, hướng dẫn thi hành  
+    17→một số điều của Luật Hóa chất về phát triển ngành công nghiệp  
+    18→hóa chất và an toàn, an ninh hóa chất  
+    19→ 
+    20→Căn cứ Luật Tổ chức Chính phủ số 63/2025/QH15; 
+    21→Căn cứ Luật Hóa chất số 69/2025/QH15; 
+    22→Căn cứ Nghị quyết số 198/2025/QH15 của Quốc hội về một số cơ chế, 
+    23→chính sách đặc biệt phát triển kinh tế tư nhân; 
+    24→Theo đề nghị của Bộ trưởng Bộ Công Thương; 
+    25→Chính phủ ban hành Nghị định quy định chi tiết và biện pháp để tổ chức, 
+    26→hướng dẫn thi hành một số điều của Luật Hóa chất về phát triển ngành công 
+    27→nghiệp hóa chất và an toàn, an ninh hóa chất. 
+    28→ 
+    29→Chương I 
+    30→QUY ĐỊNH CHUNG 
+    31→ 
+    32→Điều 1. Phạm vi điều chỉnh 
+    33→Nghị định này quy định chi tiết khoản 15 Điều 2; khoản 5 Điều 4, khoản 5 
+    34→Điều 5, khoản 3 Điều 6, khoản 5 Điều 8, khoản 5 Điều 33, khoản 3 Điều 35, 
+    35→khoản 3 Điều 36, khoản 2 Điều 37, khoản 2 Điều 38, khoản 5 Điều 39, khoản 3 
+    36→Điều 42, khoản 4 Điều 46 của Luật Hóa chất và biện pháp để tổ chức, hướng dẫn 
+    37→thi hành Luật Hóa chất về trách nhiệm quản lý nhà nước về phát triển ngành công 
+    38→nghiệp hóa chất và an toàn, an ninh hóa chất; lập, thẩm định, phê duyệt, công bố 
+    39→và tổ chức thực hiện Chiến lược phát triển ngành công nghiệp hóa chất; thiết lập 
+    40→khoảng cách an toàn đối với công trình hóa chất; kiểm tra, hồ sơ huấn luyện an 
+    41→toàn hóa chất; nâng cao năng lực phòng ngừa, ứng phó sự cố hóa chất trong lĩnh 
+    42→vực dân sự. 
+    43→Điều 2. Đối tượng áp dụng 
+    44→Cơ quan, tổ chức, cá nhân trong nước và tổ chức, cá nhân nước ngoài thực 
+    45→hiện các hoạt động liên quan đến hóa chất trên lãnh thổ Việt Nam. 
+    46→
+    47→2 
+    48→Điều 3. Giải thích từ ngữ 
+    49→1. Nguyên tắc hóa học xanh là bộ nguyên tắc được áp dụng trong thiết kế, 
+    50→lựa chọn công nghệ, thiết bị, quy trình sản xuất, sử dụng và thải bỏ hóa chất 
+    51→nhằm giảm thiểu hoặc loại bỏ việc sử dụng và tạo ra hóa chất nguy hiểm. 
+    52→2. Khu công nghiệp chuyên ngành hóa chất là khu công nghiệp chuyên 
+    53→sản xuất và cung ứng dịch vụ cho dự án hóa chất, công trình hóa chất; có tối 
+    54→thiểu 60% diện tích đất công nghiệp của khu công nghiệp được sử dụng để thu 
+    55→hút dự án hóa chất, công trình hóa chất và dự án sử dụng sản phẩm của ngành 
+    56→công nghiệp hóa chất được sản xuất trong khu công nghiệp làm nguyên liệu, 
+    57→dung môi, chất xúc tác trong quá trình sản xuất. 
+    58→Điều 4. Trách nhiệm quản lý nhà nước về phát triển ngành công 
+    59→nghiệp hóa chất và an toàn, an ninh hóa chất 
+    60→1. Chính phủ thống nhất quản lý nhà nước về phát triển ngành công nghiệp 
+    61→hóa chất và an toàn, an ninh hóa chất trong phạm vi cả nước. 
+    62→2. Bộ Công Thương là cơ quan đầu mối giúp Chính phủ thực hiện quản lý 
+    63→nhà nước về phát triển ngành công nghiệp hóa chất và an toàn, an ninh hóa chất. 
+    64→Trong phạm vi nhiệm vụ, quyền hạn của mình, Bộ Công Thương thực hiện các 
+    65→nội dung sau: 
+    66→a) Ban hành theo thẩm quyền hoặc trình cơ quan nhà nước có thẩm quyền 
+    67→ban hành văn bản quy phạm pháp luật; chiến lược, kế hoạch, dự án, đề án; 
+    68→chương trình, hoạt động cấp quốc gia về phát triển ngành công nghiệp hóa chất 
+    69→và an toàn, an ninh hóa chất; 
+    70→b) Chủ trì, phối hợp với các bộ, cơ quan ngang bộ và Ủy ban nhân dân cấp 
+    71→tỉnh tổ chức lập Chiến lược phát triển ngành công nghiệp hóa chất, trình Thủ tướng 
+    72→Chính phủ phê duyệt; hướng dẫn, giám sát việc thực hiện Chiến lược; 
+    73→c) Tổ chức tuyên truyền, phổ biến, giáo dục pháp luật về phát triển ngành 
+    74→công nghiệp hóa chất và an toàn, an ninh hóa chất; 
+    75→d) Tiếp nhận, giải quyết khiếu nại, tố cáo, kiến nghị, phản ánh liên quan 
+    76→đến phát triển ngành công nghiệp hóa chất và an toàn, an ninh hóa chất trong 
+    77→lĩnh vực quản lý nhà nước của Bộ Công Thương; 
+    78→đ) Thực hiện hợp tác quốc tế về phát triển ngành công nghiệp hóa chất và 
+    79→an toàn, an ninh hóa chất trong phạm vi quản lý nhà nước của Bộ Công Thương; 
+    80→e) Thực hiện quản lý công tác an toàn hóa chất trong lĩnh vực dân sự; phối 
+    81→hợp với các cơ quan có liên quan trong việc phòng ngừa, ứng phó, khắc phục 
+    82→sự cố hóa chất theo quy định tại Nghị định này; 
+    83→
+    84→3 
+    85→g) Kiểm tra chuyên ngành hoạt động hóa chất trong phạm vi quản lý nhà 
+    86→nước của Bộ Công Thương. 
+    87→3. Bộ Y tế trong phạm vi nhiệm vụ, quyền hạn của mình thực hiện các nội 
+    88→dung sau: 
+    89→a) Ban hành theo thẩm quyền hoặc trình cơ quan có thẩm quyền ban hành 
+    90→văn bản quy phạm pháp luật; kế hoạch, chương trình, dự án, đề án về phát triển 
+    91→ngành công nghiệp hóa chất và an toàn, an ninh hóa chất trong lĩnh vực y tế; 
+    92→b) Tổ chức tuyên truyền, phổ biến, giáo dục pháp luật về an toàn, an ninh 
+    93→hóa chất trong lĩnh vực y tế; 
+    94→c) Tiếp nhận, giải quyết khiếu nại, tố cáo, kiến nghị, phản ánh liên quan 
+    95→đến phát triển ngành công nghiệp hóa chất và an toàn, an ninh hóa chất trong 
+    96→lĩnh vực quản lý nhà nước của Bộ Y tế; 
+    97→d) Thực hiện hợp tác quốc tế về phát triển ngành công nghiệp hóa chất và 
+    98→an toàn, an ninh hóa chất trong phạm vi quản lý nhà nước của Bộ Y tế; 
+    99→đ) Thực hiện quản lý công tác an toàn hóa chất trong hoạt động sử dụng 
+   100→hóa chất thuộc lĩnh vực y tế;  
+   101→e) Kiểm tra chuyên ngành hoạt động hóa chất trong phạm vi quản lý nhà 
+   102→nước của Bộ Y tế. 
+   103→4. Bộ Nông nghiệp và Môi trường trong phạm vi nhiệm vụ, quyền hạn của 
+   104→mình thực hiện các nội dung sau: 
+   105→a) Ban hành theo thẩm quyền hoặc trình cơ quan có thẩm quyền ban hành 
+   106→văn bản quy phạm pháp luật; kế hoạch, chương trình, dự án, đề án về phát triển 
+   107→ngành công nghiệp hóa chất và an toàn, an ninh hóa chất trong lĩnh vực nông 
+   108→nghiệp và môi trường; 
+   109→b) Tổ chức tuyên truyền, phổ biến, giáo dục pháp luật về an toàn, an ninh 
+   110→hóa chất trong lĩnh vực nông nghiệp và môi trường; 
+   111→c) Tiếp nhận, giải quyết khiếu nại, tố cáo, kiến nghị, phản ánh liên quan 
+   112→đến phát triển ngành công nghiệp hóa chất và an toàn, an ninh hóa chất trong 
+   113→lĩnh vực quản lý nhà nước của Bộ Nông nghiệp và Môi trường; 
+   114→d) Thực hiện hợp tác quốc tế về phát triển ngành công nghiệp hóa chất và 
+   115→an toàn, an ninh hóa chất trong lĩnh vực quản lý nhà nước của Bộ Nông nghiệp 
+   116→và Môi trường; 
+   117→đ) Thực hiện quản lý công tác an toàn hóa chất trong hoạt động sử dụng 
+   118→hóa chất thuộc lĩnh vực nông nghiệp và môi trường; 
+   119→
+   120→4 
+   121→e) Kiểm tra chuyên ngành hoạt động hóa chất trong phạm vi quản lý nhà 
+   122→nước của Bộ Nông nghiệp và Môi trường. 
+   123→5. Bộ Công an trong phạm vi nhiệm vụ, quyền hạn của mình thực hiện các 
+   124→nội dung sau: 
+   125→a) Ban hành theo thẩm quyền hoặc trình cơ quan nhà nước có thẩm quyền 
+   126→ban hành văn bản quy phạm pháp luật; chiến lược, kế hoạch, dự án, đề án; 
+   127→chương trình, hoạt động cấp quốc gia về phát triển ngành công nghiệp hóa chất 
+   128→và an toàn, an ninh hóa chất trong lĩnh vực quản lý nhà nước của Bộ Công an; 
+   129→b) Tổ chức tuyên truyền, phổ biến, giáo dục pháp luật về an toàn, an ninh 
+   130→hóa chất trong lĩnh vực quản lý nhà nước của Bộ Công an; 
+   131→c) Tiếp nhận, giải quyết khiếu nại, tố cáo, kiến nghị, phản ánh liên quan 
+   132→đến phát triển ngành công nghiệp hóa chất và an toàn, an ninh hóa chất trong 
+   133→lĩnh vực quản lý nhà nước của Bộ Công an; 
+   134→d) Quản lý công tác an toàn hóa chất trong lĩnh vực an ninh, trật tự an toàn 
+   135→xã hội; chỉ đạo lực lượng Phòng cháy, chữa cháy và cứu nạn, cứu hộ chuẩn bị 
+   136→lực lượng, phương tiện, trang thiết bị và lập phương án ứng phó khi có sự cố 
+   137→hóa chất xảy ra; phối hợp với quân đội, chính quyền địa phương sơ tán dân khỏi 
+   138→những vùng nguy hiểm và tham gia cứu hộ, cứu nạn, khắc phục hậu quả sự cố 
+   139→hóa chất; 
+   140→đ) Kiểm tra chuyên ngành hoạt động hóa chất trong phạm vi quản lý nhà 
+   141→nước của Bộ Công an. 
+   142→6. Bộ Quốc phòng trong phạm vi nhiệm vụ, quyền hạn của mình thực hiện 
+   143→các nội dung sau: 
+   144→a) Ban hành theo thẩm quyền hoặc trình cơ quan nhà nước có thẩm quyền 
+   145→ban hành văn bản quy phạm pháp luật; chiến lược, kế hoạch, dự án, đề án; 
+   146→chương trình, hoạt động cấp quốc gia về phát triển ngành công nghiệp hóa chất 
+   147→và an toàn, an ninh hóa chất trong lĩnh vực quản lý nhà nước của Bộ Quốc phòng; 
+   148→b) Tổ chức tuyên truyền, phổ biến, giáo dục pháp luật về an toàn, an ninh 
+   149→hóa chất trong lĩnh vực quản lý nhà nước của Bộ Quốc phòng; 
+   150→c) Tiếp nhận, giải quyết khiếu nại, tố cáo, kiến nghị, phản ánh liên quan 
+   151→đến phát triển ngành công nghiệp hóa chất và an toàn, an ninh hóa chất trong 
+   152→lĩnh vực quản lý nhà nước của Bộ Quốc phòng; 
+   153→d) Quản lý công tác an toàn hóa chất trong lĩnh vực quốc phòng; chỉ đạo, 
+   154→phối hợp với các địa phương, đơn vị liên quan lập các phương án, chuẩn bị lực 
+   155→lượng, phương tiện, trang thiết bị sẵn sàng thực hiện các nhiệm vụ: ứng cứu các 
+   156→tình huống khẩn cấp về sự cố hóa chất, thực hiện tìm kiếm, cứu nạn và tham 
+   157→gia ứng cứu khi có sự cố hóa chất xảy ra; 
+   158→
+   159→5 
+   160→đ) Kiểm tra chuyên ngành hoạt động hóa chất trong phạm vi quản lý nhà 
+   161→nước của Bộ Quốc phòng. 
+   162→7. Ban Chỉ đạo Phòng thủ dân sự Quốc gia chủ trì, phối hợp với Bộ Công 
+   163→Thương, Bộ Quốc phòng, Bộ Công an và các địa phương chỉ đạo, kiểm tra tình 
+   164→hình xây dựng các kế hoạch phòng ngừa, ứng phó sự cố hóa chất cấp tỉnh, công 
+   165→tác huấn luyện, diễn tập, ứng phó sự cố hóa chất của các địa phương. 
+   166→8. Bộ Khoa học và Công nghệ trong phạm vi nhiệm vụ, quyền hạn của 
+   167→mình thực hiện các nội dung sau: 
+   168→a) Ban hành theo thẩm quyền hoặc trình cơ quan có thẩm quyền ban hành 
+   169→quy định khuyến khích doanh nghiệp ứng dụng công nghệ cảm biến, camera 
+   170→AI, hệ thống cảnh báo sớm; 
+   171→b)  Xây dựng chuẩn kết nối dữ liệu về an toàn hóa chất giữa doanh nghiệp, 
+   172→địa phương và cơ quan quản lý nhà nước trình cấp có thẩm quyền ban hành. 
+   173→9. Thanh tra Chính phủ quản lý nhà nước về công tác thanh tra, tiếp công 
+   174→dân, giải quyết khiếu nại, tố cáo và phòng, chống tham nhũng, tiêu cực trong 
+   175→lĩnh vực  hóa  chất;  thực  hiện  hoạt động  thanh  tra,  tiếp  công  dân,  giải  quyết 
+   176→khiếu nại, tố cáo và phòng, chống tham nhũng, lãng phí, tiêu cực trong lĩnh 
+   177→vực hóa chất theo quy định của pháp luật. 
+   178→10. Ủy ban nhân dân các cấp trong phạm vi nhiệm vụ, quyền hạn của mình 
+   179→thực hiện quản lý nhà nước về phát triển ngành công nghiệp hóa chất và an 
+   180→toàn, an ninh hóa chất trong phạm vi địa phương theo quy định tại Nghị định 
+   181→này và thực hiện các nội dung sau: 
+   182→a) Thực hiện quản lý, thanh tra, kiểm tra; tiếp nhận, giải quyết khiếu nại, 
+   183→tố cáo, kiến nghị, phản ánh về hoạt động hóa chất tại địa phương theo quy định 
+   184→của pháp luật; 
+   185→b) Quyết định hoặc báo cáo cơ quan có thẩm quyền quyết định bố trí ngân 
+   186→sách nhà nước, quỹ đất để đầu tư hoặc hỗ trợ đầu tư các khu công nghiệp chuyên 
+   187→ngành hóa chất theo quy định của pháp luật; 
+   188→c) Căn cứ chiến lược phát triển ngành công nghiệp hóa chất đã được phê 
+   189→duyệt để xây dựng và tổ chức thực hiện nội dung về phát triển ngành công 
+   190→nghiệp hóa chất trên địa bàn phù hợp với mục tiêu phát triển kinh tế - xã hội địa 
+   191→phương trong quá trình xây dựng, điều chỉnh quy hoạch phát triển địa phương. 
+   192→11. Bộ, cơ quan ngang bộ, các cơ quan, tổ chức khác trong phạm vi nhiệm 
+   193→vụ, quyền hạn của mình có trách nhiệm chủ trì hoặc phối hợp thực hiện quản 
+   194→lý nhà nước về phát triển ngành công nghiệp hóa chất và an toàn, an ninh hóa 
+   195→chất theo quy định của pháp luật. 
+   196→
+   197→6 
+   198→Chương II  
+   199→CHIẾN LƯỢC PHÁT TRIỂN NGÀNH CÔNG NGHIỆP HÓA CHẤT 
+   200→ 
+   201→Điều 5. Nội dung Chiến lược phát triển ngành công nghiệp hóa chất 
+   202→Nội dung Chiến lược phát triển ngành công nghiệp hóa chất phải bảo đảm 
+   203→các yêu cầu quy định tại khoản 2 Điều 4 của Luật Hóa chất số 69/2025/QH15 
+   204→và bao gồm những nội dung sau đây: 
+   205→1. Phân tích, đánh giá điều kiện tự nhiên, hiện trạng phát triển ngành công 
+   206→nghiệp hóa chất. 
+   207→2. Phân tích, dự báo xu thế phát triển trong nước và quốc tế; phân tích 
+   208→những nhân tố ảnh hưởng đến phát triển của ngành công nghiệp hóa chất trong 
+   209→giai đoạn lập Chiến lược. 
+   210→3. Xác định quan điểm, mục tiêu, định hướng phát triển ngành công nghiệp 
+   211→hóa chất trên phạm vi cả nước và các vùng kinh tế; lĩnh vực ưu tiên phát triển 
+   212→trong từng thời kỳ; định hướng hình thành các khu công nghiệp chuyên ngành 
+   213→hóa chất phù hợp với điều kiện tự nhiên, điều kiện kinh tế - xã hội của các địa 
+   214→phương và đáp ứng yêu cầu an toàn hóa chất. 
+   215→4. Nhiệm vụ, giải pháp, các chương trình phát triển, nguồn lực và tổ chức 
+   216→thực hiện, kiểm tra, giám sát thực hiện Chiến lược. 
+   217→Điều 6. Lập Chiến lược phát triển ngành công nghiệp hóa chất 
+   218→1. Bộ Công Thương chủ trì, phối hợp với các bộ, cơ quan ngang bộ và Ủy 
+   219→ban nhân dân cấp tỉnh tổ chức lập Chiến lược phát triển ngành công nghiệp 
+   220→hóa chất. 
+   221→2. Trong quá trình tổ chức lập Chiến lược, Bộ Công Thương có  trách 
+   222→nhiệm lấy ý kiến của các cơ quan, tổ chức có liên quan đối với các nội dung 
+   223→của dự thảo Chiến lược. Dự thảo Chiến lược, trừ những nội dung liên quan đến 
+   224→bí mật nhà nước theo quy định của pháp luật, phải được đăng tải trên Cổng 
+   225→thông tin điện tử của Bộ Công Thương để lấy ý kiến rộng rãi của các cơ quan, 
+   226→tổ chức, cá nhân trong thời gian ít nhất 15 ngày làm việc.  
+   227→3. Cơ quan được giao lập Chiến lược có trách nhiệm đánh giá môi trường 
+   228→chiến lược theo quy định của pháp luật về bảo vệ môi trường. Kết quả đánh giá 
+   229→môi trường chiến lược được tích hợp trong báo cáo thuyết minh Chiến lược. 
+   230→4. Trường hợp cần thiết, cơ quan được giao lập Chiến lược có thể lựa chọn 
+   231→tư vấn lập chiến lược theo quy định của pháp luật về đấu thầu. 
+   232→
+   233→7 
+   234→Điều 7. Thẩm định, phê duyệt Chiến lược phát triển ngành công 
+   235→nghiệp hóa chất 
+   236→1. Thẩm định Chiến lược phát triển ngành công nghiệp hóa chất 
+   237→a) Việc thẩm định Chiến lược được thực hiện theo chế độ Hội đồng. Bộ 
+   238→trưởng Bộ Công Thương quyết định thành lập Hội đồng thẩm định Chiến lược; 
+   239→b) Hội đồng thẩm định hoạt động theo nguyên tắc thảo luận tập thể. Chiến 
+   240→lược đủ điều kiện trình Thủ tướng Chính phủ xem xét, phê duyệt khi có tối thiểu 
+   241→2/3 thành viên Hội đồng tham gia họp thẩm định đồng ý thông qua. 
+   242→2. Phê duyệt Chiến lược phát triển ngành công nghiệp hóa chất 
+   243→a) Hồ sơ Chiến lược trình phê duyệt gồm: Tờ trình Thủ tướng Chính phủ; 
+   244→Dự thảo văn bản phê duyệt Chiến lược; Báo cáo thuyết minh Chiến lược đã 
+   245→được tích hợp kết quả đánh giá môi trường chiến lược; Báo cáo tổng hợp và 
+   246→giải trình, tiếp thu ý kiến góp ý của các cơ quan, tổ chức, cá nhân về Chiến 
+   247→lược; Báo cáo kết quả thẩm định; Báo cáo giải trình, tiếp thu ý kiến thẩm định; 
+   248→Các tài liệu khác có liên quan về Chiến lược (nếu có); 
+   249→b) Việc tiếp nhận, xem xét hồ sơ trình phê duyệt Chiến lược và phê duyệt 
+   250→Chiến lược thực hiện theo Quy chế làm việc của Chính phủ. 
+   251→Điều 8. Công bố Chiến lược phát triển ngành công nghiệp hóa chất 
+   252→1. Chiến lược phải được công bố công khai sau khi được phê duyệt, trừ 
+   253→những nội dung liên quan đến bí mật nhà nước theo quy định của pháp luật. 
+   254→2. Văn phòng Chính phủ, Bộ Công Thương có trách nhiệm công bố Chiến 
+   255→lược và đăng tải công khai Quyết định của Thủ tướng Chính phủ phê duyệt 
+   256→Chiến lược trên Cổng thông tin điện tử Chính phủ và Bộ Công Thương. 
+   257→Điều 9. Tổ chức thực hiện Chiến lược phát triển ngành công nghiệp 
+   258→hóa chất 
+   259→1. Sau khi Chiến lược được phê duyệt, Bộ Công Thương xây dựng và ban 
+   260→hành kế hoạch hành động thực hiện Chiến lược. Các bộ, cơ quan ngang bộ, địa 
+   261→phương có trách nhiệm tổ chức thực hiện các nhiệm vụ, giải pháp thuộc chức 
+   262→năng, nhiệm vụ được giao tại văn bản phê duyệt Chiến lược và kế hoạch hành 
+   263→động thực hiện Chiến lược.  
+   264→2.  Cơ quan lập quy hoạch vùng căn cứ Chiến lược phát triển ngành công 
+   265→nghiệp hóa chất đã được phê duyệt để xây dựng nội dung về phát triển ngành 
+   266→công nghiệp hóa chất trong nội dung phương hướng phát triển ngành có lợi thế 
+   267→của vùng và phương án phát triển, sắp xếp, lựa chọn, phân bố nguồn lực phát 
+   268→triển trên địa bàn vùng.  
+   269→
+   270→8 
+   271→3. Cơ quan lập quy hoạch tỉnh căn cứ Chiến lược phát triển ngành công 
+   272→nghiệp hóa chất đã được phê duyệt để xây dựng nội dung về phát triển ngành 
+   273→công nghiệp hóa chất trong nội dung phương hướng phát triển ngành quan trọng 
+   274→trên địa bàn tỉnh, lựa chọn phương án tổ chức hoạt động kinh tế - xã hội và xây 
+   275→dựng phương án phát triển hệ thống khu kinh tế, khu công nghiệp, khu chế xuất, 
+   276→khu công nghệ cao trên địa bàn tỉnh. 
+   277→ 4. Trong quá trình quyết định chủ trương đầu tư hoặc chấp thuận chủ 
+   278→trương đầu tư dự án hóa chất, cơ quan có thẩm quyền quyết định chủ trương 
+   279→đầu tư hoặc chấp thuận chủ trương đầu tư dự án hóa chất có trách nhiệm xem 
+   280→xét sự phù hợp của dự án với Chiến lược phát triển ngành công nghiệp hóa chất. 
+   281→5. Trước ngày 15 tháng 3 hằng năm, các bộ, cơ quan ngang bộ, Ủy ban 
+   282→nhân dân cấp tỉnh có trách nhiệm cập nhật thông tin về kết quả thực hiện nhiệm 
+   283→vụ, giải pháp được quy định tại khoản 1 Điều này vào Cơ sở dữ liệu chuyên 
+   284→ngành hóa chất. 
+   285→6. Trách nhiệm cập nhật thông tin về dự án hóa chất vào Cơ sở dữ liệu 
+   286→chuyên ngành hóa chất 
+   287→a) Trong giai đoạn trước khi hoàn thành công trình và đưa công trình vào 
+   288→sử dụng, chủ đầu tư cập nhật tình hình thực hiện dự án theo tiến độ từng giai 
+   289→đoạn đầu tư xây dựng; 
+   290→b) Tổ chức, cá nhân vận hành dự án hóa chất sau khi hoàn thành công trình 
+   291→và đưa công trình vào sử dụng có trách nhiệm cập nhật tình hình thực hiện hoạt 
+   292→động sản xuất, kinh doanh định kỳ trước ngày 15 tháng 02 hằng năm. 
+   293→7. Kinh phí lập, thẩm định, phê duyệt và tổ chức thực hiện Chiến lược 
+   294→được bảo đảm từ ngân sách nhà nước theo quy định của pháp luật về ngân sách 
+   295→nhà nước và các nguồn vốn hợp pháp khác. 
+   296→8. Bộ trưởng Bộ Công Thương quy định biểu mẫu để thực hiện cập nhật 
+   297→thông tin quy định tại khoản 5 và khoản 6 Điều này vào Cơ sở dữ liệu chuyên 
+   298→ngành hóa chất. 
+   299→Điều 10. Điều chỉnh Chiến lược 
+   300→1. Chiến lược được điều chỉnh trong các trường hợp sau: 
+   301→a) Có thay đổi lớn trong chiến lược phát triển kinh tế - xã hội, quy hoạch 
+   302→phát triển tổng thể quốc gia hoặc chính sách pháp luật liên quan đến nội dung 
+   303→của Chiến lược đã được phê duyệt; 
+   304→b) Có thay đổi liên quan đến các cam kết quốc tế mà Việt Nam là thành viên; 
+   305→c) Do yêu cầu bảo đảm quốc phòng, an ninh; 
+   306→
+   307→9 
+   308→d) Yêu cầu điều chỉnh theo kết quả giám sát, đánh giá giữa kỳ hoặc cuối 
+   309→kỳ thực hiện Chiến lược hoặc theo chỉ đạo của cơ quan có thẩm quyền. 
+   310→2. Trình tự, thủ tục điều chỉnh Chiến lược thực hiện theo quy định về việc 
+   311→lập, thẩm định, phê duyệt Chiến lược tại Điều 6, Điều 7 của Nghị định này. 
+   312→ 
+   313→Chương III 
+   314→DỰ ÁN HÓA CHẤT 
+   315→Điều 11. Nguyên tắc hoá học xanh trong thiết kế và lựa chọn công 
+   316→nghệ, thiết bị 
+   317→1. Trong quá trình thiết kế và lựa chọn công nghệ, thiết bị, chủ đầu tư, tư 
+   318→vấn thiết kế dự án hóa chất phải áp dụng những nguyên tắc hóa học xanh sau:  
+   319→a) Sử dụng quy trình sản xuất giảm hoặc không tạo ra chất thải nguy hại; 
+   320→b) Tăng hiệu quả sử dụng năng lượng; 
+   321→c) Phân tích theo thời gian thực để giám sát và kiểm soát việc phát thải; 
+   322→d) Áp dụng các biện pháp giảm thiểu khả năng xảy ra sự cố. 
+   323→2. Trong quá trình thiết kế và lựa chọn công nghệ, thiết bị, chủ đầu tư, tư 
+   324→vấn thiết kế dự án hóa chất được khuyến khích áp dụng những nguyên tắc hóa 
+   325→học xanh sau:  
+   326→a) Nghiên cứu và phát triển các hoá chất và sản phẩm an toàn, có tính năng 
+   327→và hiệu quả tương đương nhưng ít nguy hại hơn; 
+   328→b) Nghiên cứu và phát triển các hóa chất và sản phẩm có thể phân hủy sau 
+   329→khi hết chức năng; 
+   330→c) Sử dụng các quá trình tổng hợp hóa học ít nguy hại, hạn chế hoặc loại 
+   331→bỏ việc sử dụng và tạo ra hoá chất có nguy hại tới sức khoẻ con người và môi 
+   332→trường sinh học; 
+   333→d) Sử dụng các quá trình tổng hợp và phản ứng hoá học không tạo ra nhiều 
+   334→chất trung gian; 
+   335→đ) Sử dụng công nghệ hoặc phản ứng hoá học tối ưu nguyên liệu đầu vào 
+   336→(tiết kiệm nguyên tử);  
+   337→e) Sử dụng chất xúc tác để tăng hiệu suất phản ứng; 
+   338→g) Sử dụng nguyên liệu sinh học hoặc nguyên liệu tái tạo; 
+   339→h) Hạn chế hoặc loại bỏ việc sử dụng dung môi, hoá chất phụ trợ có tính 
+   340→chất nguy hại và sử dụng các giải pháp thay thế an toàn hơn. 
+   341→
+   342→10 
+   343→Điều 12. Đánh giá việc đáp ứng quy định về khoảng cách an toàn đối 
+   344→với địa điểm thực hiện dự án hóa chất  
+   345→1. Đối với các dự án hóa chất thuộc đối tượng phải áp dụng quy chuẩn kỹ 
+   346→thuật về khoảng cách an toàn theo quy định tại Điều 28 của Nghị định này và 
+   347→thuộc đối tượng được cơ quan nhà nước có thẩm quyền quyết định chủ trương 
+   348→đầu tư theo pháp luật về đầu tư công: 
+   349→a) Chủ đầu tư dự án hóa chất có nghĩa vụ báo cáo về sự phù hợp của địa 
+   350→điểm xây dựng dự án với quy định về khoảng cách an toàn trong nội dung báo 
+   351→cáo đề xuất chủ trương đầu tư hoặc báo cáo nghiên cứu tiền khả thi trước khi 
+   352→gửi cơ quan nhà nước có thẩm quyền quyết định chủ trương đầu tư; 
+   353→b) Cơ quan nhà nước có thẩm quyền quyết định chủ trương đầu tư có trách 
+   354→nhiệm đánh giá việc đáp ứng quy định về khoảng cách an toàn đối với địa điểm 
+   355→thực hiện dự án hóa chất trước khi quyết định chủ trương đầu tư; 
+   356→c) Quy định tại điểm a, điểm b khoản này là một thành phần trong hồ sơ, 
+   357→trình tự, thủ tục quyết định chủ trương đầu tư theo pháp luật về đầu tư công.   
+   358→2. Đối với các dự án hóa chất thuộc đối tượng phải áp dụng quy chuẩn kỹ 
+   359→thuật về khoảng cách an toàn theo quy định tại Điều 28 của Nghị định này và 
+   360→thuộc đối tượng được cơ quan nhà nước có thẩm quyền chấp thuận chủ trương 
+   361→đầu tư theo pháp luật về đầu tư: 
+   362→a) Chủ đầu tư dự án hóa chất có nghĩa vụ báo cáo về sự phù hợp của địa 
+   363→điểm xây dựng dự án với quy định về khoảng cách an toàn trong nội dung báo 
+   364→cáo đề xuất dự án đầu tư trước khi gửi cơ quan nhà nước có thẩm quyền chấp 
+   365→thuận chủ trương đầu tư; 
+   366→b) Cơ quan nhà nước có thẩm quyền chấp thuận chủ trương đầu tư có trách 
+   367→nhiệm đánh giá việc đáp ứng quy định về khoảng cách an toàn đối với địa điểm 
+   368→thực hiện dự án hóa chất trước khi chấp thuận chủ trương đầu tư; 
+   369→c) Quy định tại điểm a, điểm b khoản này là một thành phần trong hồ sơ, 
+   370→trình tự, thủ tục chấp thuận chủ trương đầu tư theo pháp luật về đầu tư. 
+   371→3. Đối với các dự án hóa chất thuộc đối tượng phải áp dụng quy chuẩn kỹ 
+   372→thuật về khoảng cách an toàn theo quy định tại Điều 28 của Nghị định này và 
+   373→không thuộc đối tượng được cơ quan nhà nước có thẩm quyền quyết định chủ 
+   374→trương đầu tư hoặc chấp thuận chủ trương đầu tư: 
+   375→a) Tổ chức, cá nhân có thẩm quyền quyết định đầu tư xây dựng dự án theo 
+   376→pháp luật về xây dựng có nghĩa vụ đánh giá và chịu trách nhiệm về việc đáp 
+   377→ứng quy định về khoảng cách an toàn đối với địa điểm thực hiện dự án hóa chất 
+   378→trước khi phê duyệt dự án, quyết định đầu tư; 
+   379→
+   380→11 
+   381→b) Tổ chức, cá nhân có thẩm quyền quyết định đầu tư xây dựng không 
+   382→được phê duyệt dự án, quyết định đầu tư trong trường hợp không đáp ứng quy 
+   383→định về khoảng cách an toàn. 
+   384→Điều 13. Nội dung Báo cáo nghiên cứu khả thi đầu tư xây dựng, Báo 
+   385→cáo kinh tế - kỹ thuật đầu tư xây dựng của dự án hóa chất  
+   386→1. Báo cáo nghiên cứu khả thi đầu tư xây dựng, Báo cáo kinh tế - kỹ thuật 
+   387→đầu tư xây dựng của dự án hóa chất được thực hiện theo quy định pháp luật về 
+   388→xây dựng và bổ sung các nội dung như sau:  
+   389→a) Làm rõ sự phù hợp của nội dung Báo cáo nghiên cứu khả thi đầu tư xây 
+   390→dựng, Báo cáo kinh tế - kỹ thuật đầu tư xây dựng với các tiêu chuẩn, quy chuẩn 
+   391→kỹ thuật và quy định về an toàn hóa chất trong nội dung tiêu chuẩn, quy chuẩn 
+   392→kỹ thuật được áp dụng để lập thiết kế cơ sở;  
+   393→b) Làm rõ nguyên tắc hóa học xanh đã được áp dụng trong thiết kế và lựa 
+   394→chọn công nghệ, thiết bị trong nội dung phương án công nghệ, kỹ thuật và thiết 
+   395→bị được lựa chọn. 
+   396→2. Nội dung thẩm định Báo cáo nghiên cứu khả thi đầu tư xây dựng, Báo 
+   397→cáo kinh tế - kỹ thuật đầu tư xây dựng của dự án hóa chất được thực hiện theo 
+   398→quy định của pháp luật về xây dựng và bổ sung nội dung như sau: 
+   399→a) Đánh giá sự phù hợp của nội dung Báo cáo nghiên cứu khả thi đầu tư 
+   400→xây dựng, Báo cáo kinh tế - kỹ thuật đầu tư xây dựng với các tiêu chuẩn, quy 
+   401→chuẩn kỹ thuật và quy định về an toàn hóa chất trong nội dung thẩm định việc 
+   402→tuân thủ quy chuẩn kỹ thuật và áp dụng tiêu chuẩn theo quy định của pháp luật; 
+   403→b) Đánh giá việc áp dụng nguyên tắc hóa học xanh trong thiết kế và lựa 
+   404→chọn công nghệ, thiết bị áp dụng cho dự án. 
+   405→Điều 14. Quy mô, tiến độ giải ngân đối với dự án thuộc lĩnh vực công 
+   406→nghiệp hóa chất trọng điểm 
+   407→1. Dự án đầu tư thuộc lĩnh vực quy định tại các điểm a, b và c khoản 1 
+   408→Điều 6 của Luật Hóa chất số 69/2025/QH15 có quy mô vốn đầu tư theo quy 
+   409→định tại khoản 2 Điều này và thực hiện giải ngân tối thiểu 1/3 quy mô vốn đầu 
+   410→tư trong thời hạn 03 năm kể từ ngày được cấp giấy chứng nhận đăng ký đầu tư 
+   411→hoặc chấp thuận chủ trương đầu tư hoặc quyết định chủ trương đầu tư được 
+   412→hưởng ưu đãi và hỗ trợ đầu tư đặc biệt theo quy định tại pháp luật về đầu tư và 
+   413→quy định của pháp luật có liên quan, bao gồm: ưu đãi về thuế thu nhập doanh 
+   414→nghiệp, thuế nhập khẩu, đất, tiền thuê đất, thuế sử dụng đất; ưu đãi trong lựa 
+   415→chọn nhà thầu; hỗ trợ phát triển hệ thống kết cấu hạ tầng kỹ thuật, hạ tầng xã 
+   416→hội; hỗ trợ tiếp cận đất đai, mặt bằng sản xuất, kinh doanh; đào tạo, phát triển 
+   417→nguồn nhân lực; hỗ trợ tài chính, tín dụng đầu tư; hỗ trợ khoa học, kỹ thuật, 
+   418→chuyển giao công nghệ, đổi mới sáng tạo, chuyển đổi số, phát triển thị trường, 
+   419→cung cấp thông tin; các hình thức ưu đãi, hỗ trợ đầu tư khác. 
+   420→
+   421→12 
+   422→2. Quy mô vốn đầu tư đối với dự án quy định tại khoản 1 Điều này được 
+   423→quy định như sau: 
+   424→a) Dự án sản xuất sản phẩm hóa dược là nguyên liệu làm thuốc có tổng 
+   425→mức đầu tư từ 160 tỷ đồng trở lên; 
+   426→b) Dự án sản xuất sản phẩm hóa chất cơ bản thuộc lĩnh vực công nghiệp 
+   427→hóa chất trọng điểm; sản phẩm hóa dầu; sản phẩm hóa dược là nguyên liệu làm 
+   428→thực phẩm bảo vệ sức khỏe; hydro, amoniac được sản xuất bằng nguồn năng 
+   429→lượng tái tạo có tổng mức đầu tư từ 4.600 tỷ đồng trở lên; 
+   430→c) Dự án sản xuất sản phẩm cao su, trừ sản phẩm săm, lốp; sản xuất phân 
+   431→bón hàm lượng cao; đầu tư khu công nghiệp chuyên ngành hóa chất; đầu tư tổ 
+   432→hợp công trình hóa chất với mục tiêu chính là sản xuất hóa chất và sản phẩm 
+   433→của ngành công nghiệp hóa chất có tổng mức đầu tư từ 10.000 tỷ đồng trở lên. 
+   434→3. Trường hợp cần thiết, cơ quan có thẩm quyền cấp giấy chứng nhận đăng 
+   435→ký đầu tư hoặc chấp thuận chủ trương đầu tư hoặc quyết định chủ trương đầu 
+   436→tư lấy ý kiến của Bộ Công Thương về sự phù hợp của dự án đầu tư với lĩnh vực 
+   437→công nghiệp hóa chất trọng điểm quy định tại khoản 1 Điều 6 của Luật Hóa 
+   438→chất số 69/2025/QH15. 
+   439→4. Người có thẩm quyền, chủ đầu tư được lựa chọn áp dụng một trong các 
+   440→hình thức đặt hàng hoặc đấu thầu hạn chế hoặc chỉ định thầu hoặc hình thức 
+   441→phù hợp khác theo quy định của pháp luật để thực hiện đối với các dự án đầu 
+   442→tư quy định tại khoản 1 Điều 6 của Luật Hóa chất số 69/2025/QH15 trên cơ sở 
+   443→bảo đảm công khai, minh bạch, chất lượng, tiến độ, hiệu quả và trách nhiệm 
+   444→giải trình. 
+   445→ 
+   446→Chương IV 
+   447→TƯ VẤN CHUYÊN NGÀNH HÓA CHẤT 
+   448→ 
+   449→Điều 15. Điều kiện tổ chức thực hiện hoạt động tư vấn xây dựng đối 
+   450→với dự án hóa chất  
+   451→Tổ chức thực hiện hoạt động tư vấn xây dựng đối với dự án hóa chất phải 
+   452→đáp  ứng quy  định  tại  điểm  a,  điểm  b  khoản  1  Điều  8  Luật  Hóa  chất  số 
+   453→69/2025/QH15 và có ít nhất 01 cá nhân tham gia hoạt động tư vấn đáp ứng các 
+   454→điều kiện sau đây:  
+   455→1. Có bằng cử nhân hoặc tương đương trở lên ngành đào tạo về hóa học 
+   456→thuộc Danh mục quy định tại Phụ lục III ban hành kèm theo Nghị định này.  
+   457→2. Có kinh nghiệm công tác như sau: 
+   458→
+   459→13 
+   460→a) Trường hợp tham gia hoạt động tư vấn xây dựng đối với dự án hóa chất 
+   461→có công trình cấp I trở lên: Có kinh nghiệm đảm nhận một trong các vị trí về 
+   462→kỹ thuật, công nghệ, an toàn hóa chất tại các dự án hóa chất từ 07 năm trở lên 
+   463→hoặc từng tham gia hoạt động tư vấn xây dựng đối với dự án hóa chất có công 
+   464→trình cấp I trở lên. 
+   465→b) Trường hợp tham gia hoạt động tư vấn xây dựng đối với dự án hóa chất 
+   466→có công trình cấp II: Có kinh nghiệm đảm nhận một trong các vị trí về kỹ thuật, 
+   467→công nghệ, an toàn hóa chất tại các dự án hóa chất từ 04 năm trở lên hoặc từng 
+   468→tham gia hoạt động tư vấn xây dựng đối với dự án hóa chất có công trình cấp II 
+   469→trở lên;  
+   470→c) Trường hợp tham gia hoạt động tư vấn xây dựng đối với dự án hóa chất 
+   471→có công trình cấp III trở xuống: Có kinh nghiệm đảm nhận một trong các vị trí 
+   472→về kỹ thuật, công nghệ, an toàn hóa chất tại các dự án hóa chất từ 02 năm trở 
+   473→lên hoặc từng tham gia hoạt động tư vấn xây dựng đối với dự án hóa chất. 
+   474→Điều 16. Điều kiện cấp chứng chỉ tư vấn chuyên ngành hóa chất đối 
+   475→với cá nhân thực hiện hoạt động tư vấn lựa chọn công nghệ, thiết bị đối với 
+   476→dự án hóa chất  
+   477→1. Cá nhân hoạt động tư vấn lựa chọn công nghệ, thiết bị đối với dự án 
+   478→hóa chất được cấp chứng chỉ tư vấn chuyên ngành hóa chất khi đáp ứng các 
+   479→điều kiện sau đây: 
+   480→a) Có bằng cử nhân hoặc tương đương trở lên ngành đào tạo về hóa học 
+   481→thuộc Danh mục quy định tại Phụ lục III ban hành kèm theo Nghị định này; 
+   482→b) Đáp ứng điều kiện kinh nghiệm công tác theo quy định tại khoản 2 
+   483→Điều này. 
+   484→2. Điều kiện kinh nghiệm công tác của cá nhân thực hiện hoạt động tư vấn 
+   485→lựa chọn công nghệ, thiết bị đối với dự án hóa chất được quy định như sau: 
+   486→a) Đối với cá nhân đề nghị cấp chứng chỉ Hạng A1: Có thời gian kinh 
+   487→nghiệm tham gia công việc về công nghệ, kỹ thuật hóa học từ 07 năm trở lên; 
+   488→đã thực hiện các công việc liên quan đến tư vấn lựa chọn công nghệ, thiết bị 
+   489→đối với 02 dự án hóa chất có công trình cấp II trở lên;  
+   490→b) Đối với cá nhân đề nghị cấp chứng chỉ Hạng A2: Có thời gian kinh 
+   491→nghiệm tham gia công việc về công nghệ, kỹ thuật hóa học từ 04 năm trở lên; 
+   492→đã thực hiện các công việc liên quan đến tư vấn lựa chọn công nghệ, thiết bị 
+   493→đối với 02 dự án hóa chất có công trình cấp III trở lên; 
+   494→c) Đối với cá nhân đề nghị cấp chứng chỉ Hạng A3: Có thời gian kinh 
+   495→nghiệm tham gia công việc về công nghệ, kỹ thuật hóa học từ 04 năm trở lên. 
+   496→
+   497→14 
+   498→3. Phạm vi hoạt động của cá nhân hoạt động tư vấn lựa chọn công nghệ, 
+   499→thiết bị đối với dự án hóa chất được quy định như sau: 
+   500→a) Cá nhân có chứng chỉ tư vấn chuyên ngành hóa chất Hạng A1: Được 
+   501→thực hiện các công việc liên quan đến tư vấn lựa chọn công nghệ, thiết bị đối 
+   502→với tất cả các dự án hóa chất;  
+   503→b) Cá nhân có chứng chỉ tư vấn chuyên ngành hóa chất Hạng A2: Được 
+   504→thực hiện các công việc liên quan đến tư vấn lựa chọn công nghệ, thiết bị đối 
+   505→với dự án hóa chất có công trình từ cấp II trở xuống;  
+   506→c) Cá nhân có chứng chỉ tư vấn chuyên ngành hóa chất Hạng A3: Được 
+   507→thực hiện các công việc liên quan đến tư vấn lựa chọn công nghệ, thiết bị đối 
+   508→với dự án hóa chất có công trình từ cấp III trở xuống. 
+   509→4. Kinh nghiệm công tác quy định tại khoản 2 Điều này được tính đối với 
+   510→các công việc đã được nghiệm thu theo quy định trong vòng 10 năm gần nhất 
+   511→tính đến thời điểm đề nghị cấp chứng chỉ tư vấn. Trường hợp sử dụng kinh 
+   512→nghiệm công tác phù hợp nhưng quá 10 năm thì được đề nghị cấp chứng chỉ tư 
+   513→vấn thấp hơn 01 hạng theo quy định. 
+   514→Điều 17. Điều kiện đối với tổ chức thực hiện hoạt động tư vấn lựa chọn 
+   515→công nghệ, thiết bị đối với dự án hóa chất  
+   516→1.  Đáp  ứng  quy  định  tại  điểm  a  khoản  2  Điều  8  Luật  Hóa  chất  số 
+   517→69/2025/QH15. 
+   518→2. Tổ chức thực hiện các công việc liên quan đến tư vấn lựa chọn công 
+   519→nghệ, thiết bị đối với dự án hóa chất có công trình cấp I trở lên phải có ít nhất 
+   520→02 tư vấn viên có chứng chỉ tư vấn chuyên ngành hóa chất Hạng A1 làm việc 
+   521→trọn thời gian theo quy định của pháp luật về lao động. 
+   522→3. Tổ chức thực hiện các công việc liên quan đến tư vấn lựa chọn công 
+   523→nghệ, thiết bị đối với dự án hóa chất có công trình cấp II phải có ít nhất 01 tư 
+   524→vấn viên có chứng chỉ tư vấn chuyên ngành hóa chất Hạng A1 hoặc Hạng A2 
+   525→làm việc trọn thời gian theo quy định của pháp luật về lao động. 
+   526→4. Tổ chức thực hiện các công việc liên quan đến tư vấn lựa chọn công nghệ, 
+   527→thiết bị đối với dự án hóa chất có công trình cấp III, cấp IV phải có ít nhất 01 tư 
+   528→vấn viên có chứng chỉ tư vấn chuyên ngành hóa chất Hạng A1 hoặc Hạng A2 
+   529→hoặc Hạng A3 làm việc trọn thời gian theo quy định của pháp luật về lao động. 
+   530→5. Có phần mềm phục vụ công tác thiết kế, lựa chọn công nghệ, thiết bị. 
+   531→
+   532→15 
+   533→Điều 18. Điều kiện cấp chứng chỉ tư vấn chuyên ngành hóa chất đối 
+   534→với cá nhân hoạt động tư vấn an toàn, an ninh hóa chất 
+   535→1. Cá nhân hoạt động tư vấn an toàn, an ninh hóa chất được cấp chứng chỉ 
+   536→tư vấn chuyên ngành hóa chất khi đáp ứng các điều kiện sau đây: 
+   537→a) Có bằng cử nhân hoặc tương đương trở lên ngành đào tạo về hóa học 
+   538→thuộc Danh mục quy định tại Phụ lục III ban hành kèm theo Nghị định này; 
+   539→b) Có thời gian kinh nghiệm công tác tại vị trí liên quan đến hoạt động an 
+   540→toàn hóa chất bằng tiêu chuẩn về thời gian kinh nghiệm của người huấn luyện 
+   541→nội dung lý thuyết chuyên ngành có trình độ từ đại học trở lên theo quy định tại 
+   542→pháp luật về an toàn, vệ sinh lao động; 
+   543→c) Đáp ứng điều kiện kinh nghiệm nghề nghiệp tương ứng với nội dung tư 
+   544→vấn theo quy định tại khoản 2 Điều này. 
+   545→2. Điều kiện kinh nghiệm nghề nghiệp và phạm vi hoạt động đối với cá 
+   546→nhân thực hiện hoạt động tư vấn an toàn, an ninh hóa chất được quy định như sau: 
+   547→a) Cá nhân được cấp chứng chỉ tư vấn chuyên ngành hóa chất Hạng B để 
+   548→thực hiện các công việc tư vấn về diễn tập ứng phó sự cố hóa chất cấp quốc gia 
+   549→và các công việc tư vấn quy định tại điểm c, d, đ, e g, h tại khoản này khi có 
+   550→kinh nghiệm tham gia xây dựng tối thiểu 05 chương trình diễn tập cấp tỉnh; 
+   551→b) Cá nhân được cấp chứng chỉ tư vấn chuyên ngành hóa chất Hạng B để 
+   552→thực hiện các công việc tư vấn về xây dựng kế hoạch phòng ngừa ứng phó sự 
+   553→cố hóa chất cấp quốc gia và các công việc tư vấn quy định tại điểm c, d, đ, e g, 
+   554→h tại khoản này khi đã tham gia xây dựng tối thiểu 02 kế hoạch phòng ngừa ứng 
+   555→phó sự cố hóa chất cấp tỉnh đã được phê duyệt, ban hành trong 02 năm gần nhất 
+   556→tính đến ngày đề nghị cấp chứng chỉ. 
+   557→c) Cá nhân được cấp chứng chỉ tư vấn chuyên ngành hóa chất Hạng B để 
+   558→thực hiện các công việc tư vấn diễn tập ứng phó sự cố hóa chất của cơ sở hóa chất 
+   559→khi đã tham gia xây dựng tối thiểu 02 chương trình diễn tập của cơ sở hóa chất. 
+   560→d) Cá nhân được cấp chứng chỉ tư vấn chuyên ngành hóa chất Hạng B để 
+   561→thực hiện các công việc tư vấn về diễn tập ứng phó sự cố hóa chất cấp tỉnh và 
+   562→của cơ sở hóa chất khi có kinh nghiệm tham gia xây dựng tối thiểu 02 chương 
+   563→trình diễn tập cấp tỉnh. 
+   564→đ) Cá nhân được cấp chứng chỉ tư vấn chuyên ngành hóa chất Hạng B để 
+   565→thực hiện các công việc tư vấn về xây dựng kế hoạch phòng ngừa ứng phó sự 
+   566→cố hóa chất của dự án hóa chất, cơ sở hóa chất khi đã tham gia xây dựng tối 
+   567→thiểu 02 kế hoạch phòng ngừa ứng phó sự cố hóa chất của cơ sở hóa chất đã được 
+   568→phê duyệt trong 02 năm gần nhất tính đến ngày đề nghị cấp chứng chỉ. 
+   569→
+   570→16 
+   571→e) Cá nhân được cấp chứng chỉ tư vấn chuyên ngành hóa chất Hạng B để 
+   572→thực hiện các công việc vấn về xây dựng kế hoạch phòng ngừa ứng phó sự cố 
+   573→hóa chất cấp tỉnh khi đã tham gia xây dựng tối thiểu 02 kế hoạch phòng ngừa 
+   574→ứng phó sự cố hóa chất cấp tỉnh đã được phê duyệt trong 02 năm gần nhất tính 
+   575→đến ngày đề nghị cấp chứng chỉ. 
+   576→g) Cá nhân được cấp chứng chỉ tư vấn chuyên ngành hóa chất Hạng B để 
+   577→thực hiện các công việc tư vấn về huấn luyện an toàn chuyên ngành hóa chất 
+   578→cho đối tượng thuộc nhóm I, II, III quy định tại khoản 3 Điều 29 của Nghị định này 
+   579→khi có kinh nghiệm làm người huấn luyện hoặc tham gia hỗ trợ huấn luyện tối 
+   580→thiểu 05 chương trình huấn luyện an toàn chuyên ngành hóa chất trong 02 năm 
+   581→gần nhất tính đến ngày đề nghị cấp chứng chỉ. 
+   582→h) Cá nhân chỉ đáp ứng các điều kiện quy định tại điểm a và b khoản 1 
+   583→Điều này được cấp chứng chỉ tư vấn chuyên ngành hóa chất Hạng B để thực 
+   584→hiện các công việc tư vấn về xây dựng biện pháp phòng ngừa ứng phó sự cố 
+   585→hóa chất; phân loại, ghi nhãn hóa chất, lập phiếu an toàn hóa chất, đăng kí hóa 
+   586→chất mới. 
+   587→Điều 19. Điều kiện đối với tổ chức thực hiện hoạt động tư vấn an toàn, 
+   588→an ninh hóa chất  
+   589→1. Đáp ứng quy định tại điểm a khoản 2 Điều 8 Luật Hóa chất số 69/2025/QH15. 
+   590→2. Tổ chức thực hiện hoạt động tư vấn an toàn, an ninh hóa chất phải có ít 
+   591→nhất 01 tư vấn viên đảm nhận nhiệm vụ tư vấn có chứng chỉ tư vấn chuyên 
+   592→ngành hóa chất phù hợp với công việc đảm nhận theo quy định Điều 18 của 
+   593→Nghị định này. 
+   594→3. Có trang thiết bị, phương tiện kỹ thuật, cần thiết đáp ứng yêu cầu của 
+   595→hoạt động tư vấn: Trang thiết bảo vệ cá nhân phù hợp với đặc tính nguy hiểm 
+   596→của các loại hóa chất, phương tiện, thiết bị phục vụ thực hành hoặc diễn tập ứng 
+   597→phó sự cố hóa chất. 
+   598→Điều 20. Chứng chỉ tư vấn chuyên ngành hóa chất 
+   599→1. Chứng chỉ tư vấn chuyên ngành hóa chất (sau đây gọi tắt là chứng chỉ 
+   600→tư vấn) được cấp cho cá nhân là công dân Việt Nam, người Việt Nam định cư 
+   601→ở nước ngoài, người nước ngoài lao động hoặc tạm trú hợp pháp tại Việt Nam 
+   602→để thực hiện hoạt động tư vấn theo quy định tại khoản 3 Điều 8 của Luật Hóa 
+   603→chất số 69/2025/QH15. 
+   604→2. Chứng chỉ tư vấn cấp mới, cấp điều chỉnh có hiệu lực 05 năm kể từ ngày 
+   605→cấp. Đối với chứng chỉ tư vấn của cá nhân nước ngoài, hiệu lực được xác định 
+   606→theo thời hạn còn lại được ghi trong giấy phép lao động hoặc thẻ tạm trú do cơ 
+   607→quan có thẩm quyền cấp nhưng không quá 05 năm. 
+   608→
+   609→17 
+   610→Thời hạn của chứng chỉ tư vấn cấp lại được xác định theo thời hạn ghi trên 
+   611→chứng chỉ tư vấn được cấp lần gần nhất trước đó. 
+   612→3. Quy cách và nội dung của chứng chỉ tư vấn quy định tại Mẫu số 01 Phụ 
+   613→lục ban hành kèm theo Nghị định này. 
+   614→4. Bộ trưởng Bộ Công Thương hướng dẫn việc ghi mã số chứng chỉ tư vấn.  
+   615→Điều 21. Trường hợp cấp, cấp lại, cấp điều chỉnh, thu hồi chứng chỉ 
+   616→tư vấn chuyên ngành hóa chất 
+   617→1. Chứng chỉ tư vấn chuyên ngành hóa chất được cấp cho cá nhân khi 
+   618→thuộc một trong các trường hợp sau đây: 
+   619→a) Cấp mới chứng chỉ tư vấn đối với các trường hợp: lần đầu được cấp 
+   620→chứng chỉ; chứng chỉ hết thời hạn hiệu lực hoặc đề nghị cấp lại đối với chứng 
+   621→chỉ còn thời hạn hiệu lực không thuộc điểm b khoản này; 
+   622→b) Cấp lại chứng chỉ tư vấn đối với các trường hợp: chứng chỉ tư vấn còn 
+   623→thời hạn hiệu lực nhưng bị mất hoặc hư hỏng; điều chỉnh, bổ sung thông tin cá 
+   624→nhân; ghi sai thông tin do lỗi của cơ quan cấp chứng chỉ; 
+   625→c) Cấp điều chỉnh chứng chỉ tư vấn đối với trường hợp điều chỉnh hạng, 
+   626→nhóm chứng chỉ tư vấn; 
+   627→d) Cá nhân người nước ngoài đã được cấp chứng chỉ tư vấn theo quy định 
+   628→tại điểm a khoản này, nếu giấy phép lao động hoặc thẻ tạm trú hết hạn trước 
+   629→thời hạn của chứng chỉ tư vấn, để tiếp tục hoạt động tư vấn tại Việt Nam thì 
+   630→thực hiện cấp mới chứng chỉ tư vấn sau khi được gia hạn giấy phép lao động 
+   631→hoặc thẻ tạm trú. 
+   632→2. Chứng chỉ tư vấn bị thu hồi khi thuộc một trong các trường hợp sau đây: 
+   633→a) Cá nhân không còn đáp ứng điều kiện cấp chứng chỉ tư vấn theo quy 
+   634→định tại khoản 1 Điều 16 và khoản 1 Điều 18 của Nghị định này; 
+   635→b) Giả mạo giấy tờ, kê khai không trung thực trong hồ sơ đề nghị cấp 
+   636→chứng chỉ tư vấn; 
+   637→c) Cho thuê, cho mượn hoặc cho người khác sử dụng chứng chỉ tư vấn; 
+   638→d) Sửa chữa, tẩy xóa làm sai lệch nội dung chứng chỉ tư vấn; 
+   639→đ) Chứng chỉ tư vấn được cấp không đúng thẩm quyền; không đúng 
+   640→đối tượng; 
+   641→e) Chứng chỉ tư vấn được cấp khi cá nhân không đáp ứng điều kiện theo 
+   642→quy định; 
+   643→
+   644→18 
+   645→g) Cá nhân có sai phạm và bị cơ quan chức năng kiến nghị thu hồi chứng 
+   646→chỉ tư vấn; 
+   647→h) Cá nhân được cấp chứng chỉ tư vấn không còn nhu cầu sử dụng chứng 
+   648→chỉ tư vấn mà mình được cấp và đề nghị cơ quan có thẩm quyền cấp chứng chỉ 
+   649→thu hồi. 
+   650→3. Cá nhân đã bị thu hồi chứng chỉ tư vấn được đề nghị cấp mới chứng chỉ 
+   651→tư vấn sau thời hạn: 
+   652→a) 24 tháng kể từ ngày có quyết định thu hồi chứng chỉ tư vấn đối với các 
+   653→trường hợp theo quy định tại các điểm b, c, d và g khoản 2 Điều này; 
+   654→b) Theo thời hạn tại quyết định xử phạt vi phạm hành chính tước quyền sử 
+   655→dụng chứng chỉ tư vấn hoặc đình chỉ hoạt động đối với các trường hợp theo quy 
+   656→định tại điểm h khoản 2 Điều này. 
+   657→Điều 22. Hồ sơ đề nghị cấp, cấp lại, cấp điều chỉnh chứng chỉ tư vấn 
+   658→chuyên ngành hóa chất 
+   659→1. Hồ sơ đề nghị cấp mới chứng chỉ tư vấn bao gồm: 
+   660→a) Văn bản đề nghị cấp chứng chỉ tư vấn là bản gốc trong trường hợp nộp 
+   661→trực tiếp hoặc thông qua dịch vụ bưu chính; tệp tin chụp từ bản gốc trong trường 
+   662→hợp nộp trực tuyến; 
+   663→b) Tệp tin ảnh màu cỡ 4 x 6 cm có nền màu trắng chân dung của người đề 
+   664→nghị cấp chứng chỉ tư vấn được chụp trong thời gian không quá 06 tháng; 
+   665→c) Bản sao văn bằng có chứng thực hoặc tệp tin bản sao điện tử được chứng 
+   666→thực theo quy định do cơ sở đào tạo hợp pháp cấp phù hợp với lĩnh vực, hạng 
+   667→chứng chỉ tư vấn đề nghị cấp; trường hợp trên văn bằng không ghi hoặc ghi 
+   668→không rõ chuyên ngành đào tạo thì phải nộp kèm bảng điểm hoặc phụ lục văn 
+   669→bằng để làm cơ sở kiểm tra, đánh giá (đối với văn bằng do cơ sở đào tạo nước 
+   670→ngoài cấp, trường hợp cá nhân là người nước ngoài và người Việt Nam định cư 
+   671→ở nước ngoài phải là bản được hợp pháp hóa lãnh sự và bản dịch sang tiếng 
+   672→Việt được công chứng, chứng thực theo quy định của pháp luật Việt Nam; các 
+   673→trường hợp còn lại văn bằng do cơ sở đào tạo nước ngoài cấp phải được hệ 
+   674→thống giáo dục Việt Nam công nhận); 
+   675→d) Tài liệu chứng minh thời gian công tác tại các vị trí phù hợp là bản sao 
+   676→có chứng thực hoặc tệp tin bản sao điện tử được chứng thực theo quy định một 
+   677→hoặc một số giấy tờ sau đây: Quyết định bổ nhiệm, bổ nhiệm lại, tuyển dụng, 
+   678→luân chuyển, điều động; hợp đồng làm việc hoặc hợp đồng lao động; bảng 
+   679→lương hoặc giấy tờ chứng minh thời gian đóng bảo hiểm xã hội; giấy xác nhận 
+   680→quá trình công tác; 
+   681→
+   682→19 
+   683→đ) Tài liệu chứng minh kinh nghiệm tham gia các công việc phù hợp là 
+   684→bản sao có chứng thực hoặc tệp tin bản sao điện tử được chứng thực theo quy 
+   685→định một hoặc một số giấy tờ sau đây: Các quyết định phân công công việc 
+   686→(giao nhiệm vụ) của tổ chức cho cá nhân hoặc văn bản xác nhận của đại diện 
+   687→hợp pháp của chủ đầu tư và chịu trách nhiệm về tính trung thực của nội dung 
+   688→xác nhận về các công việc mà cá nhân đã hoàn thành theo nội dung kê khai; 
+   689→hợp đồng kinh tế và biên bản nghiệm thu các công việc thực hiện đã kê khai; 
+   690→e) Bản sao có chứng thực hoặc tệp tin bản sao điện tử được chứng thực 
+   691→theo quy định giấy tờ về cư trú hoặc giấy phép lao động tại Việt Nam đối với 
+   692→người nước ngoài hoặc người Việt Nam định cư ở nước ngoài. 
+   693→2. Hồ sơ đề nghị cấp lại chứng chỉ tư vấn bao gồm: 
+   694→a) Văn bản đề nghị cấp lại chứng chỉ tư vấn là bản gốc trong trường hợp 
+   695→nộp trực tiếp hoặc thông qua dịch vụ bưu chính; tệp tin chụp từ bản gốc trong 
+   696→trường hợp nộp trực tuyến; 
+   697→b) Tệp tin ảnh màu cỡ 4 x 6 cm có nền màu trắng chân dung của người đề 
+   698→nghị cấp chứng chỉ tư vấn được chụp trong thời gian không quá 06 tháng; 
+   699→c) Bản gốc chứng chỉ tư vấn đề nghị cấp lại. Trong  trường hợp bị mất 
+   700→chứng chỉ tư vấn thì phải có cam kết của người đề nghị cấp lại. 
+   701→3. Hồ sơ đề nghị cấp điều chỉnh chứng chỉ tư vấn bao gồm: 
+   702→a) Văn bản đề nghị cấp điều chỉnh chứng chỉ tư vấn là bản gốc trong trường 
+   703→hợp nộp trực tiếp hoặc thông qua dịch vụ bưu chính; tệp tin chụp từ bản gốc 
+   704→trong trường hợp nộp trực tuyến; 
+   705→b) Tệp tin ảnh màu cỡ 4 x 6 cm có nền màu trắng chân dung của người đề 
+   706→nghị cấp chứng chỉ tư vấn được chụp trong thời gian không quá 06 tháng; 
+   707→c) Các tài liệu theo quy định tại các điểm c, d, đ, e khoản 1 Điều này. 
+   708→4. Cá nhân thực hiện nộp lệ phí theo quy định của pháp luật về phí và lệ 
+   709→phí khi nộp hồ sơ đề nghị cấp, cấp lại, cấp điều chỉnh chứng chỉ tư vấn trừ 
+   710→trường hợp đề nghị cấp lại do cơ quan cấp chứng chỉ ghi sai thông tin. 
+   711→Điều 23. Trình tự, thủ tục, thẩm quyền cấp, cấp lại, cấp điều chỉnh, 
+   712→thu hồi chứng chỉ tư vấn chuyên ngành hóa chất 
+   713→1. Cá nhân nộp 01 bộ hồ sơ đề nghị cấp, cấp lại, cấp điều chỉnh chứng chỉ 
+   714→tư vấn đến cơ quan có thẩm quyền cấp chứng chỉ tư vấn bằng một trong các 
+   715→hình thức sau:  
+   716→a) Trực tiếp tại Bộ phận Một cửa; 
+   717→
+   718→20 
+   719→b) Thông qua dịch vụ bưu chính; 
+   720→c) Trực tuyến tại cổng dịch vụ công. 
+   721→2. Kể từ ngày tiếp nhận đủ hồ sơ hợp lệ theo quy định tại các khoản 1, 2, 3 
+   722→Điều 22 của Nghị định này, cơ quan có thẩm quyền cấp chứng chỉ tư vấn có 
+   723→trách nhiệm đánh giá việc đáp ứng các điều kiện và cấp chứng chỉ tư vấn. 
+   724→Trường hợp không cấp chứng chỉ tư vấn, cơ quan có thẩm quyền cấp chứng chỉ 
+   725→tư vấn phải thông báo bằng văn bản tới cá nhân và nêu rõ lý do. 
+   726→3. Thời hạn cấp chứng chỉ tư vấn được quy định như sau: 
+   727→a) 10 ngày làm việc đối với trường hợp cấp mới; 
+   728→b) 05 ngày làm việc đối với trường hợp cấp lại; 
+   729→c) 10 ngày làm việc đối với trường hợp cấp điều chỉnh. 
+   730→4. Đối với trường hợp thu hồi chứng chỉ tư vấn: 
+   731→a) Trong thời hạn 10 ngày làm việc, kể từ ngày nhận được kết luận thanh 
+   732→tra, kiểm tra của cơ quan có thẩm quyền, trong đó có kiến nghị thu hồi chứng 
+   733→chỉ tư vấn hoặc khi phát hiện hoặc có căn cứ xác định một trong các trường hợp 
+   734→thu hồi chứng chỉ tư vấn quy định tại khoản 2 Điều 21 của Nghị định này, cơ 
+   735→quan có thẩm quyền thu hồi chứng chỉ tư vấn ban hành quyết định thu hồi; 
+   736→trường hợp không thu hồi thì phải thông báo bằng văn bản gửi cơ quan, tổ chức, 
+   737→cá nhân có kiến nghị thu hồi và nêu rõ lý do không thu hồi; 
+   738→b) Cơ quan có thẩm quyền thu hồi chứng chỉ tư vấn có trách nhiệm gửi 
+   739→quyết định thu hồi chứng chỉ tư vấn cho cá nhân bị thu hồi;  
+   740→c) Cá nhân bị thu hồi chứng chỉ tư vấn phải nộp lại bản gốc chứng chỉ tư 
+   741→vấn cho cơ quan ra quyết định thu hồi trong thời hạn 05 ngày làm việc, kể từ 
+   742→ngày nhận được quyết định thu hồi; 
+   743→d) Cơ quan ra quyết định thu hồi tổ chức thực hiện việc tiêu hủy chứng chỉ 
+   744→tư vấn bằng hình thức cắt chéo ½ (một phần hai) chứng chỉ. 
+   745→5. Cơ quan có thẩm quyền cấp, cấp lại, cấp điều chỉnh, thu hồi chứng chỉ 
+   746→tư vấn chuyên ngành hóa chất có trách nhiệm cập nhập thông tin về chứng chỉ 
+   747→tư vấn được cấp, cấp lại, cấp điều chỉnh, thu hồi vào cơ sở dữ liệu chuyên ngành 
+   748→hóa chất.  
+   749→6. Ủy ban nhân dân cấp tỉnh nơi cá nhân đăng ký thường trú cấp, cấp lại, 
+   750→cấp điều chỉnh, thu hồi chứng chỉ tư vấn chuyên ngành hóa chất. 
+   751→
+   752→21 
+   753→7. Bộ trưởng Bộ Công Thương hướng dẫn biểu mẫu cấp, cấp lại, cấp điều 
+   754→chỉnh, thu hồi chứng chỉ tư vấn chuyên ngành hóa chất. 
+   755→Điều 24. Quyền, nghĩa vụ của cá nhân đề nghị cấp chứng chỉ tư vấn 
+   756→1. Cá nhân đề nghị cấp chứng chỉ tư vấn có các quyền sau đây: 
+   757→a) Được yêu cầu cung cấp thông tin về việc cấp chứng chỉ tư vấn; 
+   758→b) Khiếu nại, tố cáo các hành vi vi phạm các quy định của pháp luật về 
+   759→cấp chứng chỉ tư vấn. 
+   760→2. Cá nhân đề nghị cấp chứng chỉ tư vấn có các nghĩa vụ sau đây: 
+   761→a) Khai báo trung thực hồ sơ đề nghị cấp chứng chỉ tư vấn theo quy định 
+   762→tại Nghị định này; chịu trách nhiệm trước pháp luật về nội dung kê khai trong 
+   763→hồ sơ; cung cấp thông tin khi cơ quan có thẩm quyền yêu cầu; 
+   764→b) Chỉ được hành nghề đúng với nội dung ghi trên chứng chỉ tư vấn, tuân 
+   765→thủ các quy định của pháp luật về hóa chất và pháp luật khác có liên quan; 
+   766→c) Không được cho người khác thuê, mượn, sử dụng chứng chỉ tư vấn; 
+   767→d) Không được tẩy xóa, sửa chữa chứng chỉ tư vấn; 
+   768→đ) Xuất trình chứng chỉ tư vấn và chấp hành yêu cầu về thanh tra, kiểm tra 
+   769→của cơ quan có thẩm quyền. 
+   770→ 
+   771→Chương V 
+   772→BẢO ĐẢM AN TOÀN, AN NINH TRONG HOẠT ĐỘNG HÓA CHẤT 
+   773→Điều 25. Bảo đảm yêu cầu về cơ sở vật chất - kỹ thuật trong hoạt động 
+   774→hoá chất 
+   775→1. Nhà xưởng, kho chứa phải bảo đảm các yêu cầu về an toàn trong hoạt 
+   776→động hóa chất theo quy định tại quy chuẩn kỹ thuật, tiêu chuẩn quốc gia và văn 
+   777→bản quy phạm pháp luật có liên quan. 
+   778→2. Thiết bị, phương tiện sản xuất, bao bì, thiết bị chứa đối với hoạt động 
+   779→hoá chất phải đáp ứng các yêu cầu sau đây: 
+   780→a) Thiết bị, phương tiện phục vụ sản xuất hóa chất được lựa chọn đảm bảo 
+   781→giảm thiểu nguy cơ gây sự cố hóa chất, ô nhiễm môi trường, đảm bảo an toàn 
+   782→phòng, chống cháy nổ; 
+   783→
+   784→22 
+   785→b) Thiết bị kỹ thuật phải đạt yêu cầu chung về an toàn phù hợp với chủng 
+   786→loại hóa chất và quy trình công nghệ, đáp ứng được công suất sản xuất, quy mô 
+   787→tồn trữ hoá chất. Máy, thiết bị, vật tư có yêu cầu nghiêm ngặt về an toàn, vệ 
+   788→sinh lao động và thiết bị đo lường thử nghiệm phải được kiểm định, hiệu chuẩn, 
+   789→hiệu chỉnh, bảo dưỡng theo quy định hiện hành về kiểm định máy móc, thiết bị;  
+   790→c) Bao bì, thiết bị chứa hóa chất phải bảo đảm kín, chắc chắn, phù hợp với 
+   791→chủng loại hóa chất, không rò rỉ hóa chất, có độ bền chịu được tác động của hóa 
+   792→chất, thời tiết và các tác động thông thường khi bảo quản, bốc, xếp vận chuyển.  
+   793→Bao bì, thiết bị chứa đã qua sử dụng phải bảo quản riêng. Trước khi nạp 
+   794→hóa chất, cơ sở thực hiện nạp phải kiểm tra bao bì, thiết bị chứa hóa chất, làm 
+   795→sạch bao bì, thiết bị chứa đã qua sử dụng để loại trừ khả năng phản ứng, cháy 
+   796→nổ khi nạp hóa chất. Các bao bì, thiết bị chứa đã qua sử dụng nhưng không sử dụng 
+   797→lại phải được thu gom, xử lý theo quy định của pháp luật về bảo vệ môi trường; 
+   798→d) Bao bì, thiết bị chứa hoá chất phải có nhãn ghi đầy đủ các nội dung theo 
+   799→quy định về ghi nhãn hóa chất. Nhãn của hoá chất phải đảm bảo rõ, dễ đọc và 
+   800→có độ bền chịu được tác động của hóa chất, thời tiết và các tác động thông 
+   801→thường khi bảo quản, bốc, xếp vận chuyển. 
+   802→3. Thiết bị an toàn phòng cháy chữa cháy, trang thiết bị phòng ngừa ứng 
+   803→phó sự cố hoá chất, phương tiện bảo hộ cá nhân trong hoạt động hoá chất phải 
+   804→đáp ứng các yêu cầu sau đây:  
+   805→a) Hệ thống phòng cháy, chữa cháy của nhà xưởng, kho chứa phải đáp ứng 
+   806→các quy định của pháp luật về phòng cháy, chữa cháy; 
+   807→b) Trang thiết bị phòng ngừa ứng phó sự cố hoá chất phải đáp ứng đúng 
+   808→và đủ theo Kế hoạch phòng ngừa, ứng phó sự cố hóa chất đã được phê duyệt 
+   809→hoặc Biện pháp phòng ngừa, ứng phó sự cố hóa chất đã được ban hành tại cơ 
+   810→sở hoá chất; 
+   811→c) Phương tiện bảo hộ cá nhân phải được bảo đảm đúng chủng loại, số 
+   812→lượng, chất lượng đáp ứng các quy định của pháp luật về an toàn vệ sinh lao 
+   813→động, phù hợp với chủng loại hóa chất. 
+   814→4. Tổ chức, cá nhân sử dụng hóa chất cho nhu cầu tiêu dùng, sinh hoạt 
+   815→thiết yếu thực hiện đảm bảo an toàn theo hướng dẫn của nhà sản xuất. 
+   816→Điều 26. Bảo đảm an toàn, an ninh trong hoạt động vận chuyển hóa chất 
+   817→Phương tiện, thiết bị, bồn chứa đối với hoạt động vận chuyển hóa chất 
+   818→phải đáp ứng các yêu cầu sau đây: 
+   819→1. Phương tiện, thiết bị, bồn chứa phục vụ hoạt động vận chuyển hóa chất 
+   820→phải được đăng kiểm, kiểm định, cấp phép vận chuyển hóa chất nguy hiểm theo 
+   821→quy định của pháp luật về vận chuyển hàng hóa nguy hiểm. 
+   822→
+   823→23 
+   824→2. Phương tiện, thiết bị, bồn chứa phục vụ hoạt động vận chuyển hóa chất 
+   825→phải đạt yêu cầu chung về an toàn theo tiêu chuẩn, quy chuẩn kỹ thuật quốc 
+   826→gia; được lựa chọn đảm bảo giảm thiểu nguy cơ gây sự cố hóa chất, ô nhiễm 
+   827→môi trường, đảm bảo an toàn phòng, chống cháy nổ phù hợp với chủng loại hóa 
+   828→chất, quy mô vận chuyển hoá chất. 
+   829→3. Bao bì, thiết bị chứa hoá chất phải bảo đảm kín, chắc chắn, phù hợp với 
+   830→chủng loại hóa chất, không rò rỉ hóa chất, có độ bền chịu được tác động của hóa 
+   831→chất, thời tiết và các tác động thông thường khi bốc, xếp vận chuyển. Bao bì đã 
+   832→qua sử dụng phải bảo quản riêng. Bao bì, thiết bị đã qua sử dụng nhưng không 
+   833→sử dụng lại phải được thu gom, xử lý theo quy định của pháp luật về bảo vệ môi trường. 
+   834→4. Bao bì, thiết bị chứa hoá chất phải có nhãn ghi đầy đủ các nội dung theo 
+   835→quy định về ghi nhãn hóa chất. Nhãn của hoá chất phải đảm bảo rõ, dễ đọc và 
+   836→có độ bền chịu được tác động của hóa chất, thời tiết và các tác động thông 
+   837→thường khi bốc, xếp vận chuyển. 
+   838→5. Phương tiện bảo hộ cá nhân và trang thiết bị ứng phó sự cố hóa chất cho 
+   839→lái xe và người áp tải theo xe phải được trang bị đúng chủng loại, số lượng, chất 
+   840→lượng theo Biện pháp phòng ngừa, ứng phó sự cố hóa chất trong vận chuyển đã 
+   841→xây dựng, đáp ứng các quy định của pháp luật về an toàn vệ sinh lao động. 
+   842→6. Trước khi vận chuyển hóa chất, phải kiểm tra phương tiện vận chuyển 
+   843→để đảm bảo phương tiện tham gia giao thông an toàn; làm sạch bao bì, thiết bị 
+   844→chứa hóa chất đã qua sử dụng để loại trừ khả năng phản ứng, cháy nổ khi vận 
+   845→chuyển hóa chất. 
+   846→7. Lưu trữ biện pháp phòng ngừa, ứng phó sự cố hóa chất trong vận chuyển 
+   847→hóa chất theo phương tiện trong suốt quá trình vận chuyển dưới dạng bản cứng 
+   848→hoặc bản điện tử. 
+   849→Điều 27. Yêu cầu chuyên môn đối với người chịu trách nhiệm chuyên 
+   850→môn về an toàn hóa chất  
+   851→1. Tổ chức, cá nhân sản xuất hóa chất phải có người chịu trách nhiệm 
+   852→chuyên môn về an toàn hóa chất có bằng cử nhân hoặc tương đương trở lên 
+   853→ngành đào tạo về hóa học thuộc Danh mục quy định tại Phụ lục III ban hành 
+   854→kèm theo Nghị định này. 
+   855→2. Tổ chức, cá nhân kinh doanh hóa chất, tồn trữ hóa chất, sử dụng hóa 
+   856→chất, xử lý chất thải hóa chất, tiêu hủy hóa chất, thải bỏ hóa chất phải có người 
+   857→chịu trách nhiệm chuyên môn về an toàn hóa chất có trình độ trung cấp trở lên 
+   858→ngành đào tạo về hóa học thuộc Danh mục quy định tại Phụ lục III ban hành 
+   859→kèm theo Nghị định này. 
+   860→3. Tổ chức, cá nhân vận chuyển hóa chất thực hiện theo quy định tại pháp 
+   861→luật về vận chuyển hàng hóa nguy hiểm. 
+   862→
+   863→24 
+   864→4. Tổ chức, cá nhân nghiên cứu, thử nghiệm hóa chất thực hiện theo quy 
+   865→định tại pháp luật về khoa học và công nghệ. 
+   866→Điều 28. Thiết lập khoảng cách an toàn đối với công trình hóa chất 
+   867→1. Bộ quản lý ngành tổ chức xây dựng và ban hành quy chuẩn kỹ thuật về 
+   868→khoảng cách an toàn đối với cơ sở sản xuất, tồn trữ hóa chất nguy hiểm trong 
+   869→lĩnh vực quản lý. 
+   870→2. Trách nhiệm thực hiện thiết lập khoảng cách an toàn: 
+   871→a) Các dự án đầu tư có hoạt động sản xuất, tồn trữ hóa chất nguy hiểm 
+   872→phải thiết lập khoảng cách an toàn đối với các khu dân cư, công trình công cộng, 
+   873→công trình quốc phòng, khu quân sự, công trình an ninh, di tích lịch sử - văn 
+   874→hóa, danh lam thắng cảnh, khu bảo tồn thiên nhiên, khu vực khai thác nguồn 
+   875→nước sinh hoạt; 
+   876→b) Tổ chức, cá nhân không được xây dựng công trình nhà ở và công trình 
+   877→khác trong phạm vi khoảng cách an toàn quy định tại khoản 1 Điều này, trừ 
+   878→công trình chuyên dụng nhằm phục vụ mục đích đảm bảo an ninh, quốc phòng, 
+   879→giao thông hạ tầng, an ninh năng lượng. Ủy ban nhân dân cấp tỉnh quyết định 
+   880→chấp thuận việc xây dựng các công trình chuyên dụng trong phạm vi khoảng 
+   881→cách an toàn. 
+   882→ 
+   883→ 
+   884→Chương VI 
+   885→HUẤN LUYỆN AN TOÀN CHUYÊN NGÀNH HÓA CHẤT 
+   886→ 
+   887→Điều 29. Đối tượng phải được huấn luyện an toàn chuyên ngành 
+   888→hóa chất 
+   889→1. Tổ chức, cá nhân hoạt động hóa chất có trách nhiệm tổ chức huấn luyện 
+   890→an toàn chuyên ngành hóa chất cho các đối tượng được quy định tại khoản 3 
+   891→Điều này định kỳ 02 năm một lần, trừ hoạt động sử dụng hóa chất cho nhu cầu 
+   892→tiêu dùng, sinh hoạt thiết yếu và hoạt động vận chuyển hóa chất bằng phương 
+   893→tiện giao thông cơ giới đường bộ, đường thủy nội địa. Việc huấn luyện an toàn 
+   894→chuyên ngành hóa chất có thể do tổ chức, cá nhân tự thực hiện hoặc thông qua 
+   895→tổ chức tư vấn. Tổ chức, cá nhân và tổ chức tư vấn chịu trách nhiệm trước pháp 
+   896→luật về chất lượng huấn luyện an toàn chuyên ngành hóa chất.  
+   897→2. Người đã được huấn luyện phải được huấn luyện lại trong các trường 
+   898→hợp sau đây: Khi có sự thay đổi chủng loại hóa chất, công nghệ, cơ sở vật chất, 
+   899→phương án sản xuất liên quan đến vị trí làm việc; khi người đã được huấn luyện 
+   900→thay đổi vị trí làm việc; sau 02 lần kiểm tra người đã được huấn luyện không 
+   901→đạt yêu cầu; khi hết thời hạn 02 năm từ kể từ lần huấn luyện gần nhất. 
+   902→
+   903→25 
+   904→3. Đối tượng tham gia huấn luyện an toàn chuyên ngành hóa chất được 
+   905→quy định như sau: 
+   906→a) Nhóm 1, bao gồm: 
+   907→Người đứng đầu tổ chức, cơ sở trực tiếp hoạt động hóa chất; trưởng phòng, 
+   908→ban, chi nhánh trực thuộc trực thuộc, quản đốc phân xưởng hoặc tương đương 
+   909→phụ trách hoạt động hoá chất; 
+   910→Cấp phó của người đứng đầu theo quy định tại điểm a khoản 3 Điều này 
+   911→được giao nhiệm vụ phụ trách điều hành hoạt động hóa chất. 
+   912→b) Nhóm 2, bao gồm: 
+   913→Người chịu trách nhiệm về an toàn hóa chất của tổ chức, cá nhân hoạt 
+   914→động hóa chất; 
+   915→Người trực tiếp giám sát về an toàn hóa chất tại nơi làm việc; thủ kho liên 
+   916→quan đến hoạt động hoá chất hoặc tương đương. 
+   917→c) Nhóm 3, bao gồm: 
+   918→Người lao động liên quan trực tiếp đến hóa chất;  
+   919→Nhân viên y tế tại cơ sở hoạt động hoá chất (nếu có). 
+   920→4. Căn cứ vào điều kiện cụ thể của cơ sở hoạt động hóa chất, tổ chức, cá 
+   921→nhân chủ động tổ chức huấn luyện riêng về an toàn chuyên ngành hóa chất hoặc 
+   922→kết hợp huấn luyện các nội dung về an toàn chuyên ngành hóa chất với huấn 
+   923→luyện về an toàn, vệ sinh lao động, về phòng cháy, chữa cháy hoặc nội dung 
+   924→huấn luyện khác được pháp luật chuyên ngành quy định nhưng phải bảo đảm 
+   925→đáp ứng các quy định về nội dung huấn luyện, người huấn luyện và thời gian 
+   926→huấn luyện tại Điều 30, Điều 31 và khoản 1 Điều 32 của Nghị định này. 
+   927→Điều 30. Nội dung huấn luyện an toàn chuyên ngành hóa chất 
+   928→1. Nội dung huấn luyện an toàn chuyên ngành hóa chất phải phù hợp với 
+   929→vị trí công tác của người được huấn luyện; tính chất, chủng loại, mức độ nguy 
+   930→hiểm của hóa chất tại cơ sở hoạt động hóa chất.  
+   931→2. Nội dung huấn luyện đối với Nhóm 1:  
+   932→a) Những quy định của pháp luật trong hoạt động hóa chất; 
+   933→b) Các yếu tố nguy hiểm trong hoạt động hóa chất của cơ sở;  
+   934→c) Phương án phối hợp với cơ quan có thẩm quyền để huy động nguồn lực 
+   935→bên trong và bên ngoài của cơ sở để ứng phó, khắc phục sự cố. 
+   936→
+   937→26 
+   938→3. Nội dung huấn luyện đối với Nhóm 2: 
+   939→a) Những quy định của pháp luật trong hoạt động hóa chất; 
+   940→b) Các yếu tố nguy hiểm trong hoạt động hóa chất của cơ sở, các biện pháp 
+   941→phòng ngừa theo kế hoạch phòng ngừa, ứng phó sự cố hóa chất đã được phê 
+   942→duyệt hoặc biện pháp phòng ngừa, ứng phó sự cố hóa chất đã được ban hành; 
+   943→c) Quy trình quản lý an toàn hóa chất, kỹ thuật đảm bảo an toàn khi làm 
+   944→việc, tiếp xúc với hóa chất nguy hiểm; 
+   945→d) Các đặc tính nguy hiểm của hóa chất, phiếu an toàn hóa chất của các 
+   946→hóa chất nguy hiểm trong hoạt động hóa chất của cơ sở; phân loại, ghi nhãn hóa 
+   947→chất; sắp xếp hóa chất; 
+   948→đ) Quy trình ứng phó đối với các hóa chất nguy hiểm điển hình: Quy trình 
+   949→thông báo, kỹ thuật ứng phó, vật liệu ứng phó, trang thiết bị bảo hộ cá nhân, 
+   950→phương án thu gom, tiêu tẩy, khử nhiễm...; 
+   951→e) Nội dung thực hành tại cơ sở hoạt động hóa chất: Nhận biết hóa chất 
+   952→nguy hiểm thông qua nhãn hóa chất và hình đồ cảnh báo; sử dụng, bảo quản 
+   953→trang thiết bị bảo hộ cá nhân phục vụ công tác ứng phó sự cố hóa chất; sử dụng 
+   954→các thiết bị, vật liệu ứng phó sự cố hóa chất. 
+   955→4. Nội dung huấn luyện đối với Nhóm 3: 
+   956→a) Các yếu tố nguy hiểm trong hoạt động hóa chất của cơ sở, các biện pháp 
+   957→phòng ngừa theo kế hoạch phòng ngừa, ứng phó sự cố hóa chất đã được phê 
+   958→duyệt hoặc biện pháp phòng ngừa, ứng phó sự cố hóa chất đã được ban hành; 
+   959→b) Quy trình quản lý an toàn hóa chất, kỹ thuật đảm bảo an toàn khi làm 
+   960→việc, tiếp xúc với hóa chất nguy hiểm; 
+   961→c) Các đặc tính nguy hiểm của hóa chất, phiếu an toàn hóa chất của các 
+   962→hóa chất nguy hiểm trong hoạt động hóa chất của cơ sở; phân loại, ghi nhãn hóa 
+   963→chất; sắp xếp hóa chất; 
+   964→d) Quy trình ứng phó đối với các hóa chất nguy hiểm điển hình: Quy trình 
+   965→thông báo, kỹ thuật ứng phó, vật liệu ứng phó, trang thiết bị bảo hộ cá nhân, 
+   966→phương án thu gom, tiêu tẩy, khử nhiễm...; 
+   967→đ) Nội dung thực hành tại cơ sở hoạt động hóa chất: Nhận biết hóa chất 
+   968→nguy hiểm thông qua nhãn hóa chất và hình đồ cảnh báo; sử dụng, bảo quản 
+   969→trang thiết bị bảo hộ cá nhân phục vụ công tác ứng phó sự cố hóa chất; sử dụng 
+   970→các thiết bị, vật liệu ứng phó sự cố hóa chất. 
+   971→
+   972→27 
+   973→Điều 31. Người huấn luyện an toàn chuyên ngành hóa chất 
+   974→1. Đối với trường hợp tổ chức tự thực hiện huấn luyện an toàn chuyên ngành 
+   975→hóa chất, người huấn luyện an toàn chuyên ngành hóa chất phải có bằng cử nhân 
+   976→hoặc tương đương trở lên ngành đào tạo về hóa học thuộc Danh mục quy định tại 
+   977→Phụ lục III ban hành kèm theo Nghị định này và có kinh nghiệm làm việc liên 
+   978→quan đến hoạt động an toàn hóa chất tại tổ chức mình thực hiện huấn luyện theo 
+   979→quy định tại điểm b khoản 1 Điều 18 của Nghị định này. 
+   980→2. Đối với trường hợp tổ chức, cá nhân thông qua tổ chức tư vấn để thực 
+   981→hiện huấn luyện an toàn chuyên ngành hóa chất, người huấn luyện thuộc tổ 
+   982→chức tư vấn phải có chứng chỉ tư vấn chuyên ngành hóa chất trong đó được 
+   983→huấn luyện an toàn chuyên ngành hóa chất. Tổ chức tư vấn huấn luyện an toàn 
+   984→chuyên ngành hóa chất phải đáp ứng các điều kiện theo quy định tại Điều 19 
+   985→của Nghị định này. 
+   986→Điều 32. Thời lượng huấn luyện, kiểm tra, hồ sơ huấn luyện an toàn 
+   987→chuyên ngành hóa chất 
+   988→1. Thời gian huấn luyện an toàn chuyên ngành hóa chất được quy định 
+   989→như sau: 
+   990→a) Thời gian huấn luyện an toàn chuyên ngành hóa chất chu kỳ đầu tiên 
+   991→tối thiểu là 08 giờ, bao gồm cả thời gian kiểm tra; 
+   992→b) Thời gian huấn luyện an toàn hóa chất từ chu kỳ thứ hai trở đi bằng 50% 
+   993→thời gian huấn luyện an toàn hóa chất chu kỳ đầu tiên, trừ các trường hợp phải 
+   994→được huấn luyện an toàn chuyên ngành hóa chất lại theo quy định tại khoản 2 
+   995→Điều 29 của Nghị định này. 
+   996→2. Quy định về kiểm tra: 
+   997→a) Nội dung kiểm tra phải phù hợp với nội dung huấn luyện; 
+   998→b) Thời gian kiểm tra tối đa là 02 giờ; 
+   999→c) Bài kiểm tra đạt yêu cầu phải đạt điểm trung bình trở lên. 
+  1000→3. Hồ sơ huấn luyện an toàn chuyên ngành hóa chất gồm: 
+  1001→a) Nội dung huấn luyện; 
+  1002→b) Danh sách người được huấn luyện với các thông tin: Họ tên, ngày tháng 
+  1003→năm sinh, chức danh, vị trí làm việc, chữ ký xác nhận tham gia huấn luyện; 
+  1004→c) Thông tin về người huấn luyện bao gồm: Họ tên, ngày tháng năm sinh, 
+  1005→trình độ học vấn, chuyên ngành được đào tạo, kinh nghiệm công tác, kèm theo 
+  1006→các tài liệu chứng minh; 
+  1007→
+  1008→28 
+  1009→d) Nội dung và kết quả kiểm tra huấn luyện an toàn chuyên ngành hóa chất; 
+  1010→đ) Quyết định công nhận kết quả kiểm tra huấn luyện an toàn chuyên 
+  1011→ngành hóa chất của tổ chức thực hiện huấn luyện. 
+  1012→4. Tổ chức, cá nhân có trách nhiệm lưu giữ đầy đủ hồ sơ quy định tại khoản 3 
+  1013→Điều này trong thời gian tối thiểu 03 năm kể từ ngày ban hành quyết định công 
+  1014→nhận kết quả kiểm tra huấn luyện an toàn chuyên ngành hóa chất và xuất trình 
+  1015→khi cơ quan quản lý nhà nước yêu cầu. 
+  1016→ 
+  1017→Chương VII 
+  1018→PHÒNG NGỪA, ỨNG PHÓ SỰ CỐ HÓA CHẤT 
+  1019→ 
+  1020→Điều 33. Kế hoạch phòng ngừa, ứng phó sự cố hóa chất 
+  1021→1. Danh mục Hóa chất phải xây dựng Kế hoạch phòng ngừa, ứng phó sự cố 
+  1022→hóa chất được ban hành tại Phụ lục IV kèm theo Nghị định số 24/2026/NĐ-CP 
+  1023→ngày 17 tháng 01 năm 2026 của Chính phủ quy định các danh mục hóa chất 
+  1024→thuộc phạm vi điều chỉnh của Luật Hóa chất. 
+  1025→2. Chủ đầu tư dự án, tổ chức, cá nhân hoạt động hóa chất nguy hiểm phải 
+  1026→xây dựng Kế hoạch phòng ngừa, ứng phó sự cố hóa chất đối với tất cả các hóa 
+  1027→chất nguy hiểm mà dự án có hoạt động và trình cơ quan có thẩm quyền thẩm 
+  1028→định, phê duyệt nếu thuộc một trong các trường hợp sau: 
+  1029→a) Có ít nhất 01 hóa chất thuộc Bảng A hoặc 01 hỗn hợp chất thuộc Bảng 
+  1030→B Phụ lục IV kèm theo Nghị định số 24/2026/NĐ-CP ngày 17 tháng 01 năm 
+  1031→2026 của Chính phủ quy định các danh mục hóa chất thuộc phạm vi điều chỉnh 
+  1032→của Luật Hóa chất với khối lượng tồn trữ lớn nhất tại một thời điểm lớn hơn 
+  1033→hoặc bằng ngưỡng khối lượng quy định tại Phụ lục; 
+  1034→b) Tổng tỉ lệ của khối lượng hóa chất nguy hiểm tồn trữ trên ngưỡng quy 
+  1035→định lớn hơn hoặc bằng 1 trong trường hợp không thuộc đối tượng được quy 
+  1036→định tại điểm a khoản 2 Điều này. 
+  1037→Tổng tỉ lệ của khối lượng hóa chất nguy hiểm tồn trữ được tính toán như sau: 
+  1038→qx
+  1039→1
+  1040→/QUX
+  1041→1
+  1042→ + qx
+  1043→2
+  1044→/QUX
+  1045→2
+  1046→ + .......qx
+  1047→i
+  1048→/QUX
+  1049→i 
+  1050→ ≥ 1 
+  1051→Trong đó: 
+  1052→qx
+  1053→i
+  1054→ = khối lượng tồn trữ lớn nhất tại một thời điểm hóa chất nguy hiểm i thuộc 
+  1055→Bảng A hoặc Bảng B của Phụ lục IV kèm theo Nghị định số 24/2026/NĐ-CP ngày 
+  1056→17 tháng 01 năm 2026 của Chính phủ quy định các danh mục hóa chất thuộc 
+  1057→phạm vi điều chỉnh của Luật Hóa chất. 
+  1058→
+  1059→29 
+  1060→QUX
+  1061→i
+  1062→ = ngưỡng tồn trữ lớn nhất tại một thời điểm hóa chất nguy hiểm i 
+  1063→được quy định tại Bảng A hoặc Bảng B của Phụ lục IV kèm theo Nghị định số 
+  1064→24/2026/NĐ-CP ngày 17 tháng 01 năm 2026 của Chính phủ quy định các danh 
+  1065→mục hóa chất thuộc phạm vi điều chỉnh của Luật Hóa chất. 
+  1066→3. Kế hoạch phòng ngừa, ứng phó sự cố hóa chất phải có các nội dung 
+  1067→sau đây: 
+  1068→a) Thông tin về đặc tính, khối lượng, quy mô hoạt động, tồn trữ hóa chất, 
+  1069→công nghệ sản xuất, sử dụng hóa chất, đặc điểm điều kiện địa lý, dân cư, môi 
+  1070→trường nơi có hoạt động hóa chất.  
+  1071→Nhân lực, trang thiết bị phục vụ công tác phòng ngừa, ứng phó sự cố 
+  1072→hóa chất.  
+  1073→Đánh giá sự ảnh hưởng của các điều kiện trên đối với công tác phòng 
+  1074→ngừa, ứng phó sự cố hóa chất. 
+  1075→b) Dự báo nguy cơ, tình huống xảy ra sự cố hóa chất, xác định phạm vi 
+  1076→ảnh hưởng, ước lượng hậu quả và nhận định phân cấp sự cố hóa chất. 
+  1077→c) Giải pháp phòng ngừa sự cố hóa chất tại khu vực tồn trữ hóa chất và tại 
+  1078→các vị trí nguy cơ cao; giải pháp bảo quản, tránh thất thoát hóa chất. 
+  1079→d) Giải pháp ứng phó sự cố hóa chất tại các khu vực nguy cơ cao bao gồm 
+  1080→các nội dung sau: 
+  1081→Phân vùng nguy hiểm, phương án triển khai lực lượng, phương tiện theo 
+  1082→điều kiện địa hình, khí tượng. 
+  1083→Kỹ thuật, vật liệu ứng phó với các tình huống sự cố được nhận định. 
+  1084→Cách thức sử dụng trang thiết bị bảo hộ cá nhân phù hợp với đặc tính nguy 
+  1085→hiểm của từng loại hóa chất xảy ra sự cố. 
+  1086→Kế hoạch phối hợp với các lực lượng ngoài cơ sở. 
+  1087→Kế hoạch sơ tán người, tài sản. 
+  1088→đ) Kế hoạch diễn tập ứng phó sự cố hóa chất.  
+  1089→e) Phương án khắc phục hậu quả sự cố hóa chất theo quy định của pháp 
+  1090→luật có liên quan. 
+  1091→4. Các nội dung quy định tại điểm b, c, d khoản 3 Điều này là nội dung cơ 
+  1092→bản của Kế hoạch phòng ngừa, ứng phó sự cố hóa chất. 
+  1093→5. Bộ trưởng Bộ Công Thương hướng dẫn chi tiết khoản 3 Điều này. 
+  1094→
+  1095→30 
+  1096→Điều 34. Thẩm định kế hoạch phòng ngừa ứng phó sự cố hóa chất 
+  1097→1. Hồ sơ đề nghị thẩm định Kế hoạch phòng ngừa, ứng phó sự cố hóa chất 
+  1098→bao gồm: 
+  1099→a) Văn bản đề nghị thẩm định Kế hoạch phòng ngừa, ứng phó sự cố hóa 
+  1100→chất theo mẫu quy định tại khoản 8 Điều này; 
+  1101→b) Kế hoạch phòng ngừa, ứng phó sự cố hóa chất gồm 09 bản. 
+  1102→2. Trình tự, thủ tục thẩm định, phê duyệt Kế hoạch phòng ngừa, ứng phó 
+  1103→sự cố hóa chất: 
+  1104→a) Tổ chức, cá nhân đề nghị thẩm định Kế hoạch phòng ngừa, ứng phó sự 
+  1105→cố hóa chất lập 01 bộ hồ sơ gửi cơ quan thẩm định qua đường bưu điện hoặc 
+  1106→gửi trực tiếp hoặc qua hệ thống dịch vụ công trực tuyến. Thời điểm gửi hồ sơ 
+  1107→đề nghị thẩm định thực hiện theo quy định tại khoản 3 Điều này; 
+  1108→b) Trường hợp hồ sơ chưa đầy đủ và hợp lệ, trong thời gian 03 ngày làm 
+  1109→việc kể từ ngày tiếp nhận hồ sơ, cơ quan thẩm định thông báo trả lại hồ sơ cho 
+  1110→tổ chức, cá nhân và nêu rõ lý do; 
+  1111→c) Sau khi nhận đủ hồ sơ hợp lệ, cơ quan thẩm định có trách nhiệm tổ chức 
+  1112→thẩm định Kế hoạch trong vòng 15 ngày làm việc. Việc thẩm định Kế hoạch 
+  1113→được thực hiện thông qua Hội đồng thẩm định theo quy định khoản 4 Điều này; 
+  1114→d) Cơ quan thẩm định có trách nhiệm gửi thông báo kết quả thẩm định đến 
+  1115→tổ chức, cá nhân trong vòng 05 ngày làm việc kể từ ngày kết thúc thẩm định. 
+  1116→Thông báo kết quả thẩm định phải thể hiện rõ kết luận của Hội đồng thẩm định 
+  1117→về việc Kế hoạch đủ điều kiện hoặc không đủ điều kiện để thực hiện các bước 
+  1118→tiếp theo và các yêu cầu đối với tổ chức, cá nhân.  
+  1119→Trường hợp Kế hoạch không đủ điều kiện để thực hiện các bước tiếp theo, 
+  1120→tổ chức, cá nhân có trách nhiệm xây dựng và trình thẩm định lại Kế hoạch.  
+  1121→Trường hợp Kế hoạch đủ điều kiện để thực hiện các bước tiếp theo, tổ 
+  1122→chức, cá nhân có trách nhiệm thực hiện các yêu cầu của Hội đồng thẩm định 
+  1123→nêu tại Thông báo kết quả thẩm định;  
+  1124→đ) Đến thời điểm phê duyệt Kế hoạch theo quy định tại khoản 3 Điều này, 
+  1125→tổ chức, cá nhân gửi báo cáo về kết quả thực hiện các yêu cầu của Hội đồng 
+  1126→thẩm định nêu tại Thông báo kết quả thẩm định, 01 bản điện tử và 07 bản in Kế 
+  1127→hoạch đã được chỉnh sửa, bổ sung đến Hội đồng thẩm định thông qua cơ quan 
+  1128→thẩm định; 
+  1129→e) Chậm nhất 20 ngày làm việc kể từ ngày nhận được báo cáo của tổ chức, 
+  1130→cá nhân, Hội đồng thẩm định tiến hành kiểm tra thực tế việc thực hiện các yêu 
+  1131→cầu của Hội đồng thẩm định nêu tại Thông báo kết quả thẩm định; báo cáo kết 
+  1132→quả kiểm tra và kết luận kiến nghị phê duyệt hoặc không phê duyệt Kế hoạch; 
+  1133→
+  1134→31 
+  1135→g) Chậm nhất 10 ngày làm việc kể từ ngày nhận được báo cáo kết quả 
+  1136→kiểm tra của Hội đồng thẩm định, cơ quan phê duyệt Kế hoạch xem xét, phê 
+  1137→duyệt Kế hoạch, trường hợp không phê duyệt Kế hoạch, phải có văn bản trả lời, 
+  1138→nêu rõ lý do. Mẫu Quyết định phê duyệt Kế hoạch được quy định tại Phụ lục II 
+  1139→ban hành kèm theo Nghị định này; 
+  1140→h) Trên cơ sở Kế hoạch được phê duyệt, cơ quan thẩm định chứng thực 
+  1141→vào trang phụ bìa của bản Kế hoạch và gửi Quyết định phê duyệt kèm theo Kế 
+  1142→hoạch cho tổ chức, cá nhân, các cơ quan, đơn vị liên quan tại địa phương thực 
+  1143→hiện dự án bao gồm: Ủy ban nhân dân cấp tỉnh; cơ quan quản lý chuyên ngành 
+  1144→cấp tỉnh; cơ quan quản lý nhà nước về phòng cháy, chữa cháy cấp tỉnh; cơ quan 
+  1145→quản lý nhà nước về môi trường cấp tỉnh; Ban quản lý khu công nghiệp, khu 
+  1146→chế xuất, khu kinh tế trong trường hợp địa điểm thực hiện dự án nằm trong khu 
+  1147→công nghiệp, khu chế xuất, khu kinh tế; Ủy ban nhân dân cấp xã trong trường 
+  1148→hợp Kế hoạch phòng ngừa, ứng phó sự cố hóa chất được Ủy ban nhân dân cấp 
+  1149→tỉnh phê duyệt. 
+  1150→3. Thời điểm thẩm định, phê duyệt Kế hoạch phòng ngừa, ứng phó sự cố 
+  1151→hóa chất  
+  1152→a) Đối với dự án đầu tư, chủ đầu tư phải trình thẩm định Kế hoạch phòng 
+  1153→ngừa, ứng phó sự cố hóa chất trước khi có kết luận thẩm định báo cáo nghiên 
+  1154→cứu khả thi đầu tư xây dựng, báo cáo kinh tế - kỹ thuật; 
+  1155→Sau khi hoàn thành công trình xây dựng, chủ đầu tư báo cáo Hội đồng thẩm 
+  1156→định để kiểm tra việc thực hiện các yêu cầu nêu tại Thông báo kết quả thẩm định 
+  1157→và kiến nghị phê duyệt Kế hoạch. Chủ đầu tư chỉ được đưa công trình  vào 
+  1158→khai thác sử dụng sau khi Kế hoạch phòng ngừa, ứng phó sự cố hóa chất được 
+  1159→phê duyệt; 
+  1160→b) Đối với trường hợp không thuộc quy định tại điểm a khoản này, chủ 
+  1161→đầu tư, tổ chức, cá nhân phải trình cơ quan nhà nước có thẩm quyền thẩm định 
+  1162→và phê duyệt Kế hoạch phòng ngừa, ứng phó sự cố hóa chất trước khi thực hiện 
+  1163→tồn trữ hóa chất. 
+  1164→4. Tổ chức và hoạt động của Hội đồng thẩm định Kế hoạch phòng ngừa, 
+  1165→ứng phó sự cố hóa chất: 
+  1166→a) Hội đồng thẩm định do cơ quan phê duyệt Kế hoạch thành lập. Thành 
+  1167→phần Hội đồng thẩm định gồm đại diện cơ quan thẩm định, các cơ quan quản 
+  1168→lý nhà nước và các chuyên gia trong các lĩnh vực liên quan;  
+  1169→b) Cơ cấu tổ chức của Hội đồng thẩm định gồm: Chủ tịch Hội đồng, Phó 
+  1170→Chủ tịch Hội đồng (nếu có), Ủy viên phản biện, Ủy viên thư ký và các Ủy viên. 
+  1171→Tổng số thành viên Hội đồng tối thiểu là 07 người, tối đa là 09 người; 
+  1172→c) Hội đồng thẩm định có trách nhiệm tiến hành đánh giá, thẩm định Kế 
+  1173→hoạch, kiểm tra thực tế việc thực hiện việc thực hiện các yêu cầu nêu tại Thông 
+  1174→báo kết quả thẩm định và chịu trách nhiệm về kết luận thẩm định, kiểm tra. Hội 
+  1175→đồng thẩm định chấm dứt hoạt động và tự giải thể sau khi Kế hoạch được phê duyệt; 
+  1176→
+  1177→32 
+  1178→d) Hội đồng thẩm định hoạt động theo nguyên tắc thảo luận tập thể giữa 
+  1179→các thành viên trong Hội đồng và lập Biên bản theo mẫu quy định. Việc đánh 
+  1180→giá Kế hoạch thực hiện thông qua phiếu đánh giá; 
+  1181→đ) Hội đồng thẩm định chỉ tiến hành họp khi có sự tham gia của ít nhất 2/3 
+  1182→thành viên, trong đó phải có Chủ tịch hoặc Phó Chủ tịch và ít nhất 01 ủy viên 
+  1183→phản biện. Chỉ những thành viên Hội đồng tham gia họp Hội đồng thẩm định 
+  1184→mới được tham gia bỏ phiếu đánh giá Kế hoạch; 
+  1185→e) Đối với họp thẩm định Kế hoạch, Chủ tịch Hội đồng hoặc Phó Chủ tịch 
+  1186→Hội đồng trong trường hợp Chủ tịch Hội đồng vắng mặt kết luận thẩm định Kế 
+  1187→hoạch theo nguyên tắc sau: Kế hoạch được thông qua không phải chỉnh sửa, bổ 
+  1188→sung nếu có ít nhất 2/3 thành viên Hội đồng tham gia họp đồng ý thông qua và 
+  1189→các thành viên còn lại đều đồng ý thông qua với điều kiện phải chỉnh sửa, bổ 
+  1190→sung; Kế hoạch không được thông qua nếu có trên 1/3 thành viên Hội đồng 
+  1191→tham gia họp không đồng ý thông qua; các trường hợp khác, Kế hoạch được 
+  1192→thông qua với điều kiện phải chỉnh sửa, bổ sung; 
+  1193→g) Đối với kiểm tra việc thực hiện các yêu cầu nêu tại Thông báo kết quả 
+  1194→thẩm định, Chủ tịch Hội đồng hoặc Phó Chủ tịch Hội đồng trong trường hợp 
+  1195→Chủ tịch Hội đồng vắng mặt kết luận theo nguyên tắc sau: Kiến nghị phê duyệt 
+  1196→Kế hoạch nếu có ít nhất 2/3 thành viên Hội đồng tham gia kiểm tra đồng ý phê 
+  1197→duyệt; kiến nghị không phê duyệt Kế hoạch nếu có thấp hơn 2/3 thành viên Hội 
+  1198→đồng tham gia kiểm tra đồng ý phê duyệt. 
+  1199→5. Trách nhiệm của tổ chức, cá nhân được phê duyệt Kế hoạch phòng ngừa, 
+  1200→ứng phó sự cố hóa chất: 
+  1201→a) Trong quá trình hoạt động hóa chất, tổ chức, cá nhân phải bảo đảm đúng 
+  1202→các yêu cầu đề ra tại Kế hoạch đã được phê duyệt; 
+  1203→b) Lưu giữ Bản Kế hoạch phòng ngừa, ứng phó sự cố hóa chất đã được phê 
+  1204→duyệt tại cơ sở hóa chất làm căn cứ để tổ chức, cá nhân thực hiện công tác kiểm 
+  1205→soát an toàn tại cơ sở hóa chất và xuất trình các cơ quan có thẩm quyền khi có 
+  1206→yêu cầu; 
+  1207→c) Chủ đầu tư, tổ chức, cá nhân hoạt động hóa chất có trách nhiệm cập 
+  1208→nhật Kế hoạch phòng ngừa, ứng phó sự cố hóa chất trên cơ sở dữ liệu quốc gia 
+  1209→không quá 30 ngày kể từ khi có quyết định phê duyệt Kế hoạch phòng ngừa, 
+  1210→ứng phó sự cố hóa chất, trừ trường hợp vì mục đích quốc phòng, an ninh. 
+  1211→6. Thẩm quyền thẩm định, phê duyệt Kế hoạch phòng ngừa, ứng phó sự 
+  1212→cố hóa chất 
+  1213→a) Bộ Công an chủ trì, phối hợp với cơ quan nhà nước có liên quan tổ chức 
+  1214→thẩm định, phê duyệt Kế hoạch phòng ngừa, ứng phó sự cố hóa chất trong lĩnh 
+  1215→vực an ninh, trật tự an toàn xã hội; 
+  1216→
+  1217→33 
+  1218→b) Bộ Quốc phòng chủ trì, phối hợp với cơ quan nhà nước có liên quan tổ 
+  1219→chức thẩm định, phê duyệt Kế hoạch phòng ngừa, ứng phó sự cố hóa chất trong 
+  1220→lĩnh vực quốc phòng; 
+  1221→c) Bộ Công Thương chủ trì, phối hợp cơ quan nhà nước có liên quan tổ 
+  1222→chức thẩm định, phê duyệt Kế hoạch phòng ngừa, ứng phó sự cố hóa chất trong 
+  1223→lĩnh vực dân sự đối với các đối tượng thuộc quy định tại điểm a khoản 2 Điều 33 
+  1224→của Nghị định này; 
+  1225→d) Ủy ban nhân dân cấp tỉnh nơi đặt dự án hóa chất, cơ sở hóa chất chủ trì, 
+  1226→phối hợp với cơ quan quản lý nhà nước có liên quan tổ chức thẩm định, phê duyệt 
+  1227→Kế hoạch phòng ngừa, ứng phó sự cố hóa chất trong lĩnh vực dân sự đối với các 
+  1228→đối tượng thuộc quy định tại điểm b khoản 2 Điều 33 của Nghị định này. 
+  1229→7. Chủ đầu tư dự án, tổ chức, cá nhân thực hiện nộp phí thẩm định theo 
+  1230→quy định của pháp luật về phí và lệ phí khi nộp hồ sơ đề nghị thẩm định Kế 
+  1231→hoạch phòng ngừa, ứng phó sự cố hóa chất. 
+  1232→8. Bộ trưởng Bộ Công Thương quy định các biểu mẫu theo quy định tại 
+  1233→Điều này. 
+  1234→Điều 35. Biện pháp phòng ngừa ứng phó sự cố hóa chất 
+  1235→1. Đối tượng phải xây dựng biện pháp: 
+  1236→a) Tổ chức, cá nhân có hoạt động tồn trữ hóa chất nguy hiểm trừ các trường 
+  1237→hợp quy định tại khoản 2 Điều 33 của Nghị định này phải xây dựng Biện pháp 
+  1238→phòng ngừa, ứng phó sự cố hóa chất, ra quyết định ban hành Biện pháp trước 
+  1239→khi chính thức đưa vào hoạt động; 
+  1240→b) Tổ chức, cá nhân hoạt động vận chuyển hóa chất nguy hiểm phải xây 
+  1241→dựng Biện pháp phòng ngừa, ứng phó sự cố hóa chất trong vận chuyển và mang 
+  1242→theo trong quá trình vận chuyển hóa chất nguy hiểm; 
+  1243→c) Tổ chức, cá nhân thuộc quy định tại điểm a khoản này có trách nhiệm 
+  1244→cập nhật Biện pháp phòng ngừa, ứng phó sự cố hóa chất trên cơ sở dữ liệu quốc 
+  1245→gia không quá 30 ngày kể từ ngày ban hành biện pháp. 
+  1246→2. Biện pháp phòng ngừa, ứng phó sự cố hóa chất phải có các nội dung 
+  1247→sau đây: 
+  1248→a) Xác định, khoanh vùng và lập kế hoạch kiểm tra thường xuyên các điểm 
+  1249→có nguy cơ xảy ra sự cố hóa chất cao; 
+  1250→b) Giải pháp phòng ngừa sự cố hóa chất; giải pháp bảo quản, tránh thất 
+  1251→thoát hóa chất; 
+  1252→
+  1253→34 
+  1254→c) Các biện pháp, trang thiết bị và lực lượng ứng phó tại chỗ; 
+  1255→d) Các kịch bản, tình huống sự cố hóa chất và phương án xử lý tình huống 
+  1256→sự cố hóa chất; 
+  1257→đ) Phương án phối hợp với các lực lượng bên ngoài để ứng phó sự cố 
+  1258→hóa chất. 
+  1259→3. Biện pháp phòng ngừa, ứng phó sự cố hóa chất trong vận chuyển phải 
+  1260→có các nội dung sau đây: 
+  1261→a) Thông tin về chủ đầu tư đơn vị vận chuyển, phương tiện vận chuyển, 
+  1262→thông tin về hóa chất nguy hiểm được vận chuyển; 
+  1263→b) Dự báo nguy cơ, tình huống xảy ra sự cố hóa chất, các biện pháp, trang 
+  1264→thiết bị, lực lượng ứng phó tại chỗ; 
+  1265→c) Kế hoạch kiểm tra, giám sát phương tiện vận chuyển và các giải pháp 
+  1266→phòng ngừa sự cố hóa chất; 
+  1267→d) Phương án phối hợp với các lực lượng bên ngoài để ứng phó sự cố 
+  1268→hóa chất. 
+  1269→4. Bộ trưởng Bộ Công Thương hướng dẫn chi tiết khoản 2, khoản 3 Điều này. 
+  1270→Điều 36. Thực hiện Kế hoạch phòng ngừa, ứng phó sự cố hóa chất, 
+  1271→Biện pháp phòng ngừa, ứng phó sự cố hóa chất 
+  1272→1. Tổ chức, cá nhân hoạt động hóa chất có nghĩa vụ thực hiện đầy đủ các 
+  1273→nội dung trong Kế hoạch phòng ngừa, ứng phó sự cố hóa chất đã được phê 
+  1274→duyệt hoặc Biện pháp phòng ngừa, ứng phó sự cố hóa chất đã được ban hành. 
+  1275→2. Tổ chức, cá nhân có tồn trữ hóa chất nguy hiểm thuộc danh mục hóa 
+  1276→chất phải xây dựng kế hoạch phòng ngừa, ứng phó sự cố hóa chất được ban 
+  1277→hành tại Phụ lục IV Nghị định số 24/2026/NĐ-CP ngày 17 tháng 01 năm 2026 
+  1278→của Chính phủ quy định các danh mục hóa chất thuộc phạm vi điều chỉnh của 
+  1279→Luật Hóa chất có trách nhiệm tổ chức diễn tập ứng phó sự cố hóa chất định kì 
+  1280→hằng năm và thực hiện chế độ cập nhật hoạt động diễn tập ứng phó sự cố hóa 
+  1281→chất trên cơ sở dữ liệu chuyên ngành hóa chất. 
+  1282→3. Chủ đầu tư, tổ chức, cá nhân hoạt động hóa chất phải điều chỉnh Kế 
+  1283→hoạch phòng ngừa, ứng phó sự cố hóa chất trong các trường hợp sau đây: 
+  1284→a) Thay đổi mở rộng quy mô, thay đổi dây chuyền công nghệ, trang thiết 
+  1285→bị sản xuất, sử dụng, tồn trữ của dự án, cơ sở tồn trữ hóa chất mà thuộc trường 
+  1286→hợp quy định tại khoản 2 Điều 33 của Nghị định này;  
+  1287→
+  1288→35 
+  1289→b) Bổ sung chủng loại hoặc nâng khối lượng tồn trữ lớn nhất tại một thời 
+  1290→điểm đối với hóa chất nguy hiểm thuộc danh mục hóa chất phải xây dựng kế 
+  1291→hoạch phòng ngừa, ứng phó sự cố hóa chất. 
+  1292→4. Việc xây dựng, thẩm định, phê duyệt Kế hoạch điều chỉnh được thực 
+  1293→hiện như lần đầu. 
+  1294→5. Chủ đầu tư, tổ chức, cá nhân đã được phê duyệt Kế hoạch phòng ngừa, 
+  1295→ứng phó sự cố hóa chất có thay đổi mở rộng quy mô, thay đổi dây chuyền công 
+  1296→nghệ, trang thiết bị sản xuất, sử dụng, tồn trữ của dự án, cơ sở tồn trữ hóa chất 
+  1297→nhưng không liên quan đến hóa chất nguy hiểm nguy hiểm thuộc danh mục hóa 
+  1298→chất phải xây dựng kế hoạch phòng ngừa, ứng phó sự cố hóa chất thì phải xây 
+  1299→dựng và ban hành biện pháp cho các hạng mục thay đổi. 
+  1300→6. Trường hợp tổ chức, cá nhân đã ban hành Biện pháp phòng ngừa, ứng 
+  1301→phó sự cố hóa chất có sự thay đổi trong quá trình đầu tư và hoạt động liên quan 
+  1302→đến những nội dung đề ra trong Biện pháp phòng ngừa, ứng phó sự cố hóa chất 
+  1303→nhưng không thuộc trường hợp quy định tại khoản 2 Điều 33 của Nghị định 
+  1304→này, tổ chức, cá nhân phải bổ sung, chỉnh sửa Biện pháp. 
+  1305→7. Trường hợp tổ chức, cá nhân đã ban hành Biện pháp phòng ngừa, ứng 
+  1306→phó sự cố hóa chất có sự thay đổi trong quá trình đầu tư và hoạt động dẫn đến 
+  1307→thuộc trường hợp quy định tại khoản 2 Điều 33 của Nghị định này, tổ chức, cá 
+  1308→nhân phải xây dựng Kế hoạch phòng ngừa, ứng phó sự cố hóa chất, trình cơ 
+  1309→quan có thẩm quyền thẩm định, phê duyệt. 
+  1310→8. Hạng mục thay đổi của dự án, cơ sở hóa chất chỉ được đưa vào hoạt 
+  1311→động sau khi Kế hoạch phòng ngừa, ứng phó sự cố hóa chất đã được phê duyệt 
+  1312→hoặc Biện pháp phòng ngừa, ứng phó sự cố hóa chất đã được ban hành. 
+  1313→9. Bộ trưởng Bộ Công Thương hướng dẫn chi tiết nội dung, quy trình tổ 
+  1314→chức, hồ sơ diễn tập ứng phó sự cố hóa chất được quy định tại Điều này. 
+  1315→Điều 37. Kế hoạch phòng ngừa, ứng phó sự cố hóa chất cấp tỉnh 
+  1316→1. Nội dung Kế hoạch phòng ngừa, ứng phó sự cố hóa chất cấp tỉnh 
+  1317→bao gồm: 
+  1318→a) Tóm tắt đặc điểm, tình hình điều kiện tự nhiên, xã hội và đánh giá sự 
+  1319→ảnh hưởng của các yếu tố trên tới công tác phòng ngừa, ứng phó sự cố hóa chất 
+  1320→trên địa bàn tỉnh; 
+  1321→b) Tổng quan về hoạt động hóa chất trên địa bàn tỉnh. Đánh giá tình hình 
+  1322→sự cố hóa chất và năng lực ứng phó sự cố hóa chất của tỉnh; 
+  1323→c) Xây dựng các giải pháp phòng ngừa, ứng phó sự cố hóa chất trên địa 
+  1324→bàn tỉnh; 
+  1325→
+  1326→36 
+  1327→d) Phương án khắc phục hậu quả do sự cố hóa chất theo quy định của pháp 
+  1328→luật về bảo vệ môi trường và các quy định khác của pháp luật có liên quan; 
+  1329→đ) Kế hoạch triển khai, thực hiện kế hoạch phòng ngừa, diễn tập ứng phó 
+  1330→sự cố hóa chất trên địa bàn tỉnh. 
+  1331→2. Ủy ban nhân dân cấp tỉnh giao cơ quan chuyên môn trực thuộc phối hợp 
+  1332→với các cơ quan có liên quan trên địa bàn xây dựng dự thảo, gửi xin ý kiến các 
+  1333→cơ quan có liên quan. Tiếp thu, giải trình ý kiến góp ý và hoàn thiện dự thảo; 
+  1334→trình Ủy ban nhân dân cấp tỉnh xem xét, ban hành Kế hoạch phòng ngừa, ứng 
+  1335→phó sự cố hóa chất cấp tỉnh. 
+  1336→Trong thời hạn 15 ngày làm việc kể từ ngày nhận được dự thảo Kế hoạch 
+  1337→phòng ngừa ứng phó sự cố hóa chất cấp tỉnh theo quy định tại khoản 3 Điều 
+  1338→này, Ủy ban nhân dân cấp tỉnh xem xét, ban hành Kế hoạch phòng ngừa, ứng 
+  1339→phó sự cố hóa chất cấp tỉnh. 
+  1340→3. Bộ trưởng Bộ Công Thương hướng dẫn chi tiết khoản 1 Điều này. 
+  1341→4. Ủy ban nhân dân cấp tỉnh có trách nhiệm: 
+  1342→a) Chủ tịch Ủy ban nhân dân cấp tỉnh, Thủ trưởng các cơ quan liên quan 
+  1343→chịu trách nhiệm triển khai thực hiện theo Kế hoạch phòng ngừa, ứng phó sự 
+  1344→cố hóa chất cấp tỉnh đã được ban hành; 
+  1345→b) Chỉ đạo cơ quan chức năng trên địa bàn tỉnh hướng dẫn, đôn đốc, kiểm 
+  1346→tra các cơ sở hóa chất trên địa bàn xây dựng kế hoạch hoặc biện pháp phòng 
+  1347→ngừa, ứng phó sự cố hóa chất phù hợp với quy mô, điều kiện sản xuất và đặc 
+  1348→tính của hóa chất; kiểm tra năng lực ứng phó sự cố hóa chất của các cơ sở 
+  1349→hóa chất; 
+  1350→c) Tăng cường công tác quản lý, thanh tra, kiểm tra việc thực hiện pháp 
+  1351→luật nhất là việc cấp phép về sản xuất, kinh doanh và sử dụng hóa chất, vật liệu 
+  1352→nổ của các cơ sở, tổ chức, cá nhân trên địa bàn quản lý theo đúng quy định của 
+  1353→Luật Hóa chất số 69/2025/QH15 và pháp luật về quản lý, sử dụng vũ khí, vật 
+  1354→liệu nổ và công cụ hỗ trợ, phòng ngừa sự cố về hóa chất, cháy nổ xảy ra; 
+  1355→d) Tổ chức diễn tập ứng phó sự cố hóa chất cấp tỉnh có sự tham gia của 
+  1356→các cơ quan có trách nhiệm trên địa bàn theo kế hoạch đã được ban hành. 
+  1357→Điều 38. Nâng cao năng lực phòng ngừa, ứng phó sự cố hóa chất trong 
+  1358→lĩnh vực dân sự 
+  1359→1. Bộ Công Thương chủ trì, phối hợp với các bộ, ngành xây dựng kế hoạch 
+  1360→phòng ngừa, ứng phó sự cố hóa chất cấp quốc gia và định kì tổ chức diễn tập 
+  1361→ứng phó sự cố hóa chất cấp quốc gia. 
+  1362→
+  1363→37 
+  1364→2. Bộ Công Thương chủ trì, xây dựng dự án nâng cấp cơ sở hạ tầng nhằm 
+  1365→phục vụ mục đích thực hành, đào tạo, nâng cao năng lực trong công tác phòng 
+  1366→ngừa, ứng phó sự cố hóa chất trình Thủ tướng Chính phủ phê duyệt. 
+  1367→Điều 39. Xử lý chất độc tồn dư của chiến tranh 
+  1368→1. Ban Chỉ đạo Quốc gia khắc phục hậu quả bom mìn và chất độc hóa học 
+  1369→sau chiến tranh ở Việt Nam (sau đây gọi tắt là Ban Chỉ đạo) nghiên cứu, đề xuất 
+  1370→Thủ tướng Chính phủ phương hướng, giải pháp để giải quyết những vấn đề 
+  1371→quan trọng, liên ngành về xử lý chất độc tồn dư của chiến tranh. 
+  1372→2. Ban Chỉ đạo chủ trì, phối hợp với các cơ quan có liên quan, Ủy ban 
+  1373→nhân dân cấp tỉnh xây dựng kế hoạch, chương trình triển khai xử lý chất độc 
+  1374→tồn dư chiến của chiến tranh trình Thủ tướng Chính phủ phê duyệt. 
+  1375→3. Ban Chỉ đạo xây dựng báo cáo thường xuyên, đột xuất về công tác xử 
+  1376→lý chất độc tồn dư của chiến tranh. 
+  1377→4. Ban Chỉ đạo, Ủy ban nhân dân cấp tỉnh và các cơ quan có liên quan tại 
+  1378→khoản 2 Điều này chịu trách nhiệm triển khai thực hiện theo Kế hoạch xử lý 
+  1379→chất độc tồn dư chiến tranh đã được phê duyệt. 
+  1380→ 
+  1381→Chương VIII 
+  1382→ĐIỀU KHOẢN THI HÀNH 
+  1383→ 
+  1384→Điều 40. Điều khoản chuyển tiếp 
+  1385→1. Tổ chức, cá nhân hoạt động tư vấn chuyên ngành hóa chất theo hợp 
+  1386→đồng, thỏa thuận đã ký trước ngày Nghị định này có hiệu lực thi hành được tiếp 
+  1387→tục thực hiện theo hợp đồng, thỏa thuận đã ký. 
+  1388→2. Tổ chức, cá nhân đã ban hành Biện pháp phòng ngừa, ứng phó sự cố 
+  1389→hóa chất trước ngày Nghị định này có hiệu lực nhưng thuộc đối tượng quy định 
+  1390→tại điểm b khoản 2 Điều 33 của Nghị định này phải thực hiện xây dựng Kế 
+  1391→hoạch phòng ngừa, ứng phó sự cố hóa chất trình cơ quan có thẩm quyền thẩm 
+  1392→định, phê duyệt trước ngày 31 tháng 12 năm 2026. 
+  1393→3. Ủy ban nhân dân các tỉnh, thành phố đã xây dựng Kế hoạch phòng ngừa, 
+  1394→ứng phó sự cố hóa chất cấp tỉnh được ban hành trước ngày Nghị định này có 
+  1395→hiệu lực tiếp tục thực hiện các nội dung đã được ban hành theo Kế hoạch.  
+  1396→Điều 41. Hiệu lực thi hành 
+  1397→1. Nghị định này có hiệu lực thi hành kể từ ngày ký ban hành. 
+  1398→
+  1399→38 
+  1400→2. Các Bộ trưởng, Thủ trưởng cơ quan ngang bộ, Thủ trưởng cơ quan 
+  1401→thuộc Chính phủ, Chủ tịch Ủy ban nhân dân các tỉnh, thành phố trực thuộc trung 
+  1402→ương và các đối tượng áp dụng của Nghị định chịu trách nhiệm thi hành Nghị 
+  1403→định này. 
+  1404→ 
+  1405→Nơi nhận: 
+  1406→- Ban Bí thư Trung ương Đảng; 
+  1407→- Thủ tướng, các Phó Thủ tướng Chính phủ; 
+  1408→- Các bộ, cơ quan ngang bộ, cơ quan thuộc Chính phủ; 
+  1409→- HĐND, UBND các tỉnh, thành phố trực thuộc trung ương; 
+  1410→- Văn phòng Trung ương và các Ban của Đảng; 
+  1411→- Văn phòng Tổng Bí thư; 
+  1412→- Văn phòng Chủ tịch nước; 
+  1413→- Hội đồng Dân tộc và các Ủy ban của Quốc hội; 
+  1414→- Văn phòng Quốc hội; 
+  1415→- Tòa án nhân dân tối cao; 
+  1416→- Viện kiểm sát nhân dân tối cao; 
+  1417→- Kiểm toán nhà nước; 
+  1418→- Ủy ban Trung ương Mặt trận Tổ quốc Việt Nam; 
+  1419→- Cơ quan trung ương của các tổ chức chính trị - xã hội; 
+  1420→- VPCP: BTCN, các PCN, Trợ lý TTg, TGĐ Cổng TTĐT, 
+  1421→  các Vụ, Cục, đơn vị trực thuộc, Công báo;  
+  1422→- Lưu: VT, CN (2b). 
+  1423→TM. CHÍNH PHỦ 
+  1424→KT. THỦ TƯỚNG 
+  1425→PHÓ THỦ TƯỚNG 
+  1426→ 
+  1427→[daky] 
+  1428→ 
+  1429→Bùi Thanh Sơn 
+  1430→ 
