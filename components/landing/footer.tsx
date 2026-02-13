@@ -1,25 +1,115 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FlaskConical, Phone, Mail, MapPin, ExternalLink } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/context';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
+
+interface LegalDocument {
+  id: string;
+  document_code: string;
+  document_name: string;
+  document_type: 'law' | 'decree' | 'circular';
+  full_text_url: string;
+  file_path: string;
+}
 
 export function Footer() {
   const { t } = useLanguage();
+  const [documents, setDocuments] = useState<LegalDocument[]>([]);
+
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
+
+  const fetchDocuments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('legal_documents_2026')
+        .select('id, document_code, document_name, document_type, full_text_url, file_path')
+        .in('document_code', ['69/2025/QH15', '24/2026/NĐ-CP', '25/2026/NĐ-CP', '26/2026/NĐ-CP'])
+        .order('document_type', { ascending: true });
+
+      if (error) throw error;
+      setDocuments(data || []);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    }
+  };
+
+  const getDownloadUrl = (doc: LegalDocument) => {
+    const sanitizedCode = doc.document_code.replace(/\//g, '-');
+    const params = new URLSearchParams({
+      path: doc.full_text_url,
+      name: `${sanitizedCode}.pdf`,
+    });
+    return `/api/download-document?${params.toString()}`;
+  };
+
+  const handleDownloadClick = async (e: React.MouseEvent, doc: LegalDocument) => {
+    e.preventDefault();
+
+    const toastId = toast.loading(`Đang tải xuống: ${doc.document_name}`);
+
+    try {
+      const downloadUrl = getDownloadUrl(doc);
+      const response = await fetch(downloadUrl);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.details || 'Failed to download file');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${doc.document_code.replace(/\//g, '-')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      await fetch('/api/track-download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          document_id: doc.id,
+          session_id: typeof window !== 'undefined'
+            ? localStorage.getItem('chat_session_id') || 'anonymous'
+            : 'anonymous'
+        })
+      });
+
+      toast.success('Tải xuống thành công!', { id: toastId });
+    } catch (error: any) {
+      console.error('Download error:', error);
+      toast.error(`Lỗi tải xuống: ${error.message}`, { id: toastId });
+    }
+  };
 
   const serviceLinks = [
-    // { label: t.nav.msds, href: '/msds' }, // Ẩn tính năng MSDS - chưa phát triển
     { label: t.nav.compliance, href: '/kiem-tra' },
     { label: t.nav.guidance, href: '/giay-phep' },
     { label: t.nav.declaration, href: '/khai-bao' },
   ];
 
-  const legalDocuments = [
-    { label: t.footer.law69, href: '#', isExternal: true },
-    { label: t.footer.decree24, href: '#', isExternal: true },
-    { label: t.footer.decree25, href: '#', isExternal: true },
-    { label: t.footer.decree26, href: '#', isExternal: true },
-  ];
+  const getLegalDocumentLabel = (code: string) => {
+    switch (code) {
+      case '69/2025/QH15':
+        return t.footer.law69;
+      case '24/2026/NĐ-CP':
+        return t.footer.decree24;
+      case '25/2026/NĐ-CP':
+        return t.footer.decree25;
+      case '26/2026/NĐ-CP':
+        return t.footer.decree26;
+      default:
+        return code;
+    }
+  };
 
   const supportLinks = [
     { label: t.footer.terms, href: '/dieu-khoan' },
@@ -77,15 +167,14 @@ export function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4">{t.footer.resources}</h3>
             <ul className="space-y-2">
-              {legalDocuments.map((link) => (
-                <li key={link.label}>
+              {documents.map((doc) => (
+                <li key={doc.id}>
                   <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center gap-1"
+                    href="#"
+                    onClick={(e) => handleDownloadClick(e, doc)}
+                    className="text-sm text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center gap-1 cursor-pointer"
                   >
-                    {link.label}
+                    {getLegalDocumentLabel(doc.document_code)}
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 </li>
