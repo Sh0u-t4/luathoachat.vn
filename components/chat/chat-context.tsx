@@ -17,6 +17,7 @@ interface ChatContextType {
   guestEmail: string | null;
   showEmailGate: boolean;
   showLoginGate: boolean;
+  sessionId: string | null;
   sendMessage: (content: string) => Promise<void>;
   unlockContent: () => void;
   clearMessages: () => void;
@@ -69,6 +70,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [hasUnlockedContent, setHasUnlockedContent] = useState(false);
   const [currentQuery, setCurrentQuery] = useState('');
   const [chatSessions, setChatSessions] = useState<Array<{ session_id: string; message_id: string; first_message: string; created_at: string }>>([]);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   // Freemium gate states
   const [questionCount, setQuestionCount] = useState(0);
@@ -314,6 +316,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const sendMessage = useCallback(async (content: string) => {
     const sessionToken = getSessionToken();
+    setSessionId(sessionToken);
 
     // GATE LOGIC CHECK 1: Email gate (question 2)
     // Show email gate before the 2nd question (when questionCount >= 1)
@@ -514,6 +517,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         guestEmail,
         showEmailGate,
         showLoginGate,
+        sessionId,
         sendMessage,
         unlockContent,
         clearMessages,

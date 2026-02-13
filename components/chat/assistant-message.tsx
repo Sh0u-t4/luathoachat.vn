@@ -1,10 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lock, LogIn } from 'lucide-react';
+import { Lock, LogIn, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useTypingEffect } from '@/hooks/use-typing-effect';
 import { LegalCitation } from './legal-citation';
+import { FeedbackDialog } from './feedback-dialog';
+import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 import type { ChatMessage } from '@/types';
 
 interface AssistantMessageProps {
@@ -13,6 +17,7 @@ interface AssistantMessageProps {
   isAuthenticated: boolean;
   onUnlockClick: () => void;
   messageIndex: number; // Index của assistant message này (0-based)
+  sessionId: string;
 }
 
 export function AssistantMessage({
@@ -21,7 +26,13 @@ export function AssistantMessage({
   isAuthenticated,
   onUnlockClick,
   messageIndex,
+  sessionId,
 }: AssistantMessageProps) {
+  // Feedback state
+  const [feedbackRating, setFeedbackRating] = useState<'positive' | 'negative' | null>(null);
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
+  const [pendingRating, setPendingRating] = useState<'positive' | 'negative' | null>(null);
+
   // Unlock logic: Show unblurred content if:
   // 1. User is authenticated, OR
   // 2. This is one of the first 5 free messages (messageIndex < 5)
@@ -64,6 +75,59 @@ export function AssistantMessage({
   // Nếu không phải latest message, hiển thị toàn bộ ngay
   const finalPublic = isLatest ? displayedPublic : publicPart;
   const finalLocked = isLatest ? displayedLocked : lockedPart;
+
+  // Handle feedback
+  const handleFeedback = async (rating: 'positive' | 'negative') => {
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để gửi phản hồi');
+      return;
+    }
+
+    if (feedbackRating === rating) {
+      // Already rated with the same rating, do nothing
+      return;
+    }
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error('Vui lòng đăng nhập để gửi phản hồi');
+        return;
+      }
+
+      // Quick feedback without detailed comment
+      const { error } = await supabase.from('message_feedback').upsert(
+        {
+          message_id: message.id,
+          user_id: user.id,
+          session_id: sessionId,
+          rating,
+        },
+        {
+          onConflict: 'message_id,user_id',
+        }
+      );
+
+      if (error) throw error;
+
+      setFeedbackRating(rating);
+      toast.success(
+        rating === 'positive' ? 'Cảm ơn phản hồi tích cực!' : 'Cảm ơn phản hồi của bạn!'
+      );
+
+      // Open detailed feedback dialog
+      setPendingRating(rating);
+      setShowFeedbackDialog(true);
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast.error('Không thể gửi phản hồi', {
+        description: 'Vui lòng thử lại sau.',
+      });
+    }
+  };
 
   return (
     <div className="p-4">
@@ -139,6 +203,54 @@ export function AssistantMessage({
         <div className="mt-4">
           <LegalCitation citations={message.citations} />
         </div>
+      )}
+
+      {/* Feedback Buttons - chỉ hiển thị cho user đã đăng nhập */}
+      {isAuthenticated && shouldShowUnblurred && (
+        <div className="mt-6 pt-4 border-t border-slate-200">
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-slate-600">Câu trả lời này có hữu ích không?</span>
+            <div className="flex gap-2">
+              <Button
+                variant={feedbackRating === 'positive' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleFeedback('positive')}
+                className={`transition-all ${
+                  feedbackRating === 'positive'
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : 'hover:bg-green-50 hover:text-green-700 hover:border-green-300'
+                }`}
+              >
+                <ThumbsUp className="w-4 h-4 mr-1.5" />
+                Có
+              </Button>
+              <Button
+                variant={feedbackRating === 'negative' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleFeedback('negative')}
+                className={`transition-all ${
+                  feedbackRating === 'negative'
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'hover:bg-red-50 hover:text-red-700 hover:border-red-300'
+                }`}
+              >
+                <ThumbsDown className="w-4 h-4 mr-1.5" />
+                Không
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Feedback Dialog */}
+      {pendingRating && (
+        <FeedbackDialog
+          open={showFeedbackDialog}
+          onOpenChange={setShowFeedbackDialog}
+          messageId={message.id}
+          sessionId={sessionId}
+          rating={pendingRating}
+        />
       )}
     </div>
   );

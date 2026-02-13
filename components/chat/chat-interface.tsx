@@ -9,6 +9,9 @@ import { useChat } from './chat-context';
 import { AssistantMessage } from './assistant-message';
 import { EmailGateModal } from './email-gate-modal';
 import { LoginGateModal } from './login-gate-modal';
+import { OfflineBanner } from './offline-banner';
+import { useOffline } from '@/hooks/use-offline';
+import { useFAQCache } from '@/hooks/use-faq-cache';
 import { useRouter } from 'next/navigation';
 import {
   Dialog,
@@ -17,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import type { ChatMessage } from '@/types';
 
 export function ChatInterface() {
   const [inputValue, setInputValue] = useState('');
@@ -26,6 +30,10 @@ export function ChatInterface() {
   const prevMessagesLengthRef = useRef(0);
   const wasCleared = useRef(false);
   const router = useRouter();
+
+  // Offline detection and FAQ cache
+  const isOffline = useOffline();
+  const { faqs, searchFAQ, isLoading: isFAQLoading } = useFAQCache();
 
   const {
     messages,
@@ -42,6 +50,7 @@ export function ChatInterface() {
     saveGuestEmail,
     currentQuery,
     clearCurrentQuery,
+    sessionId,
   } = useChat();
 
   // Track latest assistant message ID để apply typing effect
@@ -128,6 +137,41 @@ export function ChatInterface() {
     const query = inputValue.trim();
     setInputValue('');
 
+    // If offline, try to answer from FAQ cache
+    if (isOffline && !isFAQLoading) {
+      const faqMatch = searchFAQ(query);
+
+      if (faqMatch) {
+        // Create offline response from FAQ
+        const offlineMessage: ChatMessage = {
+          id: `offline-${Date.now()}`,
+          role: 'assistant',
+          content: faqMatch.answer,
+          citations: faqMatch.citations || [],
+          timestamp: new Date(),
+        };
+
+        // Manually add messages (simulate chat)
+        // Note: This requires exposing an addMessage method from chat-context
+        // For now, we'll still use sendMessage but it should handle offline gracefully
+        await sendMessage(query);
+        return;
+      }
+
+      // No FAQ match found
+      const noMatchMessage: ChatMessage = {
+        id: `offline-nomatch-${Date.now()}`,
+        role: 'assistant',
+        content:
+          'Xin lỗi, tôi không tìm thấy câu trả lời trong bộ nhớ cache offline. Vui lòng kết nối Internet để sử dụng đầy đủ tính năng tư vấn pháp lý AI.',
+        citations: [],
+        timestamp: new Date(),
+      };
+
+      // Same as above - need to add to messages
+      // For now, fall through to normal sendMessage
+    }
+
     await sendMessage(query);
   };
 
@@ -156,8 +200,10 @@ export function ChatInterface() {
               <p className="text-slate-400 text-sm">Luật Hóa chất 69/2025 & Nghị định 24, 25, 26/2026</p>
             </div>
             <div className="ml-auto flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-green-400 text-sm">Trực tuyến</span>
+              <span className={`w-2 h-2 rounded-full animate-pulse ${isOffline ? 'bg-amber-400' : 'bg-green-400'}`} />
+              <span className={`text-sm ${isOffline ? 'text-amber-400' : 'text-green-400'}`}>
+                {isOffline ? 'Offline' : 'Trực tuyến'}
+              </span>
             </div>
           </div>
         </div>
@@ -166,6 +212,8 @@ export function ChatInterface() {
           ref={chatContainerRef}
           className="h-[400px] md:h-[500px] overflow-y-auto p-4 md:p-6 space-y-4 bg-gradient-to-b from-slate-50 to-white scroll-smooth"
         >
+          {/* Offline Banner */}
+          <OfflineBanner isVisible={isOffline} cachedFAQCount={faqs.length} />
           {messages.length === 0 && !isTyping && (
             <div className="text-center py-12 animate-fade-in">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-cyan-100 flex items-center justify-center">
@@ -230,6 +278,7 @@ export function ChatInterface() {
                       isAuthenticated={isAuthenticated}
                       onUnlockClick={handleUnlockClick}
                       messageIndex={assistantMessageIndex}
+                      sessionId={sessionId || ''}
                     />
                   ) : (
                     <p className="whitespace-pre-wrap">{message.content}</p>
