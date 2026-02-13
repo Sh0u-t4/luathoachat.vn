@@ -12,6 +12,7 @@ import {
 import { useChat } from '@/components/chat/chat-context';
 import { useLanguage } from '@/lib/i18n/context';
 import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 interface HeroSectionProps {
   onSearch: (query: string) => void;
@@ -68,6 +69,41 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
     onSearch(suggestion);
   };
 
+  const handleDownload = async (doc: LegalDocument) => {
+    try {
+      const sessionId = typeof window !== 'undefined'
+        ? localStorage.getItem('chat_session_id') || 'anonymous'
+        : 'anonymous';
+
+      const response = await fetch('/api/track-download', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentId: doc.id,
+          sessionId,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to track download');
+      }
+
+      const link = document.createElement('a');
+      link.href = doc.full_text_url;
+      link.download = doc.document_name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success(`Đang tải xuống: ${doc.document_name}`);
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Không thể tải xuống. Vui lòng thử lại!');
+    }
+  };
+
   const suggestions = [t.hero.suggestion1, t.hero.suggestion2, t.hero.suggestion3];
 
   return (
@@ -97,16 +133,15 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
               {documents
                 .filter((doc) => doc.document_type === 'law')
                 .map((doc) => (
-                  <a
+                  <button
                     key={doc.id}
-                    href={doc.full_text_url}
-                    download
+                    onClick={() => handleDownload(doc)}
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-cyan-500/50"
                   >
                     <FileText className="w-4 h-4" />
                     <span>{doc.document_name}</span>
                     <Download className="w-4 h-4" />
-                  </a>
+                  </button>
                 ))}
 
               {documents.filter((doc) => doc.document_type === 'decree').length > 0 && (
@@ -123,16 +158,15 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
                       .filter((doc) => doc.document_type === 'decree')
                       .map((doc) => (
                         <DropdownMenuItem key={doc.id} asChild>
-                          <a
-                            href={doc.full_text_url}
-                            download
-                            className="flex items-center gap-2 px-3 py-2 text-white hover:bg-slate-700 cursor-pointer"
+                          <button
+                            onClick={() => handleDownload(doc)}
+                            className="flex items-center gap-2 px-3 py-2 text-white hover:bg-slate-700 cursor-pointer w-full text-left"
                             title={doc.summary}
                           >
                             <FileText className="w-4 h-4 text-green-400" />
                             <span className="flex-1">{doc.document_code}</span>
                             <Download className="w-4 h-4 text-slate-400" />
-                          </a>
+                          </button>
                         </DropdownMenuItem>
                       ))}
                   </DropdownMenuContent>
