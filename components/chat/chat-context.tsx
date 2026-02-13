@@ -20,6 +20,7 @@ interface ChatContextType {
   sendMessage: (content: string) => Promise<void>;
   unlockContent: () => void;
   clearMessages: () => void;
+  clearCurrentQuery: () => void;
   loadChatHistory: (sessionId?: string) => Promise<void>;
   chatSessions: Array<{ session_id: string; message_id: string; first_message: string; created_at: string }>;
   setShowEmailGate: (show: boolean) => void;
@@ -496,6 +497,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setCurrentQuery('');
   }, []);
 
+  const clearCurrentQuery = useCallback(() => {
+    setCurrentQuery('');
+  }, []);
+
   return (
     <ChatContext.Provider
       value={{
@@ -512,6 +517,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         sendMessage,
         unlockContent,
         clearMessages,
+        clearCurrentQuery,
         loadChatHistory,
         chatSessions,
         setShowEmailGate,

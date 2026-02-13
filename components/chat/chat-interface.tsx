@@ -41,6 +41,7 @@ export function ChatInterface() {
     setShowLoginGate,
     saveGuestEmail,
     currentQuery,
+    clearCurrentQuery,
   } = useChat();
 
   // Track latest assistant message ID để apply typing effect
@@ -105,8 +106,11 @@ export function ChatInterface() {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    await sendMessage(inputValue.trim());
+    // Save query and clear input IMMEDIATELY before async operation
+    const query = inputValue.trim();
     setInputValue('');
+
+    await sendMessage(query);
   };
 
   const handleUnlockClick = () => {
@@ -323,7 +327,10 @@ export function ChatInterface() {
       {/* Email Gate Modal - Appears before question 2 */}
       <EmailGateModal
         open={showEmailGate}
-        onClose={() => setShowEmailGate(false)}
+        onClose={() => {
+          setShowEmailGate(false);
+          clearCurrentQuery();
+        }}
         onEmailSubmit={saveGuestEmail}
         currentQuestion={currentQuery}
       />
@@ -331,7 +338,10 @@ export function ChatInterface() {
       {/* Login Gate Modal - Appears after question 5 */}
       <LoginGateModal
         open={showLoginGate}
-        onClose={() => setShowLoginGate(false)}
+        onClose={() => {
+          setShowLoginGate(false);
+          clearCurrentQuery();
+        }}
         email={guestEmail}
         questionCount={questionCount}
       />
