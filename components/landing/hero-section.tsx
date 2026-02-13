@@ -69,39 +69,23 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
     onSearch(suggestion);
   };
 
-  const handleDownload = async (doc: LegalDocument) => {
-    try {
-      const sessionId = typeof window !== 'undefined'
-        ? localStorage.getItem('chat_session_id') || 'anonymous'
-        : 'anonymous';
+  const handleDownloadClick = async (e: React.MouseEvent, doc: LegalDocument) => {
+    const sessionId = typeof window !== 'undefined'
+      ? localStorage.getItem('chat_session_id') || 'anonymous'
+      : 'anonymous';
 
-      const response = await fetch('/api/track-download', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          documentId: doc.id,
-          sessionId,
-        }),
-      });
+    fetch('/api/track-download', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        documentId: doc.id,
+        sessionId,
+      }),
+    }).catch((err) => console.error('Track download error:', err));
 
-      if (!response.ok) {
-        console.error('Failed to track download');
-      }
-
-      const link = document.createElement('a');
-      link.href = doc.full_text_url;
-      link.download = doc.document_name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      toast.success(`Đang tải xuống: ${doc.document_name}`);
-    } catch (error) {
-      console.error('Download error:', error);
-      toast.error('Không thể tải xuống. Vui lòng thử lại!');
-    }
+    toast.success(`Đang tải xuống: ${doc.document_name}`);
   };
 
   const suggestions = [t.hero.suggestion1, t.hero.suggestion2, t.hero.suggestion3];
@@ -133,15 +117,17 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
               {documents
                 .filter((doc) => doc.document_type === 'law')
                 .map((doc) => (
-                  <button
+                  <a
                     key={doc.id}
-                    onClick={() => handleDownload(doc)}
+                    href={doc.full_text_url}
+                    download={`${doc.document_code}.pdf`}
+                    onClick={(e) => handleDownloadClick(e, doc)}
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-cyan-500/50"
                   >
                     <FileText className="w-4 h-4" />
                     <span>{doc.document_name}</span>
                     <Download className="w-4 h-4" />
-                  </button>
+                  </a>
                 ))}
 
               {documents.filter((doc) => doc.document_type === 'decree').length > 0 && (
@@ -158,15 +144,17 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
                       .filter((doc) => doc.document_type === 'decree')
                       .map((doc) => (
                         <DropdownMenuItem key={doc.id} asChild>
-                          <button
-                            onClick={() => handleDownload(doc)}
-                            className="flex items-center gap-2 px-3 py-2 text-white hover:bg-slate-700 cursor-pointer w-full text-left"
+                          <a
+                            href={doc.full_text_url}
+                            download={`${doc.document_code}.pdf`}
+                            onClick={(e) => handleDownloadClick(e, doc)}
+                            className="flex items-center gap-2 px-3 py-2 text-white hover:bg-slate-700 cursor-pointer w-full"
                             title={doc.summary}
                           >
                             <FileText className="w-4 h-4 text-green-400" />
                             <span className="flex-1">{doc.document_code}</span>
                             <Download className="w-4 h-4 text-slate-400" />
-                          </button>
+                          </a>
                         </DropdownMenuItem>
                       ))}
                   </DropdownMenuContent>
