@@ -15,7 +15,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const fullPath = join(process.cwd(), 'public', filePath);
+    const normalizedPath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
+    const fullPath = join(process.cwd(), 'public', normalizedPath);
+
+    console.log('Download request:', { filePath, normalizedPath, fullPath });
 
     const fileBuffer = await readFile(fullPath);
 
