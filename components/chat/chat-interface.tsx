@@ -331,6 +331,7 @@ export function ChatInterface() {
       {/* Login Gate Modal - Appears after question 5 */}
       <LoginGateModal
         open={showLoginGate}
+        onClose={() => setShowLoginGate(false)}
         email={guestEmail}
         questionCount={questionCount}
       />

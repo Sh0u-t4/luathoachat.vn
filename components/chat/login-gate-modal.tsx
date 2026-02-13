@@ -14,11 +14,12 @@ import { Badge } from '@/components/ui/badge';
 
 interface LoginGateModalProps {
   open: boolean;
+  onClose: () => void;
   email: string | null;
   questionCount: number;
 }
 
-export function LoginGateModal({ open, email, questionCount }: LoginGateModalProps) {
+export function LoginGateModal({ open, onClose, email, questionCount }: LoginGateModalProps) {
   const router = useRouter();
 
   const handleSignUp = () => {
@@ -33,12 +34,8 @@ export function LoginGateModal({ open, email, questionCount }: LoginGateModalPro
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent
-        className="sm:max-w-md [&>button]:hidden"
-        onEscapeKeyDown={(e) => e.preventDefault()}
-        onPointerDownOutside={(e) => e.preventDefault()}
-      >
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="sm:max-w-md [&>button]:hidden">
         <DialogHeader>
           <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center animate-pulse">
             <Trophy className="w-8 h-8 text-white" />
