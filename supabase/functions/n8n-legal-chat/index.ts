@@ -74,29 +74,30 @@ async function validateApiKey(
 }
 
 async function createEmbedding(text: string): Promise<number[]> {
-  const apiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!apiKey) throw new Error("OPENAI_API_KEY not configured");
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
 
-  const response = await fetch("https://api.openai.com/v1/embeddings", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "text-embedding-3-small",
-      input: text,
-      encoding_format: "float",
-    }),
-  });
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "models/text-embedding-004",
+        content: {
+          parts: [{ text }]
+        }
+      }),
+    }
+  );
 
   if (!response.ok) {
     const err = await response.text();
-    throw new Error(`OpenAI embedding error: ${err}`);
+    throw new Error(`Gemini embedding error: ${err}`);
   }
 
   const data = await response.json();
-  return data.data[0].embedding;
+  return data.embedding.values;
 }
 
 async function searchKnowledgeBase(
@@ -167,33 +168,38 @@ async function generateChatResponse(
   prompt: string,
   query: string
 ): Promise<string> {
-  const apiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!apiKey) throw new Error("OPENAI_API_KEY not configured");
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: prompt },
-        { role: "user", content: query },
-      ],
-      temperature: 0.3,
-      max_tokens: 2000,
-    }),
-  });
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: prompt },
+              { text: `\n\nUser Query: ${query}` }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.3,
+          maxOutputTokens: 2000,
+        },
+      }),
+    }
+  );
 
   if (!response.ok) {
     const err = await response.text();
-    throw new Error(`OpenAI chat error: ${err}`);
+    throw new Error(`Gemini chat error: ${err}`);
   }
 
   const data = await response.json();
-  return data.choices[0].message.content;
+  return data.candidates[0].content.parts[0].text;
 }
 
 async function handleChat(
@@ -245,7 +251,7 @@ async function handleChat(
       metadata: {
         contexts_found: contexts.length,
         response_time_ms: responseTimeMs,
-        model: "gpt-4o-mini",
+        model: "gemini-2.5-pro",
       },
     },
   });
@@ -288,8 +294,8 @@ function handleHealth(): Response {
       version: "2.0.0",
       capabilities: ["chat", "search", "health"],
       models: {
-        embedding: "text-embedding-3-small",
-        chat: "gpt-4o-mini",
+        embedding: "text-embedding-004",
+        chat: "gemini-2.5-pro",
       },
       timestamp: new Date().toISOString(),
     },
