@@ -69,6 +69,14 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
     onSearch(suggestion);
   };
 
+  const getDownloadUrl = (doc: LegalDocument) => {
+    const params = new URLSearchParams({
+      path: doc.full_text_url,
+      name: `${doc.document_code}.pdf`,
+    });
+    return `/api/download-document?${params.toString()}`;
+  };
+
   const handleDownloadClick = async (e: React.MouseEvent, doc: LegalDocument) => {
     const sessionId = typeof window !== 'undefined'
       ? localStorage.getItem('chat_session_id') || 'anonymous'
@@ -119,8 +127,7 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
                 .map((doc) => (
                   <a
                     key={doc.id}
-                    href={doc.full_text_url}
-                    download={`${doc.document_code}.pdf`}
+                    href={getDownloadUrl(doc)}
                     onClick={(e) => handleDownloadClick(e, doc)}
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-cyan-500/50"
                   >
@@ -145,8 +152,7 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
                       .map((doc) => (
                         <DropdownMenuItem key={doc.id} asChild>
                           <a
-                            href={doc.full_text_url}
-                            download={`${doc.document_code}.pdf`}
+                            href={getDownloadUrl(doc)}
                             onClick={(e) => handleDownloadClick(e, doc)}
                             className="flex items-center gap-2 px-3 py-2 text-white hover:bg-slate-700 cursor-pointer w-full"
                             title={doc.summary}
