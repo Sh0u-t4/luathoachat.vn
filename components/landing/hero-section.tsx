@@ -196,6 +196,36 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
+
+              {documents.filter((doc) => doc.document_type === 'circular').length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-amber-500/50">
+                      <FileText className="w-4 h-4" />
+                      <span>Thông tư 02/2026</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-64 bg-slate-800 border-slate-700">
+                    {documents
+                      .filter((doc) => doc.document_type === 'circular')
+                      .map((doc) => (
+                        <DropdownMenuItem key={doc.id} asChild>
+                          <a
+                            href={getDownloadUrl(doc)}
+                            onClick={(e) => handleDownloadClick(e, doc)}
+                            className="flex items-center gap-2 px-3 py-2 text-white hover:bg-slate-700 cursor-pointer w-full"
+                            title={doc.summary}
+                          >
+                            <FileText className="w-4 h-4 text-amber-400" />
+                            <span className="flex-1">{doc.document_code}</span>
+                            <Download className="w-4 h-4 text-slate-400" />
+                          </a>
+                        </DropdownMenuItem>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </>
           )}
         </div>
