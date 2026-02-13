@@ -172,7 +172,7 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
                   <DropdownMenuTrigger asChild>
                     <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-green-500/50">
                       <FileText className="w-4 h-4" />
-                      <span>Nghị định 24, 25, 26/2026</span>
+                      <span>Nghị định</span>
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </DropdownMenuTrigger>
@@ -202,7 +202,7 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
                   <DropdownMenuTrigger asChild>
                     <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-amber-500/50">
                       <FileText className="w-4 h-4" />
-                      <span>Thông tư 02/2026</span>
+                      <span>Thông tư</span>
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </DropdownMenuTrigger>
