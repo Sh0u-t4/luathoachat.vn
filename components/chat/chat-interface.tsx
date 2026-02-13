@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Lock, Sparkles, LogIn } from 'lucide-react';
+import { Send, Bot, User, Sparkles, LogIn, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { useChat } from './chat-context';
-import { LegalCitation } from './legal-citation';
+import { AssistantMessage } from './assistant-message';
 import { useRouter } from 'next/navigation';
 import {
   Dialog,
@@ -27,6 +26,17 @@ export function ChatInterface() {
   const router = useRouter();
 
   const { messages, isTyping, isAuthenticated, sendMessage } = useChat();
+
+  // Track latest assistant message ID để apply typing effect
+  const [latestAssistantId, setLatestAssistantId] = useState<string | null>(null);
+
+  // Cập nhật latestAssistantId khi có message mới
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.role === 'assistant') {
+      setLatestAssistantId(lastMessage.id);
+    }
+  }, [messages]);
 
   // Log messages changes để debug
   useEffect(() => {
@@ -93,27 +103,6 @@ export function ChatInterface() {
 
   const handleRegisterRedirect = () => {
     router.push('/dang-ky');
-  };
-
-  // Hàm tách nội dung thành 2 phần: public (25%) và locked (75%)
-  const splitContent = (content: string) => {
-    const lines = content.split('\n');
-
-    if (lines.length <= 2) {
-      // Nếu chỉ có 1-2 dòng, chia theo ký tự: 25% public, 75% locked
-      const splitPoint = Math.floor(content.length * 0.25);
-      return {
-        publicPart: content.substring(0, splitPoint),
-        lockedPart: content.substring(splitPoint),
-      };
-    }
-
-    // Nếu có nhiều dòng, chia theo dòng: 25% đầu public, 75% còn lại locked
-    const splitPoint = Math.floor(lines.length * 0.25);
-    return {
-      publicPart: lines.slice(0, Math.max(1, splitPoint)).join('\n'),
-      lockedPart: lines.slice(Math.max(1, splitPoint)).join('\n'),
-    };
   };
 
   return (
@@ -190,73 +179,12 @@ export function ChatInterface() {
                 }`}
               >
                 {message.role === 'assistant' ? (
-                  <div className="p-4">
-                    {message.detectedChemicals && message.detectedChemicals.length > 0 && (
-                      <div className="mb-3 flex flex-wrap gap-2">
-                        {message.detectedChemicals.map((chemical, idx) => (
-                          <Badge key={idx} variant="secondary" className="bg-cyan-50 text-cyan-700 border-cyan-200">
-                            {chemical}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Hiển thị nội dung với phần public và phần locked */}
-                    {(() => {
-                      // Chỉ dùng content, không gộp detailed nếu nó giống content (tránh lặp)
-                      const fullContent = message.detailedContent && message.detailedContent !== message.content
-                        ? `${message.content}\n\n${message.detailedContent}`
-                        : message.content;
-
-                      const { publicPart, lockedPart } = splitContent(fullContent);
-
-                      return (
-                        <>
-                          <div className="text-slate-800 leading-relaxed space-y-3">
-                            {/* Phần public - luôn hiển thị */}
-                            <div className="whitespace-pre-wrap">{publicPart}</div>
-
-                            {/* Phần locked - chỉ hiển thị nếu đã đăng nhập */}
-                            {lockedPart && (
-                              <div className="relative mt-4 pt-4 border-t border-slate-200">
-                                <div className="flex items-center gap-2 mb-3">
-                                  <Lock className={`w-4 h-4 ${isAuthenticated ? 'text-cyan-600' : 'text-slate-400'}`} />
-                                  <span className="text-sm font-medium text-slate-700">
-                                    Chi tiết trích dẫn luật & Mức phạt
-                                  </span>
-                                </div>
-
-                                <div className="relative">
-                                  <div className={`text-slate-700 whitespace-pre-wrap ${!isAuthenticated ? 'blur-content' : ''}`}>
-                                    {lockedPart}
-                                  </div>
-
-                                  {!isAuthenticated && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-white/60 to-white/90">
-                                      <Button
-                                        onClick={handleUnlockClick}
-                                        className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-xl"
-                                      >
-                                        <LogIn className="w-4 h-4 mr-2" />
-                                        Đăng nhập để xem chi tiết
-                                      </Button>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Citations chỉ hiển thị cho user đã đăng nhập */}
-                          {isAuthenticated && message.citations && message.citations.length > 0 && (
-                            <div className="mt-4">
-                              <LegalCitation citations={message.citations} />
-                            </div>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
+                  <AssistantMessage
+                    message={message}
+                    isLatest={message.id === latestAssistantId}
+                    isAuthenticated={isAuthenticated}
+                    onUnlockClick={handleUnlockClick}
+                  />
                 ) : (
                   <p className="whitespace-pre-wrap">{message.content}</p>
                 )}
