@@ -169,13 +169,6 @@ export function ChatInterface() {
             </div>
           )}
 
-          {/* Debug: Show message count */}
-          {process.env.NODE_ENV === 'development' && messages.length > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 p-2 rounded text-xs text-yellow-800">
-              Debug: {messages.length} messages loaded
-            </div>
-          )}
-
           {messages.length > 0 && messages.map((message, index) => (
             <div
               key={`${message.id}-${index}`}
