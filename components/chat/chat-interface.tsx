@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, LogIn, Lock } from 'lucide-react';
+import { Send, Bot, User, Sparkles, LogIn, Lock, Search, BookOpen, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -47,6 +47,9 @@ export function ChatInterface() {
   // Track latest assistant message ID để apply typing effect
   const [latestAssistantId, setLatestAssistantId] = useState<string | null>(null);
 
+  // Track loading stage for dynamic typing indicator
+  const [loadingStage, setLoadingStage] = useState(0);
+
   // Cập nhật latestAssistantId khi có message mới
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
@@ -54,6 +57,21 @@ export function ChatInterface() {
       setLatestAssistantId(lastMessage.id);
     }
   }, [messages]);
+
+  // Cycle through loading stages while typing
+  useEffect(() => {
+    if (!isTyping) {
+      setLoadingStage(0);
+      return;
+    }
+
+    // Start cycling through stages
+    const interval = setInterval(() => {
+      setLoadingStage(prev => (prev + 1) % 3);
+    }, 2800); // Change stage every 2.8 seconds
+
+    return () => clearInterval(interval);
+  }, [isTyping]);
 
   // Log messages changes để debug
   useEffect(() => {
@@ -232,11 +250,26 @@ export function ChatInterface() {
               <div className="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center">
                 <Bot className="w-4 h-4 text-cyan-600" />
               </div>
-              <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
-                <div className="typing-indicator flex gap-1">
-                  <span className="w-2 h-2 bg-slate-400 rounded-full" />
-                  <span className="w-2 h-2 bg-slate-400 rounded-full" />
-                  <span className="w-2 h-2 bg-slate-400 rounded-full" />
+              <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm min-w-[240px]">
+                <div className="flex items-center gap-3">
+                  {loadingStage === 0 && (
+                    <>
+                      <Search className="w-4 h-4 text-cyan-500 animate-pulse" />
+                      <span className="text-sm text-slate-600 animate-fade-in">Đang phân tích câu hỏi...</span>
+                    </>
+                  )}
+                  {loadingStage === 1 && (
+                    <>
+                      <BookOpen className="w-4 h-4 text-cyan-600 animate-pulse" />
+                      <span className="text-sm text-slate-600 animate-fade-in">Đang tra cứu cơ sở dữ liệu...</span>
+                    </>
+                  )}
+                  {loadingStage === 2 && (
+                    <>
+                      <Zap className="w-4 h-4 text-cyan-700 animate-pulse" />
+                      <span className="text-sm text-slate-600 animate-fade-in">Đang tổng hợp câu trả lời...</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
