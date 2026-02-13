@@ -68,7 +68,7 @@ export function ChatInterface() {
     // Start cycling through stages
     const interval = setInterval(() => {
       setLoadingStage(prev => (prev + 1) % 3);
-    }, 2800); // Change stage every 2.8 seconds
+    }, 10000); // Change stage every 10 seconds
 
     return () => clearInterval(interval);
   }, [isTyping]);
