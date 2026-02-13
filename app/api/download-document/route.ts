@@ -26,11 +26,14 @@ export async function GET(request: NextRequest) {
 
     const downloadName = fileName || filePath.split('/').pop() || 'document.pdf';
 
+    const asciiFilename = downloadName.replace(/[^\x00-\x7F]/g, '');
+    const encodedFilename = encodeURIComponent(downloadName);
+
     return new NextResponse(fileBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${downloadName}"`,
+        'Content-Disposition': `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
         'Content-Length': fileBuffer.length.toString(),
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
