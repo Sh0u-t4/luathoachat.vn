@@ -70,30 +70,60 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
   };
 
   const getDownloadUrl = (doc: LegalDocument) => {
+    const sanitizedCode = doc.document_code.replace(/\//g, '-');
     const params = new URLSearchParams({
       path: doc.full_text_url,
-      name: `${doc.document_code}.pdf`,
+      name: `${sanitizedCode}.pdf`,
     });
     return `/api/download-document?${params.toString()}`;
   };
 
   const handleDownloadClick = async (e: React.MouseEvent, doc: LegalDocument) => {
+    e.preventDefault();
+
     const sessionId = typeof window !== 'undefined'
       ? localStorage.getItem('chat_session_id') || 'anonymous'
       : 'anonymous';
 
-    fetch('/api/track-download', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        documentId: doc.id,
-        sessionId,
-      }),
-    }).catch((err) => console.error('Track download error:', err));
+    toast.loading(`Đang tải xuống: ${doc.document_name}`);
 
-    toast.success(`Đang tải xuống: ${doc.document_name}`);
+    try {
+      const downloadUrl = getDownloadUrl(doc);
+      const response = await fetch(downloadUrl);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.details || 'Failed to download file');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${doc.document_code.replace(/\//g, '-')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      fetch('/api/track-download', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentId: doc.id,
+          sessionId,
+        }),
+      }).catch((err) => console.error('Track download error:', err));
+
+      toast.dismiss();
+      toast.success(`Tải xuống thành công: ${doc.document_name}`);
+    } catch (error: any) {
+      console.error('Download failed:', error);
+      toast.dismiss();
+      toast.error(`Không thể tải xuống file: ${error.message}`);
+    }
   };
 
   const suggestions = [t.hero.suggestion1, t.hero.suggestion2, t.hero.suggestion3];

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -33,10 +35,19 @@ export async function GET(request: NextRequest) {
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
     });
-  } catch (error) {
-    console.error('Download error:', error);
+  } catch (error: any) {
+    console.error('Download error:', {
+      message: error.message,
+      code: error.code,
+      path: error.path,
+      stack: error.stack
+    });
     return NextResponse.json(
-      { error: 'File not found or cannot be read' },
+      {
+        error: 'File not found or cannot be read',
+        details: error.message,
+        path: error.path
+      },
       { status: 404 }
     );
   }
