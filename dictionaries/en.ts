@@ -4,7 +4,7 @@ export const en: Translation = {
   common: {
     home: 'Home',
     search: 'Search',
-    searchPlaceholder: 'Enter CAS number or Chemical name to lookup Decree 24 Appendix...',
+    searchPlaceholder: 'Enter CAS number, chemical name or search information',
     suggestions: 'Suggestions',
     loading: 'Loading...',
     error: 'Error',

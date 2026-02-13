@@ -4,7 +4,7 @@ export const vi: Translation = {
   common: {
     home: 'Trang chủ',
     search: 'Tìm kiếm',
-    searchPlaceholder: 'Nhập mã CAS hoặc Tên hóa chất để tra cứu Phụ lục Nghị định 24...',
+    searchPlaceholder: 'Nhập mã CAS, tên hóa chất hoặc tra cứu thông tin',
     suggestions: 'Gợi ý',
     loading: 'Đang tải...',
     error: 'Lỗi',
