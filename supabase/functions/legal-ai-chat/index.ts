@@ -227,8 +227,8 @@ async function fallbackRAG(
   supabase: ReturnType<typeof createClient>,
   query: string
 ): Promise<{ responseText: string; contexts: RAGContext[] }> {
-  const apiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!apiKey) throw new Error("OPENAI_API_KEY not configured");
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
 
   const queryEmbedding = await createEmbedding(query);
   const contexts = await searchRelevantContext(supabase, queryEmbedding);
