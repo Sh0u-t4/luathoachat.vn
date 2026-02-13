@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   FlaskConical,
   Eye,
@@ -16,22 +16,30 @@ import {
   Shield,
   Sparkles,
   BookOpen,
+  Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/lib/auth/context';
 import { useLanguage } from '@/lib/i18n/context';
 import { toast } from 'sonner';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signUp } = useAuth();
   const { t } = useLanguage();
 
+  // Get email and source from URL params
+  const prefilledEmail = searchParams.get('email');
+  const registrationSource = searchParams.get('source');
+  const isFromChatbotGate = registrationSource === 'chatbot_gate';
+
   const [formData, setFormData] = useState({
     fullName: '',
-    email: '',
+    email: prefilledEmail || '',
     phone: '',
     companyName: '',
     position: '',
@@ -42,6 +50,13 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Update email when prefilled email changes
+  useEffect(() => {
+    if (prefilledEmail) {
+      setFormData((prev) => ({ ...prev, email: prefilledEmail }));
+    }
+  }, [prefilledEmail]);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -183,6 +198,16 @@ export default function RegisterPage() {
             <p className="text-slate-500">{t.auth.registerSubtitle}</p>
           </div>
 
+          {isFromChatbotGate && prefilledEmail && (
+            <Alert className="mb-6 border-cyan-200 bg-cyan-50">
+              <Info className="w-4 h-4 text-cyan-600" />
+              <AlertTitle className="text-cyan-900">Tạo mật khẩu cho {prefilledEmail}</AlertTitle>
+              <AlertDescription className="text-cyan-700">
+                Bạn đã sử dụng hết 5 câu hỏi miễn phí. Tạo tài khoản để tiếp tục hỏi không giới hạn!
+              </AlertDescription>
+            </Alert>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
@@ -238,10 +263,14 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={(e) => updateField('email', e.target.value)}
                   placeholder={t.auth.emailPlaceholder}
-                  className={`pl-10 h-11 ${errors.email ? 'border-red-400 focus-visible:ring-red-400' : ''}`}
+                  disabled={!!prefilledEmail}
+                  className={`pl-10 h-11 ${errors.email ? 'border-red-400 focus-visible:ring-red-400' : ''} ${prefilledEmail ? 'bg-slate-100 cursor-not-allowed' : ''}`}
                 />
               </div>
               {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+              {prefilledEmail && (
+                <p className="text-xs text-slate-500">Email đã được điền tự động từ chatbot</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

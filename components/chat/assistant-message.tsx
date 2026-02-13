@@ -12,6 +12,7 @@ interface AssistantMessageProps {
   isLatest: boolean;
   isAuthenticated: boolean;
   onUnlockClick: () => void;
+  messageIndex: number; // Index của assistant message này (0-based)
 }
 
 export function AssistantMessage({
@@ -19,7 +20,12 @@ export function AssistantMessage({
   isLatest,
   isAuthenticated,
   onUnlockClick,
+  messageIndex,
 }: AssistantMessageProps) {
+  // Unlock logic: Show unblurred content if:
+  // 1. User is authenticated, OR
+  // 2. This is one of the first 5 free messages (messageIndex < 5)
+  const shouldShowUnblurred = isAuthenticated || messageIndex < 5;
   // Tách nội dung thành 2 phần: public (25%) và locked (75%)
   const splitContent = (content: string) => {
     const lines = content.split('\n');
@@ -90,7 +96,7 @@ export function AssistantMessage({
             <div className="flex items-center gap-2 mb-3">
               <Lock
                 className={`w-4 h-4 ${
-                  isAuthenticated ? 'text-cyan-600' : 'text-slate-400'
+                  shouldShowUnblurred ? 'text-cyan-600' : 'text-slate-400'
                 }`}
               />
               <span className="text-sm font-medium text-slate-700">
@@ -101,18 +107,18 @@ export function AssistantMessage({
             <div className="relative">
               <div
                 className={`text-slate-700 whitespace-pre-wrap ${
-                  !isAuthenticated ? 'blur-content' : ''
+                  !shouldShowUnblurred ? 'blur-content' : ''
                 }`}
               >
                 {finalLocked}
-                {isAuthenticated &&
+                {shouldShowUnblurred &&
                   isLatest &&
                   finalLocked.length < lockedPart.length && (
                     <span className="inline-block w-1 h-4 bg-cyan-600 ml-0.5 animate-pulse" />
                   )}
               </div>
 
-              {!isAuthenticated && (
+              {!shouldShowUnblurred && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-white/60 to-white/90">
                   <Button
                     onClick={onUnlockClick}
@@ -128,8 +134,8 @@ export function AssistantMessage({
         )}
       </div>
 
-      {/* Citations chỉ hiển thị cho user đã đăng nhập */}
-      {isAuthenticated && message.citations && message.citations.length > 0 && (
+      {/* Citations - hiển thị cho user đã unlock (authenticated hoặc trong 5 câu free) */}
+      {shouldShowUnblurred && message.citations && message.citations.length > 0 && (
         <div className="mt-4">
           <LegalCitation citations={message.citations} />
         </div>

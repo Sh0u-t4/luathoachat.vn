@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useCallback, useEffect, type React
 import type { ChatMessage, Citation } from '@/types';
 import { supabase, getSessionToken } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth/context';
+import { toast } from 'sonner';
 
 interface ChatContextType {
   messages: ChatMessage[];
@@ -11,11 +12,19 @@ interface ChatContextType {
   hasUnlockedContent: boolean;
   currentQuery: string;
   isAuthenticated: boolean;
+  questionCount: number;
+  emailCollected: boolean;
+  guestEmail: string | null;
+  showEmailGate: boolean;
+  showLoginGate: boolean;
   sendMessage: (content: string) => Promise<void>;
   unlockContent: () => void;
   clearMessages: () => void;
   loadChatHistory: (sessionId?: string) => Promise<void>;
   chatSessions: Array<{ session_id: string; message_id: string; first_message: string; created_at: string }>;
+  setShowEmailGate: (show: boolean) => void;
+  setShowLoginGate: (show: boolean) => void;
+  saveGuestEmail: (email: string, currentQuestion: string) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -60,6 +69,65 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [currentQuery, setCurrentQuery] = useState('');
   const [chatSessions, setChatSessions] = useState<Array<{ session_id: string; message_id: string; first_message: string; created_at: string }>>([]);
 
+  // Freemium gate states
+  const [questionCount, setQuestionCount] = useState(0);
+  const [emailCollected, setEmailCollected] = useState(false);
+  const [guestEmail, setGuestEmail] = useState<string | null>(null);
+  const [showEmailGate, setShowEmailGate] = useState(false);
+  const [showLoginGate, setShowLoginGate] = useState(false);
+
+  // Load freemium gate state from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedCount = localStorage.getItem('chatbot_question_count');
+      const savedEmail = localStorage.getItem('chatbot_guest_email');
+      const savedCollected = localStorage.getItem('chatbot_email_collected');
+
+      if (savedCount) setQuestionCount(parseInt(savedCount, 10));
+      if (savedEmail) setGuestEmail(savedEmail);
+      if (savedCollected === 'true') setEmailCollected(true);
+    }
+  }, []);
+
+  // Persist questionCount to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined' && questionCount > 0) {
+      localStorage.setItem('chatbot_question_count', String(questionCount));
+    }
+  }, [questionCount]);
+
+  // Persist emailCollected to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined' && emailCollected) {
+      localStorage.setItem('chatbot_email_collected', 'true');
+    }
+  }, [emailCollected]);
+
+  // Persist guestEmail to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined' && guestEmail) {
+      localStorage.setItem('chatbot_guest_email', guestEmail);
+    }
+  }, [guestEmail]);
+
+  // Listen to storage changes for cross-tab sync
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'chatbot_question_count' && e.newValue) {
+        setQuestionCount(parseInt(e.newValue, 10));
+      } else if (e.key === 'chatbot_email_collected' && e.newValue) {
+        setEmailCollected(e.newValue === 'true');
+      } else if (e.key === 'chatbot_guest_email' && e.newValue) {
+        setGuestEmail(e.newValue);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   const loadUserSessions = useCallback(async () => {
     if (!user) return;
 
@@ -88,11 +156,23 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  // Load chat sessions khi user đăng nhập
+  // Load chat sessions khi user đăng nhập và reset freemium gates
   useEffect(() => {
     if (user) {
       setHasUnlockedContent(true);
       loadUserSessions();
+
+      // Clear freemium gate states when user authenticates
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('chatbot_question_count');
+        localStorage.removeItem('chatbot_email_collected');
+        localStorage.removeItem('chatbot_guest_email');
+      }
+      setQuestionCount(0); // Reset về 0 vì đã authenticated = unlimited
+      setEmailCollected(false);
+      setGuestEmail(null);
+      setShowEmailGate(false);
+      setShowLoginGate(false);
     } else {
       setHasUnlockedContent(false);
       setChatSessions([]);
@@ -183,10 +263,102 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  const sendMessage = useCallback(async (content: string) => {
-    // Tạo session_id mới cho mỗi cặp hỏi-đáp
-    const sessionToken = `chat_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const saveGuestEmail = useCallback(async (email: string, currentQuestion: string) => {
+    try {
+      const sessionToken = getSessionToken();
 
+      // Try to insert email into leads table
+      // Use upsert pattern: ignore error if email already exists
+      const { error: leadError } = await supabase
+        .from('leads')
+        .insert({
+          email: email,
+          phone_zalo: '',
+          company_name: null,
+          intent_tag: 'tu_van_luat',
+          source_page: 'chatbot_email_gate',
+          query_text: currentQuestion,
+        });
+
+      // If email already exists, that's okay - we still let user continue
+      if (leadError && !leadError.message.includes('duplicate')) {
+        console.error('Error saving lead:', leadError);
+      }
+
+      // Track email gate submission in analytics
+      await supabase.from('chat_analytics').insert({
+        session_id: sessionToken,
+        user_query: currentQuestion,
+        ai_response: email,
+        response_source: 'email_gate_submitted',
+        metadata: {
+          question_number: questionCount + 1,
+          email: email,
+        },
+      });
+
+      // Update state
+      setGuestEmail(email);
+      setEmailCollected(true);
+
+      toast.success('Email đã được lưu! Bạn có thể hỏi thêm 3 câu nữa.');
+    } catch (error) {
+      console.error('Failed to save guest email:', error);
+      // Even on error, we let user continue (better UX)
+      setGuestEmail(email);
+      setEmailCollected(true);
+      toast.success('Tiếp tục trải nghiệm!');
+    }
+  }, [questionCount]);
+
+  const sendMessage = useCallback(async (content: string) => {
+    const sessionToken = getSessionToken();
+
+    // GATE LOGIC CHECK 1: Email gate (question 2)
+    // Show email gate before the 2nd question (when questionCount >= 1)
+    if (questionCount >= 1 && !emailCollected && !user) {
+      setCurrentQuery(content);
+      setShowEmailGate(true);
+
+      // Track email gate shown
+      await supabase.from('chat_analytics').insert({
+        session_id: sessionToken,
+        user_query: content,
+        ai_response: '',
+        response_source: 'email_gate_shown',
+        metadata: {
+          question_number: questionCount + 1,
+          gate_type: 'email_gate',
+        },
+      });
+
+      return; // Block sending message until email collected
+    }
+
+    // GATE LOGIC CHECK 2: Login gate (question 6)
+    // Show login gate before the 6th question (when questionCount >= 5)
+    if (questionCount >= 5 && !user) {
+      setCurrentQuery(content);
+      setShowLoginGate(true);
+
+      // Track login gate shown
+      await supabase.from('chat_analytics').insert({
+        session_id: sessionToken,
+        user_query: content,
+        ai_response: '',
+        response_source: 'login_gate_shown',
+        metadata: {
+          question_number: questionCount + 1,
+          gate_type: 'login_gate',
+          email_collected: emailCollected,
+          guest_email: guestEmail,
+        },
+      });
+
+      return; // Block sending message until user logs in
+    }
+
+    // If passed all gates, proceed with normal message sending
     const userMessage: ChatMessage = {
       id: `user_${Date.now()}`,
       role: 'user',
@@ -233,6 +405,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       setMessages((prev) => [...prev, assistantMessage]);
       setIsTyping(false);
 
+      // Increment question count for freemium gate tracking (only for non-authenticated users)
+      if (!user) {
+        setQuestionCount((prev) => prev + 1);
+      }
+
       // Lưu assistant message vào database
       try {
         await supabase.from('chat_messages').insert({
@@ -247,6 +424,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           is_error: false,
           metadata: {
             response_source: 'legal-ai-chat',
+            question_number: !user ? questionCount + 1 : null,
           },
         });
 
@@ -298,7 +476,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         console.error('Failed to save error message:', saveError);
       }
     }
-  }, [hasUnlockedContent, user]);
+  }, [hasUnlockedContent, user, questionCount, emailCollected, guestEmail, loadUserSessions]);
 
   const unlockContent = useCallback(() => {
     setHasUnlockedContent(true);
@@ -326,11 +504,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         hasUnlockedContent,
         currentQuery,
         isAuthenticated: !!user,
+        questionCount,
+        emailCollected,
+        guestEmail,
+        showEmailGate,
+        showLoginGate,
         sendMessage,
         unlockContent,
         clearMessages,
         loadChatHistory,
         chatSessions,
+        setShowEmailGate,
+        setShowLoginGate,
+        saveGuestEmail,
       }}
     >
       {children}

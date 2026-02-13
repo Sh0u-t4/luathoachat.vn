@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { useChat } from './chat-context';
 import { AssistantMessage } from './assistant-message';
+import { EmailGateModal } from './email-gate-modal';
+import { LoginGateModal } from './login-gate-modal';
 import { useRouter } from 'next/navigation';
 import {
   Dialog,
@@ -25,7 +27,21 @@ export function ChatInterface() {
   const wasCleared = useRef(false);
   const router = useRouter();
 
-  const { messages, isTyping, isAuthenticated, sendMessage } = useChat();
+  const {
+    messages,
+    isTyping,
+    isAuthenticated,
+    sendMessage,
+    questionCount,
+    emailCollected,
+    guestEmail,
+    showEmailGate,
+    showLoginGate,
+    setShowEmailGate,
+    setShowLoginGate,
+    saveGuestEmail,
+    currentQuery,
+  } = useChat();
 
   // Track latest assistant message ID để apply typing effect
   const [latestAssistantId, setLatestAssistantId] = useState<string | null>(null);
@@ -158,45 +174,54 @@ export function ChatInterface() {
             </div>
           )}
 
-          {messages.length > 0 && messages.map((message, index) => (
-            <div
-              key={`${message.id}-${index}`}
-              className={`flex gap-3 animate-slide-up ${
-                message.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
-            >
-              {message.role === 'assistant' && (
-                <div className="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-cyan-600" />
-                </div>
-              )}
+          {messages.length > 0 && messages.map((message, index) => {
+            // Calculate assistant message index (0-based count of assistant messages)
+            // Assistant messages are typically at odd indices (1, 3, 5, 7, ...)
+            const assistantMessageIndex = message.role === 'assistant'
+              ? Math.floor(index / 2)
+              : 0;
 
+            return (
               <div
-                className={`max-w-[80%] ${
-                  message.role === 'user'
-                    ? 'bg-slate-900 text-white rounded-2xl rounded-tr-sm px-4 py-3'
-                    : 'bg-white border border-slate-200 rounded-2xl rounded-tl-sm shadow-sm'
+                key={`${message.id}-${index}`}
+                className={`flex gap-3 animate-slide-up ${
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
-                {message.role === 'assistant' ? (
-                  <AssistantMessage
-                    message={message}
-                    isLatest={message.id === latestAssistantId}
-                    isAuthenticated={isAuthenticated}
-                    onUnlockClick={handleUnlockClick}
-                  />
-                ) : (
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                {message.role === 'assistant' && (
+                  <div className="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-4 h-4 text-cyan-600" />
+                  </div>
+                )}
+
+                <div
+                  className={`max-w-[80%] ${
+                    message.role === 'user'
+                      ? 'bg-slate-900 text-white rounded-2xl rounded-tr-sm px-4 py-3'
+                      : 'bg-white border border-slate-200 rounded-2xl rounded-tl-sm shadow-sm'
+                  }`}
+                >
+                  {message.role === 'assistant' ? (
+                    <AssistantMessage
+                      message={message}
+                      isLatest={message.id === latestAssistantId}
+                      isAuthenticated={isAuthenticated}
+                      onUnlockClick={handleUnlockClick}
+                      messageIndex={assistantMessageIndex}
+                    />
+                  ) : (
+                    <p className="whitespace-pre-wrap">{message.content}</p>
+                  )}
+                </div>
+
+                {message.role === 'user' && (
+                  <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
                 )}
               </div>
-
-              {message.role === 'user' && (
-                <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center flex-shrink-0">
-                  <User className="w-4 h-4 text-white" />
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
 
           {isTyping && (
             <div className="flex gap-3 animate-fade-in">
@@ -294,6 +319,21 @@ export function ChatInterface() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Email Gate Modal - Appears before question 2 */}
+      <EmailGateModal
+        open={showEmailGate}
+        onClose={() => setShowEmailGate(false)}
+        onEmailSubmit={saveGuestEmail}
+        currentQuestion={currentQuery}
+      />
+
+      {/* Login Gate Modal - Appears after question 5 */}
+      <LoginGateModal
+        open={showLoginGate}
+        email={guestEmail}
+        questionCount={questionCount}
+      />
     </>
   );
 }

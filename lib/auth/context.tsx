@@ -8,7 +8,7 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, getSessionToken } from '@/lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface UserProfile {
@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     metadata: { full_name: string; phone?: string }
   ) => {
-    const { error } = await supabase.auth.signUp({
+    const { data: authData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -118,6 +118,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (error) {
       return { error: error.message };
+    }
+
+    // Merge guest chat history if applicable
+    if (authData.user) {
+      try {
+        // Get guest email from localStorage
+        const guestEmail = typeof window !== 'undefined'
+          ? localStorage.getItem('chatbot_guest_email')
+          : null;
+
+        // Get current session token
+        const guestSessionToken = getSessionToken();
+
+        // If guest email matches signup email, merge chat history
+        if (guestEmail === email && guestSessionToken) {
+          console.log('Merging guest chat history for email:', email);
+
+          // Update all messages from this session to belong to the new user
+          const { error: updateError } = await supabase
+            .from('chat_messages')
+            .update({ user_id: authData.user.id })
+            .eq('session_id', guestSessionToken)
+            .is('user_id', null);
+
+          if (updateError) {
+            console.error('Failed to merge chat history:', updateError);
+          } else {
+            console.log('Successfully merged chat history');
+          }
+
+          // Clear guest data from localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('chatbot_guest_email');
+            localStorage.removeItem('chatbot_email_collected');
+            localStorage.removeItem('chatbot_question_count');
+          }
+        }
+      } catch (mergeError) {
+        console.error('Error during chat history merge:', mergeError);
+        // Don't fail signup if merge fails - it's non-critical
+      }
     }
 
     return { error: null };
