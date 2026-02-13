@@ -44,7 +44,7 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
         .from('legal_documents_2026')
         .select('id, document_code, document_name, document_type, full_text_url, summary')
         .order('document_type', { ascending: false })
-        .order('issue_date', { ascending: false });
+        .order('document_code', { ascending: true });
 
       if (error) throw error;
       setDocuments(data || []);
