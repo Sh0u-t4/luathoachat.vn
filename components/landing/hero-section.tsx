@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, ArrowRight, ListChecks, FileInput, Calendar } from 'lucide-react';
+import { Search, ArrowRight, ListChecks, FileInput, Calendar, Download, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChat } from '@/components/chat/chat-context';
 import { useLanguage } from '@/lib/i18n/context';
@@ -46,9 +46,30 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
           </span>
         </h1>
 
-        <p className="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
+        <p className="text-lg md:text-xl text-slate-400 mb-8 max-w-2xl mx-auto">
           {t.hero.subtitle}
         </p>
+
+        <div className="flex flex-wrap justify-center gap-3 mb-10">
+          <a
+            href="/documents/luat-hoa-chat-69-2025.pdf"
+            download
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-cyan-500/50"
+          >
+            <FileText className="w-4 h-4" />
+            <span>Luật Hóa chất 69/2025</span>
+            <Download className="w-4 h-4" />
+          </a>
+          <a
+            href="/documents/nghi-dinh-24-2026.pdf"
+            download
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-green-500/50"
+          >
+            <FileText className="w-4 h-4" />
+            <span>Nghị định 24, 25, 26/2026</span>
+            <Download className="w-4 h-4" />
+          </a>
+        </div>
 
         <form onSubmit={handleSubmit} className="relative max-w-2xl mx-auto mb-4">
           <div className="relative search-glow rounded-full bg-white/95 backdrop-blur transition-all duration-300">
