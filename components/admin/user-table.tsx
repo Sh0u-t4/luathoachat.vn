@@ -63,12 +63,10 @@ interface UserTableProps {
 function getRoleBadge(role: string, t: Translation) {
   const labels: Record<string, string> = {
     admin: t.admin.roleAdmin,
-    moderator: t.admin.roleModerator,
     user: t.admin.roleUser,
   };
   const styles: Record<string, string> = {
     admin: 'bg-amber-100 text-amber-800 border-amber-200',
-    moderator: 'bg-sky-100 text-sky-800 border-sky-200',
     user: 'bg-slate-100 text-slate-600 border-slate-200',
   };
   return (

@@ -185,12 +185,10 @@ export function ViewUserDialog({ user, open, onOpenChange }: ViewUserDialogProps
                   className={
                     user.role === 'admin'
                       ? 'bg-amber-100 text-amber-800 border-amber-200'
-                      : user.role === 'moderator'
-                      ? 'bg-sky-100 text-sky-800 border-sky-200'
                       : 'bg-slate-100 text-slate-600 border-slate-200'
                   }
                 >
-                  {user.role === 'admin' ? 'Quản trị' : user.role === 'moderator' ? 'Điều hành' : 'Người dùng'}
+                  {user.role === 'admin' ? 'Quản trị' : 'Người dùng'}
                 </Badge>
               </div>
               <div className="space-y-1.5">
@@ -384,7 +382,6 @@ export function EditUserDialog({ user, open, onOpenChange, onSave }: EditUserDia
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="user">Người dùng</SelectItem>
-                      <SelectItem value="moderator">Điều hành</SelectItem>
                       <SelectItem value="admin">Quản trị</SelectItem>
                     </SelectContent>
                   </Select>
@@ -613,7 +610,6 @@ export function AddUserDialog({ open, onOpenChange, onAdd }: AddUserDialogProps)
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="user">Người dùng</SelectItem>
-                    <SelectItem value="moderator">Điều hành</SelectItem>
                     <SelectItem value="admin">Quản trị</SelectItem>
                   </SelectContent>
                 </Select>
