@@ -264,9 +264,10 @@ export function ChatInterface() {
               <Send className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-xs text-slate-400 mt-2 text-center">
-            Thông tin chỉ mang tính tham khảo. Liên hệ chuyên gia để được tư vấn cụ thể.
-          </p>
+          <div className="text-xs text-slate-400 mt-2 text-center space-y-1">
+            <p>Thông tin chỉ mang tính tham khảo. Liên hệ chuyên gia để được tư vấn cụ thể.</p>
+            <p>Hiện tại AI Chatbot đang được phát triển, nếu có phát hiện sai sót hãy thông báo và cùng phát triển hệ thống tốt hơn.</p>
+          </div>
         </form>
       </Card>
 
