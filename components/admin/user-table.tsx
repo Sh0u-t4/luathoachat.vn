@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { format } from 'date-fns';
-import { Download, Search, Users, UserCheck, ShieldCheck } from 'lucide-react';
+import { Download, Search, Users, UserCheck, ShieldCheck, Eye, Pencil, Trash2, UserPlus, MoreHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +14,22 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { Translation } from '@/lib/i18n/types';
+import {
+  ViewUserDialog,
+  EditUserDialog,
+  DeleteUserDialog,
+  AddUserDialog,
+  type UserProfile as DialogUserProfile,
+} from './user-dialogs';
 
 interface UserProfile {
   id: string;
@@ -21,12 +37,15 @@ interface UserProfile {
   full_name: string;
   phone: string | null;
   company_name: string | null;
+  company_tax_code: string | null;
   position: string | null;
+  industry: string | null;
   role: string;
   account_status: string;
   login_count: number;
   last_login_at: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 interface UserTableProps {
@@ -35,6 +54,9 @@ interface UserTableProps {
   onSearchChange: (value: string) => void;
   statusFilter: string;
   onStatusFilterChange: (value: string) => void;
+  onUserUpdate: (userId: string, updates: Partial<UserProfile>) => Promise<void>;
+  onUserDelete: (userId: string) => Promise<void>;
+  onUserAdd: (userData: Partial<UserProfile> & { password: string }) => Promise<void>;
   t: Translation;
 }
 
@@ -113,8 +135,16 @@ export function UserTable({
   onSearchChange,
   statusFilter,
   onStatusFilterChange,
+  onUserUpdate,
+  onUserDelete,
+  onUserAdd,
   t,
 }: UserTableProps) {
+  const [viewUser, setViewUser] = useState<UserProfile | null>(null);
+  const [editUser, setEditUser] = useState<UserProfile | null>(null);
+  const [deleteUser, setDeleteUser] = useState<UserProfile | null>(null);
+  const [addUserOpen, setAddUserOpen] = useState(false);
+
   const totalUsers = users.length;
   const activeUsers = users.filter((u) => u.account_status === 'active').length;
   const adminUsers = users.filter((u) => u.role === 'admin').length;
@@ -162,7 +192,7 @@ export function UserTable({
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div className="p-4 border-b border-slate-100 flex flex-col lg:flex-row items-start lg:items-center gap-3">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
@@ -172,7 +202,7 @@ export function UserTable({
               className="pl-10 h-10"
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {['all', 'active', 'suspended'].map((status) => {
               const labels: Record<string, string> = {
                 all: t.admin.filterAll,
@@ -196,15 +226,25 @@ export function UserTable({
               );
             })}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => exportToCsv(filtered)}
-            className="gap-2 text-slate-700 border-slate-300 hover:bg-slate-50"
-          >
-            <Download className="w-4 h-4" />
-            {t.admin.exportCsv}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => exportToCsv(filtered)}
+              className="gap-2 text-slate-700 border-slate-300 hover:bg-slate-50"
+            >
+              <Download className="w-4 h-4" />
+              {t.admin.exportCsv}
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setAddUserOpen(true)}
+              className="gap-2 bg-cyan-600 hover:bg-cyan-700 text-white"
+            >
+              <UserPlus className="w-4 h-4" />
+              Thêm người dùng
+            </Button>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -220,12 +260,13 @@ export function UserTable({
                 <TableHead className="font-semibold text-slate-700">{t.admin.columnStatus}</TableHead>
                 <TableHead className="font-semibold text-slate-700 text-center">{t.admin.columnLogins}</TableHead>
                 <TableHead className="font-semibold text-slate-700">{t.admin.columnRegistered}</TableHead>
+                <TableHead className="font-semibold text-slate-700 text-right">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-12 text-slate-400">
+                  <TableCell colSpan={10} className="text-center py-12 text-slate-400">
                     {t.admin.noUsers}
                   </TableCell>
                 </TableRow>
@@ -247,6 +288,37 @@ export function UserTable({
                     <TableCell className="text-slate-500 text-sm whitespace-nowrap">
                       {user.created_at ? format(new Date(user.created_at), 'dd/MM/yyyy') : '-'}
                     </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setViewUser(user)}
+                          className="h-8 w-8 p-0 text-slate-600 hover:text-cyan-600 hover:bg-cyan-50"
+                          title="Xem chi tiết"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditUser(user)}
+                          className="h-8 w-8 p-0 text-slate-600 hover:text-blue-600 hover:bg-blue-50"
+                          title="Chỉnh sửa"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeleteUser(user)}
+                          className="h-8 w-8 p-0 text-slate-600 hover:text-red-600 hover:bg-red-50"
+                          title="Xóa"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -254,6 +326,25 @@ export function UserTable({
           </Table>
         </div>
       </div>
+
+      {/* Dialogs */}
+      <ViewUserDialog user={viewUser} open={!!viewUser} onOpenChange={(open) => !open && setViewUser(null)} />
+
+      <EditUserDialog
+        user={editUser}
+        open={!!editUser}
+        onOpenChange={(open) => !open && setEditUser(null)}
+        onSave={onUserUpdate}
+      />
+
+      <DeleteUserDialog
+        user={deleteUser}
+        open={!!deleteUser}
+        onOpenChange={(open) => !open && setDeleteUser(null)}
+        onConfirm={onUserDelete}
+      />
+
+      <AddUserDialog open={addUserOpen} onOpenChange={setAddUserOpen} onAdd={onUserAdd} />
     </div>
   );
 }

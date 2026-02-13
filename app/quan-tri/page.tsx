@@ -20,12 +20,15 @@ interface UserProfile {
   full_name: string;
   phone: string | null;
   company_name: string | null;
+  company_tax_code: string | null;
   position: string | null;
+  industry: string | null;
   role: string;
   account_status: string;
   login_count: number;
   last_login_at: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 export default function AdminPage() {
@@ -38,6 +41,25 @@ export default function AdminPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        toast.error('Không thể tải danh sách người dùng');
+      } else {
+        setUsers(data || []);
+      }
+    } catch {
+      toast.error('Lỗi kết nối');
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
@@ -46,27 +68,75 @@ export default function AdminPage() {
     }
     if (!isAdmin) return;
 
-    const fetchUsers = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('id, email, full_name, phone, company_name, position, role, account_status, login_count, last_login_at, created_at')
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          toast.error('Khong the tai danh sach nguoi dung');
-        } else {
-          setUsers(data || []);
-        }
-      } catch {
-        toast.error('Loi ket noi');
-      } finally {
-        setLoadingUsers(false);
-      }
-    };
-
     fetchUsers();
   }, [authLoading, user, isAdmin, router]);
+
+  const handleUserUpdate = async (userId: string, updates: Partial<UserProfile>) => {
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      toast.success('Cập nhật thành công!');
+      await fetchUsers();
+    } catch (error: any) {
+      toast.error('Lỗi: ' + (error.message || 'Không thể cập nhật'));
+    }
+  };
+
+  const handleUserDelete = async (userId: string) => {
+    try {
+      const { error } = await supabase.from('user_profiles').delete().eq('id', userId);
+
+      if (error) throw error;
+
+      toast.success('Đã xóa người dùng!');
+      await fetchUsers();
+    } catch (error: any) {
+      toast.error('Lỗi: ' + (error.message || 'Không thể xóa'));
+    }
+  };
+
+  const handleUserAdd = async (userData: Partial<UserProfile> & { password: string }) => {
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: userData.email!,
+        password: userData.password,
+        options: {
+          data: {
+            full_name: userData.full_name,
+            registration_source: 'admin_created',
+          },
+        },
+      });
+
+      if (authError) throw authError;
+
+      if (authData.user) {
+        const { error: profileError } = await supabase.from('user_profiles').update({
+          full_name: userData.full_name,
+          phone: userData.phone,
+          company_name: userData.company_name,
+          position: userData.position,
+          role: userData.role,
+          account_status: userData.account_status,
+        }).eq('id', authData.user.id);
+
+        if (profileError) throw profileError;
+      }
+
+      toast.success('Tạo tài khoản thành công!');
+      await fetchUsers();
+    } catch (error: any) {
+      toast.error('Lỗi: ' + (error.message || 'Không thể tạo tài khoản'));
+    }
+  };
 
   if (authLoading) {
     return (
@@ -172,6 +242,9 @@ export default function AdminPage() {
                 onSearchChange={setSearch}
                 statusFilter={statusFilter}
                 onStatusFilterChange={setStatusFilter}
+                onUserUpdate={handleUserUpdate}
+                onUserDelete={handleUserDelete}
+                onUserAdd={handleUserAdd}
                 t={t}
               />
             )}
