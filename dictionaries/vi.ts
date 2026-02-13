@@ -106,6 +106,7 @@ export const vi: Translation = {
     decree24: 'Nghị định 24/2026/NĐ-CP (Danh mục)',
     decree25: 'Nghị định 25/2026/NĐ-CP (An toàn)',
     decree26: 'Nghị định 26/2026/NĐ-CP (Quản lý)',
+    circular02: 'Thông tư 02/2026/TT-BCT',
     terms: 'Điều khoản sử dụng',
     privacy: 'Chính sách bảo mật',
     disclaimer: 'Miễn trừ trách nhiệm',

@@ -29,7 +29,7 @@ export function Footer() {
       const { data, error } = await supabase
         .from('legal_documents_2026')
         .select('id, document_code, document_name, document_type, full_text_url, file_path')
-        .in('document_code', ['69/2025/QH15', '24/2026/NĐ-CP', '25/2026/NĐ-CP', '26/2026/NĐ-CP'])
+        .in('document_code', ['69/2025/QH15', '24/2026/NĐ-CP', '25/2026/NĐ-CP', '26/2026/NĐ-CP', '02/2026/TT-BCT'])
         .order('document_type', { ascending: true });
 
       if (error) throw error;
@@ -106,6 +106,8 @@ export function Footer() {
         return t.footer.decree25;
       case '26/2026/NĐ-CP':
         return t.footer.decree26;
+      case '02/2026/TT-BCT':
+        return t.footer.circular02;
       default:
         return code;
     }
