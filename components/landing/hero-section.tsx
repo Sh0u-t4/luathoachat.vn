@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, ArrowRight, ListChecks, FileInput, Calendar, Download, FileText, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,15 +11,48 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useChat } from '@/components/chat/chat-context';
 import { useLanguage } from '@/lib/i18n/context';
+import { supabase } from '@/lib/supabase';
 
 interface HeroSectionProps {
   onSearch: (query: string) => void;
 }
 
+interface LegalDocument {
+  id: string;
+  document_code: string;
+  document_name: string;
+  document_type: 'law' | 'decree' | 'circular';
+  full_text_url: string;
+  summary: string;
+}
+
 export function HeroSection({ onSearch }: HeroSectionProps) {
   const [searchValue, setSearchValue] = useState('');
+  const [documents, setDocuments] = useState<LegalDocument[]>([]);
+  const [loading, setLoading] = useState(true);
   const { sendMessage } = useChat();
   const { t } = useLanguage();
+
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
+
+  const fetchDocuments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('legal_documents_2026')
+        .select('id, document_code, document_name, document_type, full_text_url, summary')
+        .order('document_type', { ascending: false })
+        .order('issue_date', { ascending: false });
+
+      if (error) throw error;
+      setDocuments(data || []);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,60 +90,56 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mb-10">
-          <a
-            href="/documents/luat-hoa-chat-69-2025.pdf"
-            download
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-cyan-500/50"
-          >
-            <FileText className="w-4 h-4" />
-            <span>Luật Hóa chất 69/2025</span>
-            <Download className="w-4 h-4" />
-          </a>
+          {loading ? (
+            <div className="text-slate-400">Đang tải văn bản...</div>
+          ) : (
+            <>
+              {documents
+                .filter((doc) => doc.document_type === 'law')
+                .map((doc) => (
+                  <a
+                    key={doc.id}
+                    href={doc.full_text_url}
+                    download
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-cyan-500/50"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>{doc.document_name}</span>
+                    <Download className="w-4 h-4" />
+                  </a>
+                ))}
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-green-500/50">
-                <FileText className="w-4 h-4" />
-                <span>Nghị định 24, 25, 26/2026</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64 bg-slate-800 border-slate-700">
-              <DropdownMenuItem asChild>
-                <a
-                  href="/documents/nghi-dinh-24-2026.pdf"
-                  download
-                  className="flex items-center gap-2 px-3 py-2 text-white hover:bg-slate-700 cursor-pointer"
-                >
-                  <FileText className="w-4 h-4 text-green-400" />
-                  <span className="flex-1">Nghị định 24/2026/NĐ-CP</span>
-                  <Download className="w-4 h-4 text-slate-400" />
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <a
-                  href="/documents/nghi-dinh-25-2026.pdf"
-                  download
-                  className="flex items-center gap-2 px-3 py-2 text-white hover:bg-slate-700 cursor-pointer"
-                >
-                  <FileText className="w-4 h-4 text-green-400" />
-                  <span className="flex-1">Nghị định 25/2026/NĐ-CP</span>
-                  <Download className="w-4 h-4 text-slate-400" />
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <a
-                  href="/documents/nghi-dinh-26-2026.pdf"
-                  download
-                  className="flex items-center gap-2 px-3 py-2 text-white hover:bg-slate-700 cursor-pointer"
-                >
-                  <FileText className="w-4 h-4 text-green-400" />
-                  <span className="flex-1">Nghị định 26/2026/NĐ-CP</span>
-                  <Download className="w-4 h-4 text-slate-400" />
-                </a>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              {documents.filter((doc) => doc.document_type === 'decree').length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-green-500/50">
+                      <FileText className="w-4 h-4" />
+                      <span>Nghị định 24, 25, 26/2026</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-64 bg-slate-800 border-slate-700">
+                    {documents
+                      .filter((doc) => doc.document_type === 'decree')
+                      .map((doc) => (
+                        <DropdownMenuItem key={doc.id} asChild>
+                          <a
+                            href={doc.full_text_url}
+                            download
+                            className="flex items-center gap-2 px-3 py-2 text-white hover:bg-slate-700 cursor-pointer"
+                            title={doc.summary}
+                          >
+                            <FileText className="w-4 h-4 text-green-400" />
+                            <span className="flex-1">{doc.document_code}</span>
+                            <Download className="w-4 h-4 text-slate-400" />
+                          </a>
+                        </DropdownMenuItem>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="relative max-w-2xl mx-auto mb-4">
