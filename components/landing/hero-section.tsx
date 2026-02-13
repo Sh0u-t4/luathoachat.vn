@@ -1,8 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, ArrowRight, ListChecks, FileInput, Calendar, Download, FileText } from 'lucide-react';
+import { Search, ArrowRight, ListChecks, FileInput, Calendar, Download, FileText, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useChat } from '@/components/chat/chat-context';
 import { useLanguage } from '@/lib/i18n/context';
 
@@ -60,15 +66,51 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
             <span>Luật Hóa chất 69/2025</span>
             <Download className="w-4 h-4" />
           </a>
-          <a
-            href="/documents/nghi-dinh-24-2026.pdf"
-            download
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-green-500/50"
-          >
-            <FileText className="w-4 h-4" />
-            <span>Nghị định 24, 25, 26/2026</span>
-            <Download className="w-4 h-4" />
-          </a>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-green-500/50">
+                <FileText className="w-4 h-4" />
+                <span>Nghị định 24, 25, 26/2026</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-64 bg-slate-800 border-slate-700">
+              <DropdownMenuItem asChild>
+                <a
+                  href="/documents/nghi-dinh-24-2026.pdf"
+                  download
+                  className="flex items-center gap-2 px-3 py-2 text-white hover:bg-slate-700 cursor-pointer"
+                >
+                  <FileText className="w-4 h-4 text-green-400" />
+                  <span className="flex-1">Nghị định 24/2026/NĐ-CP</span>
+                  <Download className="w-4 h-4 text-slate-400" />
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a
+                  href="/documents/nghi-dinh-25-2026.pdf"
+                  download
+                  className="flex items-center gap-2 px-3 py-2 text-white hover:bg-slate-700 cursor-pointer"
+                >
+                  <FileText className="w-4 h-4 text-green-400" />
+                  <span className="flex-1">Nghị định 25/2026/NĐ-CP</span>
+                  <Download className="w-4 h-4 text-slate-400" />
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a
+                  href="/documents/nghi-dinh-26-2026.pdf"
+                  download
+                  className="flex items-center gap-2 px-3 py-2 text-white hover:bg-slate-700 cursor-pointer"
+                >
+                  <FileText className="w-4 h-4 text-green-400" />
+                  <span className="flex-1">Nghị định 26/2026/NĐ-CP</span>
+                  <Download className="w-4 h-4 text-slate-400" />
+                </a>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <form onSubmit={handleSubmit} className="relative max-w-2xl mx-auto mb-4">
