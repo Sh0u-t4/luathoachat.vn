@@ -22,6 +22,7 @@ interface ChatLog {
   id: string;
   user_id: string | null;
   user_email?: string;
+  user_full_name?: string;
   session_id: string;
   role: 'user' | 'assistant';
   content: string;
@@ -45,7 +46,7 @@ export function ChatLogsViewer() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'user' | 'assistant' | 'errors'>('all');
   const [selectedUser, setSelectedUser] = useState<string>('all');
-  const [users, setUsers] = useState<Array<{ id: string; email: string }>>([]);
+  const [users, setUsers] = useState<Array<{ id: string; email: string; full_name?: string }>>([]);
   const [ratings, setRatings] = useState<Map<string, MessageRating>>(new Map());
 
   useEffect(() => {
@@ -58,7 +59,7 @@ export function ChatLogsViewer() {
       // Get all user profiles
       const { data: profiles, error } = await supabase
         .from('user_profiles')
-        .select('id, email')
+        .select('id, email, full_name')
         .order('email');
 
       if (error) {
@@ -112,25 +113,32 @@ export function ChatLogsViewer() {
       const userIds = Array.from(new Set(messages.map(m => m.user_id).filter(Boolean)));
 
       // Load user profiles for those IDs
-      let userEmailMap = new Map<string, string>();
+      let userProfileMap = new Map<string, { email: string; full_name?: string }>();
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
           .from('user_profiles')
-          .select('id, email')
+          .select('id, email, full_name')
           .in('id', userIds);
 
         if (profiles) {
           profiles.forEach(profile => {
-            userEmailMap.set(profile.id, profile.email);
+            userProfileMap.set(profile.id, {
+              email: profile.email,
+              full_name: profile.full_name,
+            });
           });
         }
       }
 
-      // Combine messages with user emails
-      const logsWithEmail = messages.map(log => ({
-        ...log,
-        user_email: log.user_id ? userEmailMap.get(log.user_id) || null : null,
-      }));
+      // Combine messages with user data
+      const logsWithEmail = messages.map(log => {
+        const userProfile = log.user_id ? userProfileMap.get(log.user_id) : null;
+        return {
+          ...log,
+          user_email: userProfile?.email || null,
+          user_full_name: userProfile?.full_name || null,
+        };
+      });
 
       setLogs(logsWithEmail);
 
@@ -198,7 +206,8 @@ export function ChatLogsViewer() {
       const rating = ratings.get(log.id);
       return {
         'Thời gian': format(new Date(log.created_at), 'dd/MM/yyyy HH:mm:ss'),
-        'User Email': log.user_email || (log.user_id ? 'User đã xóa' : 'Khách (Chưa đăng nhập)'),
+        'Tên người dùng': log.user_full_name || 'N/A',
+        'Email': log.user_email || (log.user_id ? 'User đã xóa' : 'Khách (Chưa đăng nhập)'),
         'User ID': log.user_id || 'Anonymous',
         'Loại': log.role === 'user' ? 'Người dùng' : 'AI Trợ lý',
         'Nội dung': log.content,
@@ -214,7 +223,8 @@ export function ChatLogsViewer() {
 
     const columns = [
       { header: 'Thời gian', key: 'Thời gian', width: 18 },
-      { header: 'User Email', key: 'User Email', width: 25 },
+      { header: 'Tên người dùng', key: 'Tên người dùng', width: 25 },
+      { header: 'Email', key: 'Email', width: 30 },
       { header: 'User ID', key: 'User ID', width: 25 },
       { header: 'Loại', key: 'Loại', width: 12 },
       { header: 'Nội dung', key: 'Nội dung', width: 50 },
@@ -266,14 +276,14 @@ export function ChatLogsViewer() {
           </Select>
 
           <Select value={selectedUser} onValueChange={setSelectedUser}>
-            <SelectTrigger className="w-[220px]">
+            <SelectTrigger className="w-[280px]">
               <SelectValue placeholder="Chọn user" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả users</SelectItem>
               {users.map((user) => (
                 <SelectItem key={user.id} value={user.id}>
-                  {user.email}
+                  {user.full_name ? `${user.full_name} (${user.email})` : user.email}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -343,7 +353,15 @@ export function ChatLogsViewer() {
                   )}
 
                   <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
-                    <span>User: {log.user_id || 'Anonymous'}</span>
+                    <div className="flex items-center gap-1.5">
+                      <User className="w-3 h-3" />
+                      <span className="font-medium text-slate-700">
+                        {log.user_full_name || log.user_email || 'Khách (chưa đăng nhập)'}
+                      </span>
+                      {log.user_full_name && log.user_email && (
+                        <span className="text-slate-400">({log.user_email})</span>
+                      )}
+                    </div>
                     <span>Session: {log.session_id.slice(0, 8)}...</span>
                     {log.response_time_ms && <span>⏱️ {log.response_time_ms}ms</span>}
                   </div>
