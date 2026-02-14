@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User } from 'lucide-react';
+import { User, RefreshCw } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/lib/i18n/context';
 import { useAuth } from '@/lib/auth/context';
 import { supabase } from '@/lib/supabase';
@@ -26,6 +27,7 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
   const { t } = useLanguage();
   const { profile, refreshProfile } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
@@ -79,6 +81,20 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleRefreshProfile = async () => {
+    setRefreshing(true);
+    try {
+      await refreshProfile();
+      toast.success('Đã làm mới thông tin', {
+        description: 'Thông tin tài khoản của bạn đã được cập nhật',
+      });
+    } catch (error) {
+      toast.error('Không thể làm mới thông tin');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   // Update form data when dialog opens or profile changes
   useEffect(() => {
     if (profile && open) {
@@ -96,17 +112,42 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-full bg-cyan-100 flex items-center justify-center">
-              <User className="w-6 h-6 text-cyan-700" />
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-cyan-100 flex items-center justify-center">
+                <User className="w-6 h-6 text-cyan-700" />
+              </div>
+              <div>
+                <DialogTitle className="text-xl">{t.auth.editProfileTitle}</DialogTitle>
+                <DialogDescription className="text-sm">
+                  {t.auth.editProfileSubtitle}
+                </DialogDescription>
+              </div>
             </div>
-            <div>
-              <DialogTitle className="text-xl">{t.auth.editProfileTitle}</DialogTitle>
-              <DialogDescription className="text-sm">
-                {t.auth.editProfileSubtitle}
-              </DialogDescription>
-            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleRefreshProfile}
+              disabled={refreshing}
+              title="Làm mới thông tin"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            </Button>
           </div>
+          {profile && (
+            <div className="flex gap-2 mt-2">
+              <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
+                {profile.role === 'admin' ? '🛡️ Admin' : '👤 User'}
+              </Badge>
+              <Badge
+                variant={profile.account_status === 'active' ? 'default' : 'secondary'}
+                className={profile.account_status === 'active' ? 'bg-green-500' : ''}
+              >
+                {profile.account_status === 'active' ? '✓ Active' : profile.account_status}
+              </Badge>
+            </div>
+          )}
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
