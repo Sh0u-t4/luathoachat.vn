@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lock, LogIn, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Lock, LogIn, ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react';
 import { useTypingEffect } from '@/hooks/use-typing-effect';
 import { LegalCitation } from './legal-citation';
+import { FeedbackDetailedDialog } from './feedback-detailed-dialog';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import type { ChatMessage } from '@/types';
@@ -30,6 +31,9 @@ export function AssistantMessage({
   // Rating state - quick like/dislike
   const [userRating, setUserRating] = useState<'like' | 'dislike' | null>(null);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+
+  // Detailed feedback dialog state
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
 
   // Unlock logic: Show unblurred content if:
   // 1. User is authenticated, OR
@@ -290,9 +294,9 @@ export function AssistantMessage({
       {/* Quick Rating Buttons - cho tất cả users (kể cả anonymous) */}
       {shouldShowUnblurred && (
         <div className="mt-6 pt-4 border-t border-slate-200">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
             <span className="text-sm text-slate-600">Câu trả lời này có hữu ích không?</span>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant={userRating === 'like' ? 'default' : 'outline'}
                 size="sm"
@@ -321,10 +325,27 @@ export function AssistantMessage({
                 <ThumbsDown className="w-4 h-4 mr-1.5" />
                 Chưa hữu ích
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFeedbackDialog(true)}
+                className="hover:bg-cyan-50 hover:text-cyan-700 hover:border-cyan-300"
+              >
+                <MessageSquare className="w-4 h-4 mr-1.5" />
+                Góp ý chi tiết
+              </Button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Detailed Feedback Dialog */}
+      <FeedbackDetailedDialog
+        open={showFeedbackDialog}
+        onOpenChange={setShowFeedbackDialog}
+        messageId={message.id || ''}
+        sessionId={sessionId}
+      />
     </div>
   );
 }
