@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Lock, LogIn, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useTypingEffect } from '@/hooks/use-typing-effect';
 import { LegalCitation } from './legal-citation';
-import { FeedbackDialog } from './feedback-dialog';
 import { toast } from 'sonner';
 import type { ChatMessage } from '@/types';
 
@@ -27,12 +26,7 @@ export function AssistantMessage({
   messageIndex,
   sessionId,
 }: AssistantMessageProps) {
-  // Feedback state (old system - for detailed feedback)
-  const [feedbackRating, setFeedbackRating] = useState<'positive' | 'negative' | null>(null);
-  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
-  const [pendingRating, setPendingRating] = useState<'positive' | 'negative' | null>(null);
-
-  // Rating state (new system - quick like/dislike)
+  // Rating state - quick like/dislike
   const [userRating, setUserRating] = useState<'like' | 'dislike' | null>(null);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
 
@@ -227,36 +221,6 @@ export function AssistantMessage({
     }
   };
 
-  // Handle detailed feedback (old system - DEPRECATED, use rating system instead)
-  const handleFeedback = async (rating: 'positive' | 'negative') => {
-    if (!isAuthenticated) {
-      toast.error('Vui lòng đăng nhập để gửi phản hồi');
-      return;
-    }
-
-    if (feedbackRating === rating) {
-      // Already rated with the same rating, do nothing
-      return;
-    }
-
-    try {
-      // TODO: Migrate to new rating API when needed
-      // For now, just show the dialog
-      setFeedbackRating(rating);
-      setPendingRating(rating);
-      setShowFeedbackDialog(true);
-
-      toast.success(
-        rating === 'positive' ? 'Cảm ơn phản hồi tích cực!' : 'Cảm ơn phản hồi của bạn!'
-      );
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-      toast.error('Không thể gửi phản hồi', {
-        description: 'Vui lòng thử lại sau.',
-      });
-    }
-  };
-
   return (
     <div className="p-4">
       {message.detectedChemicals && message.detectedChemicals.length > 0 && (
@@ -370,34 +334,6 @@ export function AssistantMessage({
             </div>
           </div>
         </div>
-      )}
-
-      {/* Detailed Feedback Buttons - chỉ cho authenticated users */}
-      {isAuthenticated && shouldShowUnblurred && userRating && (
-        <div className="mt-3 pl-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setPendingRating(userRating === 'like' ? 'positive' : 'negative');
-              setShowFeedbackDialog(true);
-            }}
-            className="text-xs text-slate-500 hover:text-cyan-600"
-          >
-            Thêm nhận xét chi tiết →
-          </Button>
-        </div>
-      )}
-
-      {/* Feedback Dialog */}
-      {pendingRating && (
-        <FeedbackDialog
-          open={showFeedbackDialog}
-          onOpenChange={setShowFeedbackDialog}
-          messageId={message.id}
-          sessionId={sessionId}
-          rating={pendingRating}
-        />
       )}
     </div>
   );

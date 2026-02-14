@@ -6,7 +6,6 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import {
@@ -54,28 +53,43 @@ export function ChatLogsViewer() {
 
   const loadUsers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .select('user_id')
-        .not('user_id', 'is', null);
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-      if (error) throw error;
+      if (!supabaseUrl || !supabaseKey) {
+        console.error('Missing Supabase config');
+        return;
+      }
 
-      // Get unique user IDs
-      const userIdsSet = new Set(data?.map((m) => m.user_id).filter(Boolean));
-      const userIds = Array.from(userIdsSet);
-
-      // Get user emails from auth.users (requires admin access)
-      const usersData = await Promise.all(
-        userIds.map(async (userId) => {
-          try {
-            const { data: userData } = await supabase.auth.admin.getUserById(userId as string);
-            return { id: userId as string, email: userData.user?.email || 'Unknown' };
-          } catch {
-            return { id: userId as string, email: 'Unknown' };
-          }
-        })
+      // Get unique users with emails from user_profiles
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/chat_messages?select=user_id,user_profiles!inner(email)&user_id=not.is.null`,
+        {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+        }
       );
+
+      if (!response.ok) {
+        throw new Error('Failed to load users');
+      }
+
+      const data = await response.json();
+
+      // Get unique users
+      const uniqueUsers = new Map<string, string>();
+      data.forEach((item: any) => {
+        if (item.user_id && item.user_profiles?.email) {
+          uniqueUsers.set(item.user_id, item.user_profiles.email);
+        }
+      });
+
+      const usersData = Array.from(uniqueUsers.entries()).map(([id, email]) => ({
+        id,
+        email,
+      }));
 
       setUsers(usersData);
     } catch (error) {
@@ -86,33 +100,58 @@ export function ChatLogsViewer() {
   const loadChatLogs = async () => {
     setLoading(true);
     try {
-      let query = supabase
-        .from('chat_messages')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(200);
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Missing Supabase config');
+      }
+
+      // Build query parameters
+      const params = new URLSearchParams({
+        select: '*',
+        order: 'created_at.desc',
+        limit: '200',
+      });
 
       if (filter === 'user') {
-        query = query.eq('role', 'user');
+        params.append('role', 'eq.user');
       } else if (filter === 'assistant') {
-        query = query.eq('role', 'assistant');
+        params.append('role', 'eq.assistant');
       } else if (filter === 'errors') {
-        query = query.eq('is_error', true);
+        params.append('is_error', 'eq.true');
       }
 
       if (selectedUser !== 'all') {
-        query = query.eq('user_id', selectedUser);
+        params.append('user_id', `eq.${selectedUser}`);
       }
 
-      const { data, error } = await query;
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/chat_messages?${params.toString()}`,
+        {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+        }
+      );
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error('Failed to load chat logs');
+      }
 
+      const data = await response.json();
       setLogs(data || []);
 
       // Load ratings for assistant messages
       if (data) {
-        await loadRatings(data.filter(log => log.role === 'assistant').map(log => log.id));
+        const assistantMessageIds = data
+          .filter((log: ChatLog) => log.role === 'assistant')
+          .map((log: ChatLog) => log.id);
+
+        if (assistantMessageIds.length > 0) {
+          await loadRatings(assistantMessageIds);
+        }
       }
     } catch (error) {
       console.error('Failed to load chat logs:', error);
@@ -125,15 +164,48 @@ export function ChatLogsViewer() {
     if (messageIds.length === 0) return;
 
     try {
-      const { data, error } = await supabase
-        .from('message_rating_stats')
-        .select('*')
-        .in('message_id', messageIds);
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-      if (error) throw error;
+      if (!supabaseUrl || !supabaseKey) {
+        console.error('Missing Supabase config');
+        return;
+      }
+
+      // Use direct column aggregation instead of view
+      // For each message, calculate likes/dislikes from message_ratings table
+      const ratingsData: MessageRating[] = [];
+
+      for (const messageId of messageIds) {
+        const response = await fetch(
+          `${supabaseUrl}/rest/v1/message_ratings?message_id=eq.${messageId}&select=rating_type`,
+          {
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          const likes = data.filter((r: any) => r.rating_type === 'like').length;
+          const dislikes = data.filter((r: any) => r.rating_type === 'dislike').length;
+          const total = likes + dislikes;
+          const likePercentage = total > 0 ? Math.round((likes / total) * 100) : 0;
+
+          ratingsData.push({
+            message_id: messageId,
+            likes,
+            dislikes,
+            total_ratings: total,
+            like_percentage: likePercentage,
+          });
+        }
+      }
 
       const ratingsMap = new Map<string, MessageRating>();
-      data?.forEach((rating) => {
+      ratingsData.forEach((rating) => {
         ratingsMap.set(rating.message_id, rating);
       });
 

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,50 +22,60 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    });
-
     const ipAddress = request.headers.get('x-forwarded-for') ||
                      request.headers.get('x-real-ip') ||
                      'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
     const referrer = request.headers.get('referer') || request.headers.get('referrer') || null;
 
-    const { data: downloadLog, error: logError } = await supabase
-      .from('document_downloads')
-      .insert({
+    // Insert download log using REST API
+    const insertResponse = await fetch(`${supabaseUrl}/rest/v1/document_downloads`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Prefer': 'return=representation',
+      },
+      body: JSON.stringify({
         document_id: documentId,
         session_id: sessionId || null,
         ip_address: ipAddress,
         user_agent: userAgent,
         referrer: referrer,
-      })
-      .select()
-      .single();
+      }),
+    });
 
-    if (logError) {
-      console.error('Error logging download:', logError);
+    if (!insertResponse.ok) {
+      const errorText = await insertResponse.text();
+      console.error('Error logging download:', errorText);
       return NextResponse.json(
         { error: 'Failed to log download' },
         { status: 500 }
       );
     }
 
-    const { error: countError } = await supabase.rpc('increment_download_count', {
-      doc_id: documentId,
+    const downloadLog = await insertResponse.json();
+    const downloadId = Array.isArray(downloadLog) ? downloadLog[0]?.id : downloadLog?.id;
+
+    // Increment download counter using RPC
+    const rpcResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/increment_download_count`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+      },
+      body: JSON.stringify({ doc_id: documentId }),
     });
 
-    if (countError) {
-      console.error('Error incrementing counter:', countError);
+    if (!rpcResponse.ok) {
+      console.error('Error incrementing counter:', await rpcResponse.text());
     }
 
     return NextResponse.json({
       success: true,
-      downloadId: downloadLog.id,
+      downloadId,
     });
   } catch (error) {
     console.error('Track download error:', error);
