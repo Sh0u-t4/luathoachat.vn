@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('🔵 API RATE MESSAGE - POST REQUEST');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   try {
     const body = await request.json();
     const { messageId, sessionId, userId, ratingType } = body;
 
-    console.log('[Rate Message] Request:', { messageId, sessionId, userId, ratingType });
+    console.log('📨 Request body:', JSON.stringify({ messageId, sessionId, userId, ratingType }, null, 2));
 
     // Validation
     if (!messageId || !sessionId || !ratingType) {
@@ -62,7 +65,8 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString(),
     };
 
-    console.log('[Rate Message] Upserting rating:', ratingData);
+    console.log('💾 Upserting rating to database...');
+    console.log('📋 Rating data:', JSON.stringify(ratingData, null, 2));
 
     // Upsert rating (update if exists, insert if not)
     const { data: rating, error: ratingError } = await supabase
@@ -74,7 +78,12 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (ratingError) {
-      console.error('[Rate Message] Supabase error:', ratingError);
+      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.error('❌ DATABASE ERROR');
+      console.error('Error code:', ratingError.code);
+      console.error('Error message:', ratingError.message);
+      console.error('Error details:', JSON.stringify(ratingError, null, 2));
+      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       return NextResponse.json(
         {
           error: 'Failed to save rating',
@@ -85,7 +94,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('[Rate Message] Success:', rating);
+    console.log('✅ Database upsert successful!');
+    console.log('📦 Saved rating:', JSON.stringify(rating, null, 2));
 
     return NextResponse.json({
       success: true,

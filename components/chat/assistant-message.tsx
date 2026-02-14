@@ -117,24 +117,33 @@ export function AssistantMessage({
 
   // Handle quick rating (like/dislike)
   const handleRating = async (ratingType: 'like' | 'dislike') => {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🎯 RATING DEBUG START');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📌 Button clicked:', ratingType);
+    console.log('📌 Message ID:', message.id);
+    console.log('📌 Session ID:', sessionId);
+    console.log('📌 Current rating:', userRating);
+    console.log('📌 Is submitting:', isSubmittingRating);
+
     if (!message.id) {
-      console.error('[Rating] Missing message.id');
+      console.error('❌ VALIDATION FAILED: Missing message.id');
       toast.error('Lỗi: Không tìm thấy ID tin nhắn');
       return;
     }
 
     if (!sessionId || sessionId === 'no-session') {
-      console.error('[Rating] Invalid sessionId:', sessionId);
+      console.error('❌ VALIDATION FAILED: Invalid sessionId:', sessionId);
       toast.error('Lỗi: Session chưa được khởi tạo. Vui lòng tải lại trang.');
       return;
     }
 
     if (isSubmittingRating) {
-      console.log('[Rating] Already submitting, ignoring click');
+      console.log('⏸️  SKIPPED: Already submitting');
       return;
     }
 
-    console.log('[Rating] Starting rating process:', { messageId: message.id, sessionId, ratingType });
+    console.log('✅ Validation passed, proceeding...');
 
     // If user clicks the same rating, remove it
     if (userRating === ratingType) {
@@ -169,6 +178,7 @@ export function AssistantMessage({
     }
 
     // Submit new rating
+    console.log('📤 Submitting new rating...');
     setIsSubmittingRating(true);
     try {
       // Don't call supabase.auth.getUser() - let API route handle it
@@ -179,7 +189,8 @@ export function AssistantMessage({
         ratingType,
       };
 
-      console.log('[Rating] Submitting rating:', payload);
+      console.log('📦 Payload:', JSON.stringify(payload, null, 2));
+      console.log('🌐 Fetching: POST /api/rate-message');
 
       const response = await fetch('/api/rate-message', {
         method: 'POST',
@@ -187,22 +198,32 @@ export function AssistantMessage({
         body: JSON.stringify(payload),
       });
 
+      console.log('📡 Response status:', response.status, response.statusText);
+
       const result = await response.json();
-      console.log('[Rating] API response:', result);
+      console.log('📥 Response body:', JSON.stringify(result, null, 2));
 
       if (!response.ok) {
+        console.error('❌ API returned error:', result);
         throw new Error(result.details || result.error || 'Failed to submit rating');
       }
 
+      console.log('✅ Rating submitted successfully!');
       setUserRating(ratingType);
       toast.success(ratingType === 'like' ? 'Cảm ơn phản hồi tích cực! 👍' : 'Cảm ơn phản hồi của bạn! 👎');
     } catch (error: any) {
-      console.error('Error submitting rating:', error);
+      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.error('❌ RATING ERROR:', error);
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       toast.error('Không thể gửi đánh giá', {
         description: error?.message || 'Vui lòng thử lại sau.',
       });
     } finally {
       setIsSubmittingRating(false);
+      console.log('🏁 RATING DEBUG END');
     }
   };
 
