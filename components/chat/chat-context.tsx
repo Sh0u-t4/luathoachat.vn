@@ -141,7 +141,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const loadUserSessions = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('[loadUserSessions] No user, skipping...');
+      return;
+    }
+
+    console.log('[loadUserSessions] Loading sessions for user:', user.id, user.email);
 
     try {
       const { data, error } = await supabase
@@ -152,7 +157,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         .order('created_at', { ascending: false })
         .limit(50); // Giới hạn 50 câu hỏi gần nhất
 
-      if (error) throw error;
+      if (error) {
+        console.error('[loadUserSessions] Supabase error:', error);
+        throw error;
+      }
+
+      console.log('[loadUserSessions] Raw data from Supabase:', data);
 
       // Mỗi user message là một item riêng biệt trong sidebar
       const sessions = data?.map((msg) => ({
@@ -162,9 +172,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         created_at: msg.created_at,
       })) || [];
 
+      console.log('[loadUserSessions] Processed sessions:', sessions.length, sessions);
       setChatSessions(sessions);
     } catch (error) {
-      console.error('Failed to load chat sessions:', error);
+      console.error('[loadUserSessions] Failed to load chat sessions:', error);
     }
   }, [user]);
 
