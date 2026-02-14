@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lock, LogIn, ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react';
+import { Lock, LogIn, ThumbsUp, ThumbsDown, MessageSquare, Copy, Check } from 'lucide-react';
 import { useTypingEffect } from '@/hooks/use-typing-effect';
 import { LegalCitation } from './legal-citation';
 import { FeedbackDialog } from './feedback-dialog';
@@ -34,6 +34,9 @@ export function AssistantMessage({
 
   // Feedback dialog state
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
+
+  // Copy state
+  const [isCopied, setIsCopied] = useState(false);
 
   // Unlock logic: Show unblurred content if:
   // 1. User is authenticated, OR
@@ -215,6 +218,28 @@ export function AssistantMessage({
     }
   };
 
+  // Handle copy to clipboard
+  const handleCopy = async () => {
+    try {
+      // Lấy toàn bộ nội dung (public + locked nếu đã unlock)
+      const fullContent = shouldShowUnblurred
+        ? message.content
+        : publicPart;
+
+      await navigator.clipboard.writeText(fullContent);
+      setIsCopied(true);
+      toast.success('Đã sao chép câu trả lời!');
+
+      // Reset icon sau 2 giây
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Copy error:', error);
+      toast.error('Không thể sao chép');
+    }
+  };
+
   return (
     <div className="p-4">
       {message.detectedChemicals && message.detectedChemicals.length > 0 && (
@@ -297,7 +322,7 @@ export function AssistantMessage({
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3">
               <span className="text-sm text-slate-600">Câu trả lời này có hữu ích không?</span>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   variant={userRating === 'like' ? 'default' : 'outline'}
                   size="sm"
@@ -325,6 +350,28 @@ export function AssistantMessage({
                 >
                   <ThumbsDown className="w-4 h-4 mr-1.5" />
                   Chưa hữu ích
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopy}
+                  className={`transition-all ${
+                    isCopied
+                      ? 'text-green-700 border-green-300 bg-green-50'
+                      : 'text-slate-700 border-slate-300 hover:bg-slate-50 hover:text-slate-900'
+                  }`}
+                >
+                  {isCopied ? (
+                    <>
+                      <Check className="w-4 h-4 mr-1.5" />
+                      Đã sao chép
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4 mr-1.5" />
+                      Sao chép
+                    </>
+                  )}
                 </Button>
                 <Button
                   variant="outline"
