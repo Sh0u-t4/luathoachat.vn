@@ -60,6 +60,14 @@ export function ChatHistorySidebar() {
     setSelectedSession(null);
     clearMessages();
     setIsOpen(false);
+
+    // Scroll xuống phần chat
+    setTimeout(() => {
+      const chatInterface = document.getElementById('chat-interface');
+      if (chatInterface) {
+        chatInterface.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 200);
   };
 
   return (
