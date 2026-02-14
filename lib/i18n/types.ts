@@ -106,6 +106,7 @@ export interface Translation {
     decree24: string;
     decree25: string;
     decree26: string;
+    circular01: string;
     circular02: string;
     terms: string;
     privacy: string;

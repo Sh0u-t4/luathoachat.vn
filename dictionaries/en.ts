@@ -106,6 +106,7 @@ export const en: Translation = {
     decree24: 'Decree 24/2026/ND-CP (Catalog)',
     decree25: 'Decree 25/2026/ND-CP (Safety)',
     decree26: 'Decree 26/2026/ND-CP (Management)',
+    circular01: 'Circular 01/2026/TT-BCT',
     circular02: 'Circular 02/2026/TT-BCT',
     terms: 'Terms of Service',
     privacy: 'Privacy Policy',
