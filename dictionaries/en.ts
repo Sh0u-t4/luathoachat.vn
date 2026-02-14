@@ -208,6 +208,12 @@ export const en: Translation = {
     loadingStage1: 'Analyzing your question and searching relevant documents...',
     loadingStage2: 'Processing information from Chemical Law and Decrees...',
     loadingStage3: 'Generating AI response...',
+    historyButton: 'Chat History',
+    historyTitle: 'Chat History',
+    historyCount: 'questions',
+    newChatButton: 'New Chat',
+    emptyHistory: 'No chat history yet',
+    historyHint: '💡 Click on a question to view the conversation',
   },
   admin: {
     title: 'User Management',

@@ -208,6 +208,12 @@ export const vi: Translation = {
     loadingStage1: 'Đang phân tích câu hỏi và tìm kiếm văn bản liên quan...',
     loadingStage2: 'Đang xử lý thông tin từ Luật Hóa chất và Nghị định...',
     loadingStage3: 'Đang tổng hợp câu trả lời từ AI...',
+    historyButton: 'Lịch sử chat',
+    historyTitle: 'Lịch sử trò chuyện',
+    historyCount: 'câu hỏi',
+    newChatButton: 'Chat mới',
+    emptyHistory: 'Chưa có lịch sử trò chuyện',
+    historyHint: '💡 Click vào câu hỏi để xem lại đoạn chat',
   },
   admin: {
     title: 'Quản trị người dùng',

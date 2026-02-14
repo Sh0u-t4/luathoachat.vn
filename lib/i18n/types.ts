@@ -237,6 +237,12 @@ export interface Translation {
     loadingStage1: string;
     loadingStage2: string;
     loadingStage3: string;
+    historyButton: string;
+    historyTitle: string;
+    historyCount: string;
+    newChatButton: string;
+    emptyHistory: string;
+    historyHint: string;
   };
   seo: {
     home: {

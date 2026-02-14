@@ -7,14 +7,19 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { useChat } from './chat-context';
+import { useLanguage } from '@/lib/i18n/context';
 import { formatDistanceToNow } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { vi, enUS } from 'date-fns/locale';
 
 export function ChatHistorySidebar() {
   const { chatSessions, loadChatHistory, isAuthenticated, clearMessages } = useChat();
+  const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [loadingSession, setLoadingSession] = useState<string | null>(null);
+
+  // Get date-fns locale based on current language
+  const dateLocale = language === 'vi' ? vi : enUS;
 
   if (!isAuthenticated) {
     return null;
@@ -80,7 +85,7 @@ export function ChatHistorySidebar() {
         className="fixed top-20 left-4 z-40 shadow-lg bg-white"
       >
         <History className="w-4 h-4 mr-2" />
-        Lịch sử chat ({chatSessions.length})
+        {t.chat.historyButton} ({chatSessions.length})
       </Button>
 
       {/* Sidebar */}
@@ -98,7 +103,7 @@ export function ChatHistorySidebar() {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <History className="w-5 h-5 text-cyan-400" />
-                  <h2 className="font-semibold text-white">Lịch sử trò chuyện</h2>
+                  <h2 className="font-semibold text-white">{t.chat.historyTitle}</h2>
                 </div>
                 <Button
                   variant="ghost"
@@ -111,7 +116,7 @@ export function ChatHistorySidebar() {
               </div>
               <div className="flex items-center justify-between">
                 <p className="text-sm text-slate-300">
-                  {chatSessions.length} câu hỏi
+                  {chatSessions.length} {t.chat.historyCount}
                 </p>
                 <Button
                   variant="outline"
@@ -120,7 +125,7 @@ export function ChatHistorySidebar() {
                   className="text-xs bg-cyan-600 text-white border-cyan-500 hover:bg-cyan-700 hover:text-white"
                 >
                   <Plus className="w-3 h-3 mr-1" />
-                  Chat mới
+                  {t.chat.newChatButton}
                 </Button>
               </div>
             </div>
@@ -131,7 +136,7 @@ export function ChatHistorySidebar() {
                   <div className="text-center py-12 px-4">
                     <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                     <p className="text-slate-500 text-sm">
-                      Chưa có lịch sử trò chuyện
+                      {t.chat.emptyHistory}
                     </p>
                   </div>
                 ) : (
@@ -158,7 +163,7 @@ export function ChatHistorySidebar() {
                             <p className="text-xs text-slate-500">
                               {formatDistanceToNow(new Date(session.created_at), {
                                 addSuffix: true,
-                                locale: vi,
+                                locale: dateLocale,
                               })}
                             </p>
                           </div>
@@ -177,7 +182,7 @@ export function ChatHistorySidebar() {
 
             <div className="p-3 border-t bg-slate-50">
               <p className="text-xs text-slate-500 text-center">
-                💡 Click vào câu hỏi để xem lại đoạn chat
+                {t.chat.historyHint}
               </p>
             </div>
           </Card>
