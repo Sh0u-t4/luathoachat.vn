@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { Send, Bot, User, Sparkles, LogIn, Lock, Search, BookOpen, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -219,8 +220,14 @@ export function ChatInterface() {
           <OfflineBanner isVisible={isOffline} cachedFAQCount={faqs.length} />
           {messages.length === 0 && !isTyping && (
             <div className="text-center py-12 animate-fade-in">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-cyan-100 flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-cyan-600" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-cyan-100 flex items-center justify-center overflow-hidden">
+                <Image
+                  src="/logo_luathoachat.jpg"
+                  alt="Luật Hóa Chất Logo"
+                  width={48}
+                  height={48}
+                  className="object-contain"
+                />
               </div>
               <h3 className="text-lg font-semibold text-slate-800 mb-2">
                 Tra cứu & Đối chiếu Luật Hóa chất
