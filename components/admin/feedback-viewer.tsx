@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, ThumbsUp, ThumbsDown, MessageSquare, Search, Filter, RefreshCw, User } from 'lucide-react';
+import { Loader2, ThumbsUp, ThumbsDown, MessageSquare, Search, Filter, RefreshCw, User, FileDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import * as XLSX from 'xlsx';
 
 interface Feedback {
   id: string;
@@ -113,6 +114,53 @@ export function FeedbackViewer() {
     return true;
   });
 
+  const handleExportExcel = () => {
+    try {
+      // Chuẩn bị data cho Excel
+      const excelData = filteredFeedbacks.map((feedback, index) => ({
+        'STT': index + 1,
+        'Đánh giá': feedback.rating === 'positive' ? 'Tích cực' : 'Tiêu cực',
+        'Tên người gửi': feedback.user_full_name || 'Ẩn danh',
+        'Email': feedback.user_email || 'N/A',
+        'Nội dung góp ý': feedback.comment || 'Không có nội dung',
+        'Session ID': feedback.session_id,
+        'Message ID': feedback.message_id,
+        'Thời gian': new Date(feedback.created_at).toLocaleString('vi-VN'),
+      }));
+
+      // Tạo worksheet và workbook
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Phản hồi');
+
+      // Tự động điều chỉnh độ rộng cột
+      const maxWidth = 50;
+      const colWidths = [
+        { wch: 5 },  // STT
+        { wch: 12 }, // Đánh giá
+        { wch: 25 }, // Tên
+        { wch: 30 }, // Email
+        { wch: maxWidth }, // Nội dung
+        { wch: 40 }, // Session ID
+        { wch: 40 }, // Message ID
+        { wch: 20 }, // Thời gian
+      ];
+      worksheet['!cols'] = colWidths;
+
+      // Tạo tên file với timestamp
+      const timestamp = new Date().toISOString().split('T')[0];
+      const fileName = `Danh_sach_phan_hoi_${timestamp}.xlsx`;
+
+      // Download file
+      XLSX.writeFile(workbook, fileName);
+
+      toast.success(`Đã xuất ${filteredFeedbacks.length} phản hồi ra file Excel`);
+    } catch (error) {
+      console.error('[ExportExcel] Error:', error);
+      toast.error('Không thể xuất file Excel');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
@@ -191,15 +239,27 @@ export function FeedbackViewer() {
                 Xem và quản lý tất cả phản hồi từ người dùng về chatbot
               </CardDescription>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchFeedbacks}
-              className="shrink-0"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Làm mới
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportExcel}
+                disabled={filteredFeedbacks.length === 0}
+                className="shrink-0"
+              >
+                <FileDown className="w-4 h-4 mr-2" />
+                Tải Excel
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchFeedbacks}
+                className="shrink-0"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Làm mới
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
