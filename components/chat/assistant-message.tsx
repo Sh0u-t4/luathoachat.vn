@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lock, LogIn, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Lock, LogIn, ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react';
 import { useTypingEffect } from '@/hooks/use-typing-effect';
 import { LegalCitation } from './legal-citation';
+import { FeedbackDialog } from './feedback-dialog';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import type { ChatMessage } from '@/types';
@@ -30,6 +31,9 @@ export function AssistantMessage({
   // Rating state - quick like/dislike
   const [userRating, setUserRating] = useState<'like' | 'dislike' | null>(null);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+
+  // Feedback dialog state
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
 
   // Unlock logic: Show unblurred content if:
   // 1. User is authenticated, OR
@@ -290,40 +294,66 @@ export function AssistantMessage({
       {/* Quick Rating Buttons - cho tất cả users (kể cả anonymous) */}
       {shouldShowUnblurred && (
         <div className="mt-6 pt-4 border-t border-slate-200">
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-600">Câu trả lời này có hữu ích không?</span>
-            <div className="flex gap-2">
-              <Button
-                variant={userRating === 'like' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleRating('like')}
-                disabled={isSubmittingRating}
-                className={`transition-all ${
-                  userRating === 'like'
-                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                    : 'hover:bg-green-50 hover:text-green-700 hover:border-green-300'
-                }`}
-              >
-                <ThumbsUp className="w-4 h-4 mr-1.5" />
-                Hữu ích
-              </Button>
-              <Button
-                variant={userRating === 'dislike' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleRating('dislike')}
-                disabled={isSubmittingRating}
-                className={`transition-all ${
-                  userRating === 'dislike'
-                    ? 'bg-red-600 hover:bg-red-700 text-white'
-                    : 'hover:bg-red-50 hover:text-red-700 hover:border-red-300'
-                }`}
-              >
-                <ThumbsDown className="w-4 h-4 mr-1.5" />
-                Chưa hữu ích
-              </Button>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-slate-600">Câu trả lời này có hữu ích không?</span>
+              <div className="flex gap-2">
+                <Button
+                  variant={userRating === 'like' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleRating('like')}
+                  disabled={isSubmittingRating}
+                  className={`transition-all ${
+                    userRating === 'like'
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
+                      : 'hover:bg-green-50 hover:text-green-700 hover:border-green-300'
+                  }`}
+                >
+                  <ThumbsUp className="w-4 h-4 mr-1.5" />
+                  Hữu ích
+                </Button>
+                <Button
+                  variant={userRating === 'dislike' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleRating('dislike')}
+                  disabled={isSubmittingRating}
+                  className={`transition-all ${
+                    userRating === 'dislike'
+                      ? 'bg-red-600 hover:bg-red-700 text-white'
+                      : 'hover:bg-red-50 hover:text-red-700 hover:border-red-300'
+                  }`}
+                >
+                  <ThumbsDown className="w-4 h-4 mr-1.5" />
+                  Chưa hữu ích
+                </Button>
+              </div>
             </div>
+
+            {/* Detailed Feedback Button - hiển thị sau khi đã rate */}
+            {userRating && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFeedbackDialog(true)}
+                className="w-fit text-cyan-700 border-cyan-300 hover:bg-cyan-50 hover:text-cyan-800"
+              >
+                <MessageSquare className="w-4 h-4 mr-1.5" />
+                Phản hồi chi tiết
+              </Button>
+            )}
           </div>
         </div>
+      )}
+
+      {/* Feedback Dialog */}
+      {userRating && message.id && (
+        <FeedbackDialog
+          open={showFeedbackDialog}
+          onOpenChange={setShowFeedbackDialog}
+          messageId={message.id}
+          sessionId={sessionId}
+          rating={userRating === 'like' ? 'positive' : 'negative'}
+        />
       )}
     </div>
   );
