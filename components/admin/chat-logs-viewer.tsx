@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageSquare, User, Bot, Calendar, Filter, Download, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { MessageSquare, User, Bot, Calendar, Filter, Download, ThumbsUp, ThumbsDown, FileSpreadsheet } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { exportToExcel } from '@/lib/excel-export';
 
 interface ChatLog {
   id: string;
@@ -107,9 +108,9 @@ export function ChatLogsViewer() {
         throw new Error('Missing Supabase config');
       }
 
-      // Build query parameters
+      // Build query parameters - join with user_profiles to get email
       const params = new URLSearchParams({
-        select: '*',
+        select: '*, user_profiles!left(email)',
         order: 'created_at.desc',
         limit: '200',
       });
@@ -141,7 +142,14 @@ export function ChatLogsViewer() {
       }
 
       const data = await response.json();
-      setLogs(data || []);
+
+      // Map data to include user_email from user_profiles join
+      const logsWithEmail = (data || []).map((log: any) => ({
+        ...log,
+        user_email: log.user_profiles?.email || null,
+      }));
+
+      setLogs(logsWithEmail);
 
       // Load ratings for assistant messages
       if (data) {
@@ -215,25 +223,49 @@ export function ChatLogsViewer() {
     }
   };
 
-  const exportToCSV = () => {
-    const headers = ['Thời gian', 'User ID', 'Role', 'Nội dung', 'Session ID', 'Hóa chất'];
-    const rows = logs.map((log) => [
-      format(new Date(log.created_at), 'dd/MM/yyyy HH:mm:ss'),
-      log.user_id || 'Anonymous',
-      log.role,
-      log.content.replace(/"/g, '""'),
-      log.session_id,
-      log.detected_chemicals?.join(', ') || '',
-    ]);
+  const exportChatLogsToExcel = () => {
+    // Prepare data for export
+    const exportData = logs.map((log) => {
+      const rating = ratings.get(log.id);
+      return {
+        'Thời gian': format(new Date(log.created_at), 'dd/MM/yyyy HH:mm:ss'),
+        'User Email': log.user_email || (log.user_id ? 'User đã xóa' : 'Khách (Chưa đăng nhập)'),
+        'User ID': log.user_id || 'Anonymous',
+        'Loại': log.role === 'user' ? 'Người dùng' : 'AI Trợ lý',
+        'Nội dung': log.content,
+        'Session ID': log.session_id,
+        'Hóa chất phát hiện': log.detected_chemicals?.join(', ') || '',
+        'Thời gian phản hồi (ms)': log.response_time_ms || '',
+        'Có lỗi': log.is_error ? 'Có' : 'Không',
+        'Likes': rating ? rating.likes : '',
+        'Dislikes': rating ? rating.dislikes : '',
+        'Tỉ lệ tích cực (%)': rating ? rating.like_percentage : '',
+      };
+    });
 
-    const csvContent =
-      'data:text/csv;charset=utf-8,' +
-      [headers.join(','), ...rows.map((row) => row.map((cell) => `"${cell}"`).join(','))].join('\n');
+    const columns = [
+      { header: 'Thời gian', key: 'Thời gian', width: 18 },
+      { header: 'User Email', key: 'User Email', width: 25 },
+      { header: 'User ID', key: 'User ID', width: 25 },
+      { header: 'Loại', key: 'Loại', width: 12 },
+      { header: 'Nội dung', key: 'Nội dung', width: 50 },
+      { header: 'Session ID', key: 'Session ID', width: 25 },
+      { header: 'Hóa chất phát hiện', key: 'Hóa chất phát hiện', width: 30 },
+      { header: 'Thời gian phản hồi (ms)', key: 'Thời gian phản hồi (ms)', width: 15 },
+      { header: 'Có lỗi', key: 'Có lỗi', width: 10 },
+      { header: 'Likes', key: 'Likes', width: 10 },
+      { header: 'Dislikes', key: 'Dislikes', width: 10 },
+      { header: 'Tỉ lệ tích cực (%)', key: 'Tỉ lệ tích cực (%)', width: 15 },
+    ];
 
-    const link = document.createElement('a');
-    link.href = encodeURI(csvContent);
-    link.download = `chat-logs-${format(new Date(), 'yyyy-MM-dd')}.csv`;
-    link.click();
+    exportToExcel({
+      filename: 'chat_logs',
+      sheetName: 'Lịch sử Chat',
+      columns,
+      data: exportData,
+      title: 'LỊCH SỬ TRÒ CHUYỆN HỆ THỐNG',
+      subtitle: `Xuất dữ liệu ngày ${format(new Date(), 'dd/MM/yyyy HH:mm')} - Tổng số: ${logs.length} tin nhắn`,
+    });
   };
 
   return (
@@ -245,9 +277,9 @@ export function ChatLogsViewer() {
             <MessageSquare className="w-5 h-5 text-cyan-600" />
             <h2 className="text-lg font-semibold">Chat Logs ({logs.length})</h2>
           </div>
-          <Button onClick={exportToCSV} size="sm" variant="outline">
-            <Download className="w-4 h-4 mr-2" />
-            Export CSV
+          <Button onClick={exportChatLogsToExcel} size="sm" variant="outline" className="text-emerald-700 border-emerald-300 hover:bg-emerald-50">
+            <FileSpreadsheet className="w-4 h-4 mr-2" />
+            Tải Excel
           </Button>
         </div>
 
