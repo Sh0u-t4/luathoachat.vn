@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FlaskConical, Phone, Mail, MapPin, ExternalLink } from 'lucide-react';
+import { FlaskConical, Mail, MapPin, ExternalLink } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/context';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -135,10 +135,6 @@ export function Footer() {
               {t.footer.description}
             </p>
             <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-cyan-400" />
-                <span>19008238</span>
-              </div>
               <div className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-cyan-400" />
                 <span>info@luathoachat.vn</span>

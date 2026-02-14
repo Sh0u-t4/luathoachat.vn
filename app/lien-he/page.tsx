@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import {
   ChevronLeft,
-  Phone,
   Mail,
   MapPin,
   Clock,
@@ -33,12 +32,6 @@ import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 
 const contactInfo = [
-  {
-    icon: Phone,
-    title: 'Hóa Chất Lộc Thiên',
-    value: '19008238',
-    subtext: '(8h - 17h, T2 - T6)',
-  },
   {
     icon: Mail,
     title: 'Email Hỗ trợ',
@@ -157,7 +150,7 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-4 gap-4 mb-10">
+            <div className="grid md:grid-cols-3 gap-4 mb-10">
               {contactInfo.map((info) => (
                 <Card key={info.title} className="border-0 shadow-sm hover:shadow-md transition-shadow">
                   <CardContent className="p-4 text-center">
