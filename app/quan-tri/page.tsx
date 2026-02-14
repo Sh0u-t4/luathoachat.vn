@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase';
 import { UserTable } from '@/components/admin/user-table';
 import { ChatLogsViewer } from '@/components/admin/chat-logs-viewer';
 import { DashboardOverview } from '@/components/admin/dashboard-overview';
+import { FeedbackViewer } from '@/components/admin/feedback-viewer';
 import { toast } from 'sonner';
 
 interface UserProfile {
@@ -213,16 +214,22 @@ export default function AdminPage() {
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full max-w-2xl grid-cols-3 h-12">
+          <TabsList className="grid w-full max-w-4xl grid-cols-2 sm:grid-cols-4 h-auto sm:h-12 gap-1">
             <TabsTrigger value="dashboard" className="gap-2">
               <LayoutDashboard className="w-4 h-4" />
-              Dashboard
+              <span className="hidden sm:inline">Dashboard</span>
             </TabsTrigger>
             <TabsTrigger value="users" className="gap-2">
-              Quản lý Users
+              <span className="hidden sm:inline">Quản lý Users</span>
+              <span className="sm:hidden">Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="feedback" className="gap-2">
+              <span className="hidden sm:inline">Phản hồi</span>
+              <span className="sm:hidden">Feedback</span>
             </TabsTrigger>
             <TabsTrigger value="chatlogs" className="gap-2">
-              Chat Logs
+              <span className="hidden sm:inline">Chat Logs</span>
+              <span className="sm:hidden">Logs</span>
             </TabsTrigger>
           </TabsList>
 
@@ -248,6 +255,10 @@ export default function AdminPage() {
                 t={t}
               />
             )}
+          </TabsContent>
+
+          <TabsContent value="feedback">
+            <FeedbackViewer />
           </TabsContent>
 
           <TabsContent value="chatlogs">
