@@ -38,6 +38,17 @@ export function ChatHistorySidebar() {
       await loadChatHistory(sessionId);
 
       console.log('🔵 handleLoadSession SUCCESS - Chat history loaded');
+
+      // Đóng sidebar
+      setIsOpen(false);
+
+      // Scroll đến chat box
+      setTimeout(() => {
+        const chatInterface = document.getElementById('chat-interface');
+        if (chatInterface) {
+          chatInterface.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 200);
     } catch (error) {
       console.error('🔵 handleLoadSession ERROR:', error);
     } finally {

@@ -189,7 +189,10 @@ export function ChatInterface() {
 
   return (
     <>
-      <Card className="w-full max-w-4xl mx-auto overflow-hidden border-0 shadow-xl bg-white/95 backdrop-blur">
+      <Card
+        id="chat-interface"
+        className="w-full max-w-4xl mx-auto overflow-hidden border-0 shadow-xl bg-white/95 backdrop-blur"
+      >
         <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
