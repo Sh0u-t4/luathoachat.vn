@@ -278,7 +278,7 @@ export function ChatInterface() {
                       isAuthenticated={isAuthenticated}
                       onUnlockClick={handleUnlockClick}
                       messageIndex={assistantMessageIndex}
-                      sessionId={sessionId || ''}
+                      sessionId={sessionId || 'no-session'}
                     />
                   ) : (
                     <p className="whitespace-pre-wrap">{message.content}</p>

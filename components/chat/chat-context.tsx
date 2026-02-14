@@ -79,6 +79,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [showEmailGate, setShowEmailGate] = useState(false);
   const [showLoginGate, setShowLoginGate] = useState(false);
 
+  // Initialize sessionId on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = getSessionToken();
+      setSessionId(token);
+      console.log('[ChatContext] Initialized sessionId:', token);
+    }
+  }, []);
+
   // Load freemium gate state from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {

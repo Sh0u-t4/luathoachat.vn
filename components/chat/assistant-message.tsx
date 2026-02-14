@@ -83,7 +83,12 @@ export function AssistantMessage({
   // Load existing rating when component mounts
   useEffect(() => {
     const loadExistingRating = async () => {
-      if (!message.id || !sessionId) return;
+      if (!message.id || !sessionId || sessionId === 'no-session') {
+        console.log('[Rating] Skipping load - missing data:', { messageId: message.id, sessionId });
+        return;
+      }
+
+      console.log('[Rating] Loading existing rating for:', { messageId: message.id, sessionId });
 
       try {
         const { data, error } = await supabase
@@ -93,11 +98,16 @@ export function AssistantMessage({
           .eq('session_id', sessionId)
           .maybeSingle();
 
-        if (!error && data) {
+        if (error) {
+          console.error('[Rating] Error loading rating:', error);
+        } else if (data) {
+          console.log('[Rating] Found existing rating:', data.rating_type);
           setUserRating(data.rating_type as 'like' | 'dislike');
+        } else {
+          console.log('[Rating] No existing rating found');
         }
       } catch (error) {
-        console.error('Error loading rating:', error);
+        console.error('[Rating] Exception loading rating:', error);
       }
     };
 
@@ -107,16 +117,23 @@ export function AssistantMessage({
   // Handle quick rating (like/dislike)
   const handleRating = async (ratingType: 'like' | 'dislike') => {
     if (!message.id) {
+      console.error('[Rating] Missing message.id');
       toast.error('Lỗi: Không tìm thấy ID tin nhắn');
       return;
     }
 
-    if (!sessionId) {
-      toast.error('Lỗi: Không tìm thấy session ID');
+    if (!sessionId || sessionId === 'no-session') {
+      console.error('[Rating] Invalid sessionId:', sessionId);
+      toast.error('Lỗi: Session chưa được khởi tạo. Vui lòng tải lại trang.');
       return;
     }
 
-    if (isSubmittingRating) return;
+    if (isSubmittingRating) {
+      console.log('[Rating] Already submitting, ignoring click');
+      return;
+    }
+
+    console.log('[Rating] Starting rating process:', { messageId: message.id, sessionId, ratingType });
 
     // If user clicks the same rating, remove it
     if (userRating === ratingType) {
