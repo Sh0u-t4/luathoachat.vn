@@ -51,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = useCallback(async (userId: string) => {
+    console.log('[AuthContext] Fetching profile for userId:', userId);
     try {
       const { data, error } = await supabase
         .from('user_profiles')
@@ -58,11 +59,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('id', userId)
         .maybeSingle();
 
-      if (!error && data) {
+      if (error) {
+        console.error('[AuthContext] Profile fetch error:', error);
+      } else if (data) {
+        console.log('[AuthContext] Profile loaded successfully:', {
+          email: data.email,
+          role: data.role,
+          account_status: data.account_status
+        });
         setProfile(data);
+      } else {
+        console.warn('[AuthContext] No profile found for userId:', userId);
       }
-    } catch {
-      // silent fail
+    } catch (err) {
+      console.error('[AuthContext] Profile fetch exception:', err);
     }
   }, []);
 
