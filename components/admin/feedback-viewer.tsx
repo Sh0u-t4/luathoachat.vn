@@ -24,6 +24,7 @@ interface Feedback {
   created_at: string;
   user_email?: string;
   user_full_name?: string;
+  is_quick_rating?: boolean; // Flag để phân biệt quick rating vs detailed feedback
 }
 
 export function FeedbackViewer() {
@@ -40,18 +41,50 @@ export function FeedbackViewer() {
   const fetchFeedbacks = async () => {
     setLoading(true);
     try {
-      // Get all feedbacks
-      const { data: feedbackData, error } = await supabase
+      // Get detailed feedbacks (from message_feedback table)
+      const { data: feedbackData, error: feedbackError } = await supabase
         .from('message_feedback')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (feedbackError) throw feedbackError;
 
-      // Get user profiles for feedbacks that have user_id
-      const userIds = feedbackData
-        ?.filter((f) => f.user_id)
-        .map((f) => f.user_id as string) || [];
+      // Get quick ratings (from message_ratings table)
+      const { data: ratingsData, error: ratingsError } = await supabase
+        .from('message_ratings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (ratingsError) throw ratingsError;
+
+      // Transform quick ratings to feedback format
+      const transformedRatings = ratingsData?.map((rating) => ({
+        id: rating.id,
+        message_id: rating.message_id,
+        session_id: rating.session_id,
+        user_id: rating.user_id,
+        rating: rating.rating_type === 'like' ? 'positive' as const : 'negative' as const,
+        comment: null, // Quick ratings don't have comments
+        created_at: rating.created_at,
+        is_quick_rating: true, // Mark as quick rating
+      })) || [];
+
+      // Combine both sources
+      const allFeedbacks = [
+        ...(feedbackData?.map(f => ({ ...f, is_quick_rating: false })) || []),
+        ...transformedRatings,
+      ];
+
+      // Sort by created_at descending
+      allFeedbacks.sort((a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      // Get all unique user IDs
+      const userIds = allFeedbacks
+        .filter((f) => f.user_id)
+        .map((f) => f.user_id as string)
+        .filter((id, index, self) => self.indexOf(id) === index); // Unique only
 
       let userProfiles: any[] = [];
       if (userIds.length > 0) {
@@ -63,19 +96,19 @@ export function FeedbackViewer() {
         userProfiles = profileData || [];
       }
 
-      // Merge feedback with user data
-      const enrichedFeedbacks = feedbackData?.map((feedback) => {
+      // Merge with user data
+      const enrichedFeedbacks = allFeedbacks.map((feedback) => {
         const userProfile = userProfiles.find((u) => u.id === feedback.user_id);
         return {
           ...feedback,
           user_email: userProfile?.email,
           user_full_name: userProfile?.full_name,
         };
-      }) || [];
+      });
 
       setFeedbacks(enrichedFeedbacks);
 
-      // Calculate stats
+      // Calculate stats (count all ratings, including quick ones)
       const total = enrichedFeedbacks.length;
       const positive = enrichedFeedbacks.filter((f) => f.rating === 'positive').length;
       const negative = enrichedFeedbacks.filter((f) => f.rating === 'negative').length;
@@ -119,10 +152,11 @@ export function FeedbackViewer() {
       // Chuẩn bị data cho Excel
       const excelData = filteredFeedbacks.map((feedback, index) => ({
         'STT': index + 1,
+        'Loại': feedback.is_quick_rating ? 'Đánh giá nhanh' : 'Phản hồi chi tiết',
         'Đánh giá': feedback.rating === 'positive' ? 'Tích cực' : 'Tiêu cực',
         'Tên người gửi': feedback.user_full_name || 'Ẩn danh',
         'Email': feedback.user_email || 'N/A',
-        'Nội dung góp ý': feedback.comment || 'Không có nội dung',
+        'Nội dung góp ý': feedback.comment || (feedback.is_quick_rating ? 'Đánh giá nhanh (không có nội dung)' : 'Không có nội dung'),
         'Session ID': feedback.session_id,
         'Message ID': feedback.message_id,
         'Thời gian': new Date(feedback.created_at).toLocaleString('vi-VN'),
@@ -137,6 +171,7 @@ export function FeedbackViewer() {
       const maxWidth = 50;
       const colWidths = [
         { wch: 5 },  // STT
+        { wch: 18 }, // Loại
         { wch: 12 }, // Đánh giá
         { wch: 25 }, // Tên
         { wch: 30 }, // Email
@@ -236,7 +271,7 @@ export function FeedbackViewer() {
                 Danh sách phản hồi
               </CardTitle>
               <CardDescription>
-                Xem và quản lý tất cả phản hồi từ người dùng về chatbot
+                Xem và quản lý tất cả đánh giá (Like/Dislike) và phản hồi chi tiết từ người dùng
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -351,9 +386,17 @@ export function FeedbackViewer() {
                               {feedback.comment}
                             </p>
                           ) : (
-                            <span className="text-sm text-slate-400 italic">
-                              Không có nội dung
-                            </span>
+                            <div className="flex items-center gap-2">
+                              {feedback.is_quick_rating ? (
+                                <Badge variant="outline" className="text-xs">
+                                  Đánh giá nhanh
+                                </Badge>
+                              ) : (
+                                <span className="text-sm text-slate-400 italic">
+                                  Không có nội dung
+                                </span>
+                              )}
+                            </div>
                           )}
                         </TableCell>
                         <TableCell>
