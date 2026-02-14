@@ -20,6 +20,13 @@ interface AssistantMessageProps {
   sessionId: string;
 }
 
+// Helper function to validate if a string is a valid UUID
+const isValidUUID = (str: string | undefined): boolean => {
+  if (!str) return false;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+};
+
 export function AssistantMessage({
   message,
   isLatest,
@@ -31,6 +38,9 @@ export function AssistantMessage({
   // Rating state - quick like/dislike
   const [userRating, setUserRating] = useState<'like' | 'dislike' | null>(null);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+
+  // Check if message has a valid database UUID (not temporary client-side ID)
+  const hasValidMessageId = isValidUUID(message.id);
 
   // Feedback dialog state
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
@@ -84,7 +94,8 @@ export function AssistantMessage({
   // Load existing rating when component mounts
   useEffect(() => {
     const loadExistingRating = async () => {
-      if (!message.id || !sessionId || sessionId === 'no-session') {
+      // Only load if message has valid UUID from database
+      if (!hasValidMessageId || !sessionId || sessionId === 'no-session') {
         return;
       }
 
@@ -110,15 +121,16 @@ export function AssistantMessage({
     };
 
     loadExistingRating();
-  }, [message.id, sessionId]);
+  }, [message.id, sessionId, hasValidMessageId]);
 
   // Handle quick rating (like/dislike)
   const handleRating = async (ratingType: 'like' | 'dislike') => {
     console.log('[Rating] Starting rating submission:', { messageId: message.id, sessionId, ratingType });
 
-    if (!message.id) {
-      console.error('[Rating] Missing message ID');
-      toast.error('Lỗi: Không tìm thấy ID tin nhắn');
+    // Check if message has valid UUID from database
+    if (!hasValidMessageId) {
+      console.error('[Rating] Message not yet saved to database. ID:', message.id);
+      toast.error('Vui lòng đợi tin nhắn được lưu trước khi đánh giá');
       return;
     }
 
@@ -327,12 +339,13 @@ export function AssistantMessage({
                   variant={userRating === 'like' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => handleRating('like')}
-                  disabled={isSubmittingRating}
+                  disabled={isSubmittingRating || !hasValidMessageId}
                   className={`transition-all ${
                     userRating === 'like'
                       ? 'bg-green-600 hover:bg-green-700 text-white'
                       : 'hover:bg-green-50 hover:text-green-700 hover:border-green-300'
                   }`}
+                  title={!hasValidMessageId ? 'Đang lưu tin nhắn...' : ''}
                 >
                   <ThumbsUp className="w-4 h-4 mr-1.5" />
                   Hữu ích
@@ -341,12 +354,13 @@ export function AssistantMessage({
                   variant={userRating === 'dislike' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => handleRating('dislike')}
-                  disabled={isSubmittingRating}
+                  disabled={isSubmittingRating || !hasValidMessageId}
                   className={`transition-all ${
                     userRating === 'dislike'
                       ? 'bg-red-600 hover:bg-red-700 text-white'
                       : 'hover:bg-red-50 hover:text-red-700 hover:border-red-300'
                   }`}
+                  title={!hasValidMessageId ? 'Đang lưu tin nhắn...' : ''}
                 >
                   <ThumbsDown className="w-4 h-4 mr-1.5" />
                   Chưa hữu ích
@@ -377,7 +391,9 @@ export function AssistantMessage({
                   variant="outline"
                   size="sm"
                   onClick={() => setShowFeedbackDialog(true)}
+                  disabled={!hasValidMessageId}
                   className="text-cyan-700 border-cyan-300 hover:bg-cyan-50 hover:text-cyan-800"
+                  title={!hasValidMessageId ? 'Đang lưu tin nhắn...' : ''}
                 >
                   <MessageSquare className="w-4 h-4 mr-1.5" />
                   Phản hồi chi tiết
@@ -388,12 +404,12 @@ export function AssistantMessage({
         </div>
       )}
 
-      {/* Feedback Dialog */}
-      {message.id && (
+      {/* Feedback Dialog - Only render if message has valid UUID */}
+      {hasValidMessageId && (
         <FeedbackDialog
           open={showFeedbackDialog}
           onOpenChange={setShowFeedbackDialog}
-          messageId={message.id}
+          messageId={message.id!}
           sessionId={sessionId}
           rating={userRating ? (userRating === 'like' ? 'positive' : 'negative') : undefined}
         />

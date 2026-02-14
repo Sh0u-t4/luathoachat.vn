@@ -415,7 +415,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       const aiResponse = await callLegalAIEdgeFunction(content);
       const responseTime = Date.now() - startTime;
 
-      const assistantMessage: ChatMessage = {
+      // Create assistant message with temporary ID first
+      const tempAssistantMessage: ChatMessage = {
         id: `assistant_${Date.now()}`,
         role: 'assistant',
         content: aiResponse.summary,
@@ -426,7 +427,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         detectedChemicals: aiResponse.detected_chemicals,
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, tempAssistantMessage]);
       setIsTyping(false);
 
       // Increment question count for freemium gate tracking (only for non-authenticated users)
@@ -434,23 +435,41 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setQuestionCount((prev) => prev + 1);
       }
 
-      // Lưu assistant message vào database
+      // Lưu assistant message vào database và lấy UUID thực
       try {
-        await supabase.from('chat_messages').insert({
-          user_id: user?.id || null,
-          session_id: sessionToken,
-          role: 'assistant',
-          content: aiResponse.summary,
-          detailed_content: aiResponse.detailed,
-          detected_chemicals: aiResponse.detected_chemicals,
-          citations: aiResponse.citations,
-          response_time_ms: responseTime,
-          is_error: false,
-          metadata: {
-            response_source: 'legal-ai-chat',
-            question_number: !user ? questionCount + 1 : null,
-          },
-        });
+        const { data: savedMessage, error: saveError } = await supabase
+          .from('chat_messages')
+          .insert({
+            user_id: user?.id || null,
+            session_id: sessionToken,
+            role: 'assistant',
+            content: aiResponse.summary,
+            detailed_content: aiResponse.detailed,
+            detected_chemicals: aiResponse.detected_chemicals,
+            citations: aiResponse.citations,
+            response_time_ms: responseTime,
+            is_error: false,
+            metadata: {
+              response_source: 'legal-ai-chat',
+              question_number: !user ? questionCount + 1 : null,
+            },
+          })
+          .select()
+          .single();
+
+        if (saveError) {
+          console.error('Failed to save assistant message:', saveError);
+        } else if (savedMessage) {
+          // Update message in state with real UUID from database
+          console.log('[ChatContext] Message saved with UUID:', savedMessage.id);
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === tempAssistantMessage.id
+                ? { ...msg, id: savedMessage.id }
+                : msg
+            )
+          );
+        }
 
         // Reload chat sessions để cập nhật sidebar ngay lập tức
         if (user) {
@@ -474,28 +493,46 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error calling AI:', error);
 
-      const errorMessage: ChatMessage = {
+      const tempErrorMessage: ChatMessage = {
         id: `assistant_${Date.now()}`,
         role: 'assistant',
         content: 'Xin lỗi, đã có lỗi xảy ra khi xử lý câu hỏi của bạn. Vui lòng thử lại sau.',
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, tempErrorMessage]);
       setIsTyping(false);
 
-      // Lưu error message vào database
+      // Lưu error message vào database và lấy UUID thực
       try {
-        await supabase.from('chat_messages').insert({
-          user_id: user?.id || null,
-          session_id: sessionToken,
-          role: 'assistant',
-          content: errorMessage.content,
-          is_error: true,
-          metadata: {
-            error_details: error instanceof Error ? error.message : 'Unknown error',
-          },
-        });
+        const { data: savedError, error: saveError } = await supabase
+          .from('chat_messages')
+          .insert({
+            user_id: user?.id || null,
+            session_id: sessionToken,
+            role: 'assistant',
+            content: tempErrorMessage.content,
+            is_error: true,
+            metadata: {
+              error_details: error instanceof Error ? error.message : 'Unknown error',
+            },
+          })
+          .select()
+          .single();
+
+        if (saveError) {
+          console.error('Failed to save error message:', saveError);
+        } else if (savedError) {
+          // Update error message in state with real UUID from database
+          console.log('[ChatContext] Error message saved with UUID:', savedError.id);
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === tempErrorMessage.id
+                ? { ...msg, id: savedError.id }
+                : msg
+            )
+          );
+        }
       } catch (saveError) {
         console.error('Failed to save error message:', saveError);
       }
