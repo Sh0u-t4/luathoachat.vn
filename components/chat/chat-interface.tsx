@@ -223,10 +223,10 @@ export function ChatInterface() {
                 <Sparkles className="w-8 h-8 text-cyan-600" />
               </div>
               <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                Hỏi bất kỳ điều gì về Luật Hóa chất
+                Tra cứu & Đối chiếu Luật Hóa chất
               </h3>
               <p className="text-slate-500 max-w-md mx-auto">
-                Ví dụ: &quot;Axit HCl cần giấy phép gì?&quot; hoặc &quot;Mức phạt lưu trữ hóa chất sai quy định?&quot;
+                Hỗ trợ tra cứu Nghị định, phân loại hóa chất, và quy trình cấp phép
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
                 {['Axit HCl cần giấy phép gì?', 'Methanol là tiền chất?', 'Mức phạt vi phạm PCCC?'].map(
