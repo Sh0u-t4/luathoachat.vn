@@ -276,7 +276,18 @@ export function EditUserDialog({ user, open, onOpenChange, onSave }: EditUserDia
 
     setLoading(true);
     try {
-      await onSave(user.id, formData);
+      // Filter out empty strings to preserve existing data
+      const updates: Partial<UserProfile> = {};
+      Object.entries(formData).forEach(([key, value]) => {
+        // Only include non-empty values, or if it's a role/status (which should always be set)
+        if (key === 'role' || key === 'account_status') {
+          updates[key as keyof UserProfile] = value as any;
+        } else if (value && value !== '') {
+          updates[key as keyof UserProfile] = value as any;
+        }
+      });
+
+      await onSave(user.id, updates);
       onOpenChange(false);
     } finally {
       setLoading(false);
