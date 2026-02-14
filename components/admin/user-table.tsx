@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { Download, Search, Users, UserCheck, ShieldCheck, Eye, Pencil, Trash2, UserPlus, MoreHorizontal, FileSpreadsheet } from 'lucide-react';
+import { Download, Search, Users, UserCheck, ShieldCheck, Eye, Pencil, Trash2, UserPlus, MoreHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { Translation } from '@/lib/i18n/types';
-import { exportToExcel } from '@/lib/excel-export';
 import {
   ViewUserDialog,
   EditUserDialog,
@@ -95,46 +94,37 @@ function getStatusBadge(status: string, t: Translation) {
   );
 }
 
-function exportUsersToExcel(users: UserProfile[]) {
-  // Prepare data for export
-  const exportData = users.map((u) => ({
-    'Họ tên': u.full_name || '',
-    'Email': u.email,
-    'Điện thoại': u.phone || '',
-    'Công ty': u.company_name || '',
-    'Mã số thuế': u.company_tax_code || '',
-    'Chức vụ': u.position || '',
-    'Ngành nghề': u.industry || '',
-    'Phân quyền': u.role === 'admin' ? 'Quản trị viên' : 'Người dùng',
-    'Trạng thái': u.account_status === 'active' ? 'Hoạt động' : u.account_status === 'suspended' ? 'Tạm ngưng' : 'Vô hiệu hóa',
-    'Số lần đăng nhập': u.login_count,
-    'Đăng nhập cuối': u.last_login_at ? format(new Date(u.last_login_at), 'dd/MM/yyyy HH:mm') : '',
-    'Ngày đăng ký': u.created_at ? format(new Date(u.created_at), 'dd/MM/yyyy HH:mm') : '',
-  }));
-
-  const columns = [
-    { header: 'Họ tên', key: 'Họ tên', width: 20 },
-    { header: 'Email', key: 'Email', width: 25 },
-    { header: 'Điện thoại', key: 'Điện thoại', width: 15 },
-    { header: 'Công ty', key: 'Công ty', width: 25 },
-    { header: 'Mã số thuế', key: 'Mã số thuế', width: 15 },
-    { header: 'Chức vụ', key: 'Chức vụ', width: 15 },
-    { header: 'Ngành nghề', key: 'Ngành nghề', width: 20 },
-    { header: 'Phân quyền', key: 'Phân quyền', width: 15 },
-    { header: 'Trạng thái', key: 'Trạng thái', width: 15 },
-    { header: 'Số lần đăng nhập', key: 'Số lần đăng nhập', width: 12 },
-    { header: 'Đăng nhập cuối', key: 'Đăng nhập cuối', width: 18 },
-    { header: 'Ngày đăng ký', key: 'Ngày đăng ký', width: 18 },
+function exportToCsv(users: UserProfile[]) {
+  const headers = [
+    'Họ tên', 'Email', 'Điện thoại', 'Công ty', 'Chức vụ',
+    'Phân quyền', 'Trạng thái', 'Số lần đăng nhập', 'Đăng nhập cuối', 'Ngày đăng ký',
   ];
+  const rows = users.map((u) => [
+    u.full_name,
+    u.email,
+    u.phone || '',
+    u.company_name || '',
+    u.position || '',
+    u.role,
+    u.account_status,
+    String(u.login_count),
+    u.last_login_at ? format(new Date(u.last_login_at), 'dd/MM/yyyy HH:mm') : '',
+    u.created_at ? format(new Date(u.created_at), 'dd/MM/yyyy HH:mm') : '',
+  ]);
 
-  exportToExcel({
-    filename: 'danh_sach_nguoi_dung',
-    sheetName: 'Người dùng',
-    columns,
-    data: exportData,
-    title: 'DANH SÁCH NGƯỜI DÙNG HỆ THỐNG',
-    subtitle: `Xuất dữ liệu ngày ${format(new Date(), 'dd/MM/yyyy HH:mm')} - Tổng số: ${users.length} người dùng`,
-  });
+  const csvContent = [
+    headers.join(','),
+    ...rows.map((r) => r.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(',')),
+  ].join('\n');
+
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `users_${format(new Date(), 'yyyyMMdd_HHmmss')}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 export function UserTable({
@@ -238,11 +228,11 @@ export function UserTable({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => exportUsersToExcel(filtered)}
-              className="gap-2 text-emerald-700 border-emerald-300 hover:bg-emerald-50"
+              onClick={() => exportToCsv(filtered)}
+              className="gap-2 text-slate-700 border-slate-300 hover:bg-slate-50"
             >
-              <FileSpreadsheet className="w-4 h-4" />
-              Tải Excel
+              <Download className="w-4 h-4" />
+              {t.admin.exportCsv}
             </Button>
             <Button
               size="sm"

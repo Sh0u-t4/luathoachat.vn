@@ -26,17 +26,6 @@ export function Header() {
   const { user, profile, loading, isAdmin, signOut } = useAuth();
   const router = useRouter();
 
-  // Debug logging
-  if (user) {
-    console.log('🔍 Header Debug:', {
-      email: user.email,
-      profileLoaded: !!profile,
-      role: profile?.role,
-      isAdmin,
-      accountStatus: profile?.account_status
-    });
-  }
-
   const toggleLanguage = () => {
     const newLang: Language = language === 'vi' ? 'en' : 'vi';
     setLanguage(newLang);

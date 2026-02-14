@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageSquare, User, Bot, Calendar, Filter, Download, ThumbsUp, ThumbsDown, FileSpreadsheet } from 'lucide-react';
+import { MessageSquare, User, Bot, Calendar, Filter, Download, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,8 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { exportToExcel } from '@/lib/excel-export';
-import { supabase } from '@/lib/supabase';
 
 interface ChatLog {
   id: string;
@@ -55,18 +53,45 @@ export function ChatLogsViewer() {
 
   const loadUsers = async () => {
     try {
-      // Get all user profiles
-      const { data: profiles, error } = await supabase
-        .from('user_profiles')
-        .select('id, email')
-        .order('email');
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-      if (error) {
-        console.error('Failed to load users:', error);
+      if (!supabaseUrl || !supabaseKey) {
+        console.error('Missing Supabase config');
         return;
       }
 
-      setUsers(profiles || []);
+      // Get unique users with emails from user_profiles
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/chat_messages?select=user_id,user_profiles!inner(email)&user_id=not.is.null`,
+        {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to load users');
+      }
+
+      const data = await response.json();
+
+      // Get unique users
+      const uniqueUsers = new Map<string, string>();
+      data.forEach((item: any) => {
+        if (item.user_id && item.user_profiles?.email) {
+          uniqueUsers.set(item.user_id, item.user_profiles.email);
+        }
+      });
+
+      const usersData = Array.from(uniqueUsers.entries()).map(([id, email]) => ({
+        id,
+        email,
+      }));
+
+      setUsers(usersData);
     } catch (error) {
       console.error('Failed to load users:', error);
     }
@@ -75,76 +100,61 @@ export function ChatLogsViewer() {
   const loadChatLogs = async () => {
     setLoading(true);
     try {
-      // Build query
-      let query = supabase
-        .from('chat_messages')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(200);
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-      // Apply filters
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Missing Supabase config');
+      }
+
+      // Build query parameters
+      const params = new URLSearchParams({
+        select: '*',
+        order: 'created_at.desc',
+        limit: '200',
+      });
+
       if (filter === 'user') {
-        query = query.eq('role', 'user');
+        params.append('role', 'eq.user');
       } else if (filter === 'assistant') {
-        query = query.eq('role', 'assistant');
+        params.append('role', 'eq.assistant');
       } else if (filter === 'errors') {
-        query = query.eq('is_error', true);
+        params.append('is_error', 'eq.true');
       }
 
       if (selectedUser !== 'all') {
-        query = query.eq('user_id', selectedUser);
+        params.append('user_id', `eq.${selectedUser}`);
       }
 
-      const { data: messages, error } = await query;
-
-      if (error) {
-        console.error('Failed to load chat logs:', error);
-        setLogs([]);
-        return;
-      }
-
-      if (!messages || messages.length === 0) {
-        setLogs([]);
-        return;
-      }
-
-      // Get unique user IDs
-      const userIds = Array.from(new Set(messages.map(m => m.user_id).filter(Boolean)));
-
-      // Load user profiles for those IDs
-      let userEmailMap = new Map<string, string>();
-      if (userIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from('user_profiles')
-          .select('id, email')
-          .in('id', userIds);
-
-        if (profiles) {
-          profiles.forEach(profile => {
-            userEmailMap.set(profile.id, profile.email);
-          });
+      const response = await fetch(
+        `${supabaseUrl}/rest/v1/chat_messages?${params.toString()}`,
+        {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
         }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to load chat logs');
       }
 
-      // Combine messages with user emails
-      const logsWithEmail = messages.map(log => ({
-        ...log,
-        user_email: log.user_id ? userEmailMap.get(log.user_id) || null : null,
-      }));
-
-      setLogs(logsWithEmail);
+      const data = await response.json();
+      setLogs(data || []);
 
       // Load ratings for assistant messages
-      const assistantMessageIds = logsWithEmail
-        .filter((log) => log.role === 'assistant')
-        .map((log) => log.id);
+      if (data) {
+        const assistantMessageIds = data
+          .filter((log: ChatLog) => log.role === 'assistant')
+          .map((log: ChatLog) => log.id);
 
-      if (assistantMessageIds.length > 0) {
-        await loadRatings(assistantMessageIds);
+        if (assistantMessageIds.length > 0) {
+          await loadRatings(assistantMessageIds);
+        }
       }
     } catch (error) {
       console.error('Failed to load chat logs:', error);
-      setLogs([]);
     } finally {
       setLoading(false);
     }
@@ -154,29 +164,37 @@ export function ChatLogsViewer() {
     if (messageIds.length === 0) return;
 
     try {
-      // Load all ratings for these messages
-      const { data: allRatings, error } = await supabase
-        .from('message_ratings')
-        .select('message_id, rating_type')
-        .in('message_id', messageIds);
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-      if (error) {
-        console.error('Failed to load ratings:', error);
+      if (!supabaseUrl || !supabaseKey) {
+        console.error('Missing Supabase config');
         return;
       }
 
-      // Group by message_id and calculate stats
-      const ratingsMap = new Map<string, MessageRating>();
+      // Use direct column aggregation instead of view
+      // For each message, calculate likes/dislikes from message_ratings table
+      const ratingsData: MessageRating[] = [];
 
-      messageIds.forEach(messageId => {
-        const messageRatings = (allRatings || []).filter(r => r.message_id === messageId);
-        const likes = messageRatings.filter(r => r.rating_type === 'like').length;
-        const dislikes = messageRatings.filter(r => r.rating_type === 'dislike').length;
-        const total = likes + dislikes;
-        const likePercentage = total > 0 ? Math.round((likes / total) * 100) : 0;
+      for (const messageId of messageIds) {
+        const response = await fetch(
+          `${supabaseUrl}/rest/v1/message_ratings?message_id=eq.${messageId}&select=rating_type`,
+          {
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`,
+            },
+          }
+        );
 
-        if (total > 0) {
-          ratingsMap.set(messageId, {
+        if (response.ok) {
+          const data = await response.json();
+          const likes = data.filter((r: any) => r.rating_type === 'like').length;
+          const dislikes = data.filter((r: any) => r.rating_type === 'dislike').length;
+          const total = likes + dislikes;
+          const likePercentage = total > 0 ? Math.round((likes / total) * 100) : 0;
+
+          ratingsData.push({
             message_id: messageId,
             likes,
             dislikes,
@@ -184,6 +202,11 @@ export function ChatLogsViewer() {
             like_percentage: likePercentage,
           });
         }
+      }
+
+      const ratingsMap = new Map<string, MessageRating>();
+      ratingsData.forEach((rating) => {
+        ratingsMap.set(rating.message_id, rating);
       });
 
       setRatings(ratingsMap);
@@ -192,49 +215,25 @@ export function ChatLogsViewer() {
     }
   };
 
-  const exportChatLogsToExcel = () => {
-    // Prepare data for export
-    const exportData = logs.map((log) => {
-      const rating = ratings.get(log.id);
-      return {
-        'Thời gian': format(new Date(log.created_at), 'dd/MM/yyyy HH:mm:ss'),
-        'User Email': log.user_email || (log.user_id ? 'User đã xóa' : 'Khách (Chưa đăng nhập)'),
-        'User ID': log.user_id || 'Anonymous',
-        'Loại': log.role === 'user' ? 'Người dùng' : 'AI Trợ lý',
-        'Nội dung': log.content,
-        'Session ID': log.session_id,
-        'Hóa chất phát hiện': log.detected_chemicals?.join(', ') || '',
-        'Thời gian phản hồi (ms)': log.response_time_ms || '',
-        'Có lỗi': log.is_error ? 'Có' : 'Không',
-        'Likes': rating ? rating.likes : '',
-        'Dislikes': rating ? rating.dislikes : '',
-        'Tỉ lệ tích cực (%)': rating ? rating.like_percentage : '',
-      };
-    });
+  const exportToCSV = () => {
+    const headers = ['Thời gian', 'User ID', 'Role', 'Nội dung', 'Session ID', 'Hóa chất'];
+    const rows = logs.map((log) => [
+      format(new Date(log.created_at), 'dd/MM/yyyy HH:mm:ss'),
+      log.user_id || 'Anonymous',
+      log.role,
+      log.content.replace(/"/g, '""'),
+      log.session_id,
+      log.detected_chemicals?.join(', ') || '',
+    ]);
 
-    const columns = [
-      { header: 'Thời gian', key: 'Thời gian', width: 18 },
-      { header: 'User Email', key: 'User Email', width: 25 },
-      { header: 'User ID', key: 'User ID', width: 25 },
-      { header: 'Loại', key: 'Loại', width: 12 },
-      { header: 'Nội dung', key: 'Nội dung', width: 50 },
-      { header: 'Session ID', key: 'Session ID', width: 25 },
-      { header: 'Hóa chất phát hiện', key: 'Hóa chất phát hiện', width: 30 },
-      { header: 'Thời gian phản hồi (ms)', key: 'Thời gian phản hồi (ms)', width: 15 },
-      { header: 'Có lỗi', key: 'Có lỗi', width: 10 },
-      { header: 'Likes', key: 'Likes', width: 10 },
-      { header: 'Dislikes', key: 'Dislikes', width: 10 },
-      { header: 'Tỉ lệ tích cực (%)', key: 'Tỉ lệ tích cực (%)', width: 15 },
-    ];
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers.join(','), ...rows.map((row) => row.map((cell) => `"${cell}"`).join(','))].join('\n');
 
-    exportToExcel({
-      filename: 'chat_logs',
-      sheetName: 'Lịch sử Chat',
-      columns,
-      data: exportData,
-      title: 'LỊCH SỬ TRÒ CHUYỆN HỆ THỐNG',
-      subtitle: `Xuất dữ liệu ngày ${format(new Date(), 'dd/MM/yyyy HH:mm')} - Tổng số: ${logs.length} tin nhắn`,
-    });
+    const link = document.createElement('a');
+    link.href = encodeURI(csvContent);
+    link.download = `chat-logs-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    link.click();
   };
 
   return (
@@ -246,9 +245,9 @@ export function ChatLogsViewer() {
             <MessageSquare className="w-5 h-5 text-cyan-600" />
             <h2 className="text-lg font-semibold">Chat Logs ({logs.length})</h2>
           </div>
-          <Button onClick={exportChatLogsToExcel} size="sm" variant="outline" className="text-emerald-700 border-emerald-300 hover:bg-emerald-50">
-            <FileSpreadsheet className="w-4 h-4 mr-2" />
-            Tải Excel
+          <Button onClick={exportToCSV} size="sm" variant="outline">
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
           </Button>
         </div>
 

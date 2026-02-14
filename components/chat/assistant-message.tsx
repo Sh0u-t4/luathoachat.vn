@@ -107,28 +107,22 @@ export function AssistantMessage({
 
   // Handle quick rating (like/dislike)
   const handleRating = async (ratingType: 'like' | 'dislike') => {
-    console.log('[Rating] Starting rating submission:', { messageId: message.id, sessionId, ratingType });
-
     if (!message.id) {
-      console.error('[Rating] Missing message ID');
       toast.error('Lỗi: Không tìm thấy ID tin nhắn');
       return;
     }
 
     if (!sessionId || sessionId === 'no-session') {
-      console.error('[Rating] Invalid session ID:', sessionId);
       toast.error('Lỗi: Session chưa được khởi tạo. Vui lòng tải lại trang.');
       return;
     }
 
     if (isSubmittingRating) {
-      console.log('[Rating] Already submitting, ignoring request');
       return;
     }
 
     // If user clicks the same rating, remove it
     if (userRating === ratingType) {
-      console.log('[Rating] Removing existing rating');
       setIsSubmittingRating(true);
       try {
         const { error } = await supabase
@@ -137,16 +131,12 @@ export function AssistantMessage({
           .eq('message_id', message.id)
           .eq('session_id', sessionId);
 
-        if (error) {
-          console.error('[Rating] Delete error:', error);
-          throw error;
-        }
+        if (error) throw error;
 
-        console.log('[Rating] Successfully removed rating');
         setUserRating(null);
         toast.success('Đã xóa đánh giá');
       } catch (error: any) {
-        console.error('[Rating] Error removing rating:', error);
+        console.error('Error removing rating:', error);
         toast.error('Không thể xóa đánh giá');
       } finally {
         setIsSubmittingRating(false);
@@ -154,58 +144,29 @@ export function AssistantMessage({
       return;
     }
 
-    // Submit new rating (delete old + insert new for reliability)
+    // Submit new rating (upsert)
     setIsSubmittingRating(true);
     try {
-      // Get current user if authenticated
-      const { data: { user } } = await supabase.auth.getUser();
-      const currentUserId = user?.id || null;
-
-      console.log('[Rating] Current user ID:', currentUserId);
-
-      // First, delete any existing rating for this message/session
-      console.log('[Rating] Deleting existing ratings...');
-      const { error: deleteError } = await supabase
+      const { error } = await supabase
         .from('message_ratings')
-        .delete()
-        .eq('message_id', message.id)
-        .eq('session_id', sessionId);
-
-      if (deleteError) {
-        console.error('[Rating] Delete error (ignoring):', deleteError);
-      }
-
-      // Then insert the new rating
-      console.log('[Rating] Inserting new rating...');
-      const { data: insertData, error: insertError } = await supabase
-        .from('message_ratings')
-        .insert({
+        .upsert({
           message_id: message.id,
           session_id: sessionId,
           rating_type: ratingType,
-          user_id: currentUserId,
+          user_id: null,
           ip_address: null,
           user_agent: null,
-        })
-        .select();
+        }, {
+          onConflict: 'message_id,session_id'
+        });
 
-      if (insertError) {
-        console.error('[Rating] Insert error:', insertError);
-        throw insertError;
-      }
+      if (error) throw error;
 
-      console.log('[Rating] Successfully inserted rating:', insertData);
       setUserRating(ratingType);
       toast.success(ratingType === 'like' ? 'Cảm ơn phản hồi tích cực!' : 'Cảm ơn phản hồi của bạn!');
     } catch (error: any) {
-      console.error('[Rating] Rating submission error:', error);
-      console.error('[Rating] Error details:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint
-      });
-      toast.error('Không thể gửi đánh giá: ' + (error.message || 'Lỗi không xác định'));
+      console.error('Rating error:', error);
+      toast.error('Không thể gửi đánh giá');
     } finally {
       setIsSubmittingRating(false);
     }
