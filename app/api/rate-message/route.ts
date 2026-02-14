@@ -9,18 +9,31 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { messageId, sessionId, userId, ratingType } = body;
 
+    console.log('[Rate Message] Request:', { messageId, sessionId, userId, ratingType });
+
     // Validation
     if (!messageId || !sessionId || !ratingType) {
+      console.error('[Rate Message] Missing fields:', { messageId, sessionId, ratingType });
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields', details: { messageId: !!messageId, sessionId: !!sessionId, ratingType: !!ratingType } },
         { status: 400 }
       );
     }
 
     if (!['like', 'dislike'].includes(ratingType)) {
+      console.error('[Rate Message] Invalid rating type:', ratingType);
       return NextResponse.json(
         { error: 'Invalid rating type' },
         { status: 400 }
+      );
+    }
+
+    // Validate environment variables
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('[Rate Message] Missing Supabase config');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
       );
     }
 
@@ -32,42 +45,52 @@ export async function POST(request: NextRequest) {
                      'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
+    const ratingData = {
+      message_id: messageId,
+      session_id: sessionId,
+      user_id: userId || null,
+      rating_type: ratingType,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      updated_at: new Date().toISOString(),
+    };
+
+    console.log('[Rate Message] Upserting rating:', ratingData);
+
     // Upsert rating (update if exists, insert if not)
     const { data: rating, error: ratingError } = await supabase
       .from('message_ratings')
-      .upsert(
-        {
-          message_id: messageId,
-          session_id: sessionId,
-          user_id: userId || null,
-          rating_type: ratingType,
-          ip_address: ipAddress,
-          user_agent: userAgent,
-          updated_at: new Date().toISOString(),
-        },
-        {
-          onConflict: 'message_id,session_id',
-        }
-      )
+      .upsert(ratingData, {
+        onConflict: 'message_id,session_id',
+      })
       .select()
       .single();
 
     if (ratingError) {
-      console.error('Error saving rating:', ratingError);
+      console.error('[Rate Message] Supabase error:', ratingError);
       return NextResponse.json(
-        { error: 'Failed to save rating' },
+        {
+          error: 'Failed to save rating',
+          details: ratingError.message,
+          code: ratingError.code
+        },
         { status: 500 }
       );
     }
+
+    console.log('[Rate Message] Success:', rating);
 
     return NextResponse.json({
       success: true,
       rating: rating,
     });
-  } catch (error) {
-    console.error('Rate message error:', error);
+  } catch (error: any) {
+    console.error('[Rate Message] Unexpected error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        details: error?.message || 'Unknown error'
+      },
       { status: 500 }
     );
   }

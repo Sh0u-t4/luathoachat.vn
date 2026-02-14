@@ -106,7 +106,16 @@ export function AssistantMessage({
 
   // Handle quick rating (like/dislike)
   const handleRating = async (ratingType: 'like' | 'dislike') => {
-    if (!message.id) return;
+    if (!message.id) {
+      toast.error('Lỗi: Không tìm thấy ID tin nhắn');
+      return;
+    }
+
+    if (!sessionId) {
+      toast.error('Lỗi: Không tìm thấy session ID');
+      return;
+    }
+
     if (isSubmittingRating) return;
 
     // If user clicks the same rating, remove it
@@ -119,13 +128,18 @@ export function AssistantMessage({
           .eq('message_id', message.id)
           .eq('session_id', sessionId);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error removing rating:', error);
+          throw error;
+        }
 
         setUserRating(null);
         toast.success('Đã xóa đánh giá');
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error removing rating:', error);
-        toast.error('Không thể xóa đánh giá');
+        toast.error('Không thể xóa đánh giá', {
+          description: error?.message || 'Vui lòng thử lại sau.',
+        });
       } finally {
         setIsSubmittingRating(false);
       }
@@ -139,28 +153,34 @@ export function AssistantMessage({
         data: { user },
       } = await supabase.auth.getUser();
 
-      // Get user info for tracking
+      const payload = {
+        messageId: message.id,
+        sessionId,
+        userId: user?.id || null,
+        ratingType,
+      };
+
+      console.log('[Rating] Submitting rating:', payload);
+
       const response = await fetch('/api/rate-message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messageId: message.id,
-          sessionId,
-          userId: user?.id || null,
-          ratingType,
-        }),
+        body: JSON.stringify(payload),
       });
 
+      const result = await response.json();
+      console.log('[Rating] API response:', result);
+
       if (!response.ok) {
-        throw new Error('Failed to submit rating');
+        throw new Error(result.details || result.error || 'Failed to submit rating');
       }
 
       setUserRating(ratingType);
       toast.success(ratingType === 'like' ? 'Cảm ơn phản hồi tích cực! 👍' : 'Cảm ơn phản hồi của bạn! 👎');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting rating:', error);
       toast.error('Không thể gửi đánh giá', {
-        description: 'Vui lòng thử lại sau.',
+        description: error?.message || 'Vui lòng thử lại sau.',
       });
     } finally {
       setIsSubmittingRating(false);
