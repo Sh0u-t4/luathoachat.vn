@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Lock, LogIn, ThumbsUp, ThumbsDown } from 'lucide-react';
@@ -28,10 +28,14 @@ export function AssistantMessage({
   messageIndex,
   sessionId,
 }: AssistantMessageProps) {
-  // Feedback state
+  // Feedback state (old system - for detailed feedback)
   const [feedbackRating, setFeedbackRating] = useState<'positive' | 'negative' | null>(null);
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
   const [pendingRating, setPendingRating] = useState<'positive' | 'negative' | null>(null);
+
+  // Rating state (new system - quick like/dislike)
+  const [userRating, setUserRating] = useState<'like' | 'dislike' | null>(null);
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
 
   // Unlock logic: Show unblurred content if:
   // 1. User is authenticated, OR
@@ -76,7 +80,94 @@ export function AssistantMessage({
   const finalPublic = isLatest ? displayedPublic : publicPart;
   const finalLocked = isLatest ? displayedLocked : lockedPart;
 
-  // Handle feedback
+  // Load existing rating when component mounts
+  useEffect(() => {
+    const loadExistingRating = async () => {
+      if (!message.id || !sessionId) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('message_ratings')
+          .select('rating_type')
+          .eq('message_id', message.id)
+          .eq('session_id', sessionId)
+          .maybeSingle();
+
+        if (!error && data) {
+          setUserRating(data.rating_type as 'like' | 'dislike');
+        }
+      } catch (error) {
+        console.error('Error loading rating:', error);
+      }
+    };
+
+    loadExistingRating();
+  }, [message.id, sessionId]);
+
+  // Handle quick rating (like/dislike)
+  const handleRating = async (ratingType: 'like' | 'dislike') => {
+    if (!message.id) return;
+    if (isSubmittingRating) return;
+
+    // If user clicks the same rating, remove it
+    if (userRating === ratingType) {
+      setIsSubmittingRating(true);
+      try {
+        const { error } = await supabase
+          .from('message_ratings')
+          .delete()
+          .eq('message_id', message.id)
+          .eq('session_id', sessionId);
+
+        if (error) throw error;
+
+        setUserRating(null);
+        toast.success('Đã xóa đánh giá');
+      } catch (error) {
+        console.error('Error removing rating:', error);
+        toast.error('Không thể xóa đánh giá');
+      } finally {
+        setIsSubmittingRating(false);
+      }
+      return;
+    }
+
+    // Submit new rating
+    setIsSubmittingRating(true);
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      // Get user info for tracking
+      const response = await fetch('/api/rate-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messageId: message.id,
+          sessionId,
+          userId: user?.id || null,
+          ratingType,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit rating');
+      }
+
+      setUserRating(ratingType);
+      toast.success(ratingType === 'like' ? 'Cảm ơn phản hồi tích cực! 👍' : 'Cảm ơn phản hồi của bạn! 👎');
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      toast.error('Không thể gửi đánh giá', {
+        description: 'Vui lòng thử lại sau.',
+      });
+    } finally {
+      setIsSubmittingRating(false);
+    }
+  };
+
+  // Handle detailed feedback (old system)
   const handleFeedback = async (rating: 'positive' | 'negative') => {
     if (!isAuthenticated) {
       toast.error('Vui lòng đăng nhập để gửi phản hồi');
@@ -205,40 +296,59 @@ export function AssistantMessage({
         </div>
       )}
 
-      {/* Feedback Buttons - chỉ hiển thị cho user đã đăng nhập */}
-      {isAuthenticated && shouldShowUnblurred && (
+      {/* Quick Rating Buttons - cho tất cả users (kể cả anonymous) */}
+      {shouldShowUnblurred && (
         <div className="mt-6 pt-4 border-t border-slate-200">
           <div className="flex items-center gap-4">
             <span className="text-sm text-slate-600">Câu trả lời này có hữu ích không?</span>
             <div className="flex gap-2">
               <Button
-                variant={feedbackRating === 'positive' ? 'default' : 'outline'}
+                variant={userRating === 'like' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => handleFeedback('positive')}
+                onClick={() => handleRating('like')}
+                disabled={isSubmittingRating}
                 className={`transition-all ${
-                  feedbackRating === 'positive'
+                  userRating === 'like'
                     ? 'bg-green-600 hover:bg-green-700 text-white'
                     : 'hover:bg-green-50 hover:text-green-700 hover:border-green-300'
                 }`}
               >
                 <ThumbsUp className="w-4 h-4 mr-1.5" />
-                Có
+                Hữu ích
               </Button>
               <Button
-                variant={feedbackRating === 'negative' ? 'default' : 'outline'}
+                variant={userRating === 'dislike' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => handleFeedback('negative')}
+                onClick={() => handleRating('dislike')}
+                disabled={isSubmittingRating}
                 className={`transition-all ${
-                  feedbackRating === 'negative'
+                  userRating === 'dislike'
                     ? 'bg-red-600 hover:bg-red-700 text-white'
                     : 'hover:bg-red-50 hover:text-red-700 hover:border-red-300'
                 }`}
               >
                 <ThumbsDown className="w-4 h-4 mr-1.5" />
-                Không
+                Chưa hữu ích
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Detailed Feedback Buttons - chỉ cho authenticated users */}
+      {isAuthenticated && shouldShowUnblurred && userRating && (
+        <div className="mt-3 pl-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setPendingRating(userRating === 'like' ? 'positive' : 'negative');
+              setShowFeedbackDialog(true);
+            }}
+            className="text-xs text-slate-500 hover:text-cyan-600"
+          >
+            Thêm nhận xét chi tiết →
+          </Button>
         </div>
       )}
 

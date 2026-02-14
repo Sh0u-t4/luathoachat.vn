@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageSquare, User, Bot, Calendar, Filter, Download } from 'lucide-react';
+import { MessageSquare, User, Bot, Calendar, Filter, Download, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,12 +31,21 @@ interface ChatLog {
   created_at: string;
 }
 
+interface MessageRating {
+  message_id: string;
+  likes: number;
+  dislikes: number;
+  total_ratings: number;
+  like_percentage: number;
+}
+
 export function ChatLogsViewer() {
   const [logs, setLogs] = useState<ChatLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'user' | 'assistant' | 'errors'>('all');
   const [selectedUser, setSelectedUser] = useState<string>('all');
   const [users, setUsers] = useState<Array<{ id: string; email: string }>>([]);
+  const [ratings, setRatings] = useState<Map<string, MessageRating>>(new Map());
 
   useEffect(() => {
     loadUsers();
@@ -100,10 +109,37 @@ export function ChatLogsViewer() {
       if (error) throw error;
 
       setLogs(data || []);
+
+      // Load ratings for assistant messages
+      if (data) {
+        await loadRatings(data.filter(log => log.role === 'assistant').map(log => log.id));
+      }
     } catch (error) {
       console.error('Failed to load chat logs:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadRatings = async (messageIds: string[]) => {
+    if (messageIds.length === 0) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('message_rating_stats')
+        .select('*')
+        .in('message_id', messageIds);
+
+      if (error) throw error;
+
+      const ratingsMap = new Map<string, MessageRating>();
+      data?.forEach((rating) => {
+        ratingsMap.set(rating.message_id, rating);
+      });
+
+      setRatings(ratingsMap);
+    } catch (error) {
+      console.error('Failed to load ratings:', error);
     }
   };
 
@@ -238,6 +274,30 @@ export function ChatLogsViewer() {
                     <span>Session: {log.session_id.slice(0, 8)}...</span>
                     {log.response_time_ms && <span>⏱️ {log.response_time_ms}ms</span>}
                   </div>
+
+                  {/* Show ratings for assistant messages */}
+                  {log.role === 'assistant' && ratings.has(log.id) && (
+                    <div className="flex items-center gap-3 mt-3 pt-3 border-t border-slate-200">
+                      <span className="text-xs font-medium text-slate-600">Đánh giá:</span>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1">
+                          <ThumbsUp className="w-3.5 h-3.5 text-green-600" />
+                          <span className="text-xs font-semibold text-green-700">
+                            {ratings.get(log.id)!.likes}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <ThumbsDown className="w-3.5 h-3.5 text-red-600" />
+                          <span className="text-xs font-semibold text-red-700">
+                            {ratings.get(log.id)!.dislikes}
+                          </span>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          {ratings.get(log.id)!.like_percentage}% tích cực
+                        </Badge>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
