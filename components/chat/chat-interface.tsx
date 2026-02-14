@@ -13,6 +13,7 @@ import { OfflineBanner } from './offline-banner';
 import { useOffline } from '@/hooks/use-offline';
 import { useFAQCache } from '@/hooks/use-faq-cache';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/lib/i18n/context';
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,9 @@ export function ChatInterface() {
   const prevMessagesLengthRef = useRef(0);
   const wasCleared = useRef(false);
   const router = useRouter();
+
+  // i18n
+  const { t } = useLanguage();
 
   // Offline detection and FAQ cache
   const isOffline = useOffline();
@@ -199,13 +203,13 @@ export function ChatInterface() {
               <Bot className="w-5 h-5 text-cyan-400" />
             </div>
             <div>
-              <h2 className="text-white font-semibold">Trợ lý AI Luật Hóa Chất</h2>
-              <p className="text-slate-400 text-sm">Luật Hóa chất 69/2025 & Nghị định 24, 25, 26/2026</p>
+              <h2 className="text-white font-semibold">{t.chat.title}</h2>
+              <p className="text-slate-400 text-sm">{t.chat.subtitle}</p>
             </div>
             <div className="ml-auto flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full animate-pulse ${isOffline ? 'bg-amber-400' : 'bg-green-400'}`} />
               <span className={`text-sm ${isOffline ? 'text-amber-400' : 'text-green-400'}`}>
-                {isOffline ? 'Offline' : 'Trực tuyến'}
+                {isOffline ? t.chat.offline : t.chat.online}
               </span>
             </div>
           </div>
@@ -223,13 +227,13 @@ export function ChatInterface() {
                 <Sparkles className="w-8 h-8 text-cyan-600" />
               </div>
               <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                Tra cứu & Đối chiếu Luật Hóa chất
+                {t.chat.emptyTitle}
               </h3>
               <p className="text-slate-500 max-w-md mx-auto">
-                Hỗ trợ tra cứu Nghị định, phân loại hóa chất, và quy trình cấp phép
+                {t.chat.emptyDescription}
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
-                {['Axit HCl cần giấy phép gì?', 'Methanol là tiền chất?', 'Mức phạt vi phạm PCCC?'].map(
+                {[t.chat.suggestion1, t.chat.suggestion2, t.chat.suggestion3].map(
                   (suggestion) => (
                     <button
                       key={suggestion}
@@ -307,19 +311,19 @@ export function ChatInterface() {
                   {loadingStage === 0 && (
                     <>
                       <Search className="w-4 h-4 text-cyan-500 animate-pulse" />
-                      <span className="text-sm text-slate-600 animate-fade-in">Đang phân tích câu hỏi...</span>
+                      <span className="text-sm text-slate-600 animate-fade-in">{t.chat.loadingStage1}</span>
                     </>
                   )}
                   {loadingStage === 1 && (
                     <>
                       <BookOpen className="w-4 h-4 text-cyan-600 animate-pulse" />
-                      <span className="text-sm text-slate-600 animate-fade-in">Đang tra cứu cơ sở dữ liệu...</span>
+                      <span className="text-sm text-slate-600 animate-fade-in">{t.chat.loadingStage2}</span>
                     </>
                   )}
                   {loadingStage === 2 && (
                     <>
                       <Zap className="w-4 h-4 text-cyan-700 animate-pulse" />
-                      <span className="text-sm text-slate-600 animate-fade-in">Đang tổng hợp câu trả lời...</span>
+                      <span className="text-sm text-slate-600 animate-fade-in">{t.chat.loadingStage3}</span>
                     </>
                   )}
                 </div>
@@ -337,7 +341,7 @@ export function ChatInterface() {
               ref={inputRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Nhập câu hỏi về luật hóa chất..."
+              placeholder={t.chat.inputPlaceholder}
               className="flex-1 border-slate-200 focus:border-cyan-500 focus:ring-cyan-500"
               disabled={isTyping}
             />
@@ -350,8 +354,8 @@ export function ChatInterface() {
             </Button>
           </div>
           <div className="text-xs text-slate-400 mt-2 text-center space-y-1">
-            <p>Thông tin chỉ mang tính tham khảo. Liên hệ chuyên gia để được tư vấn cụ thể.</p>
-            <p>Hiện tại AI Chatbot đang được phát triển, nếu có phát hiện sai sót hãy thông báo và cùng phát triển hệ thống tốt hơn.</p>
+            <p>{t.chat.disclaimer1}</p>
+            <p>{t.chat.disclaimer2}</p>
           </div>
         </form>
       </Card>
@@ -361,10 +365,10 @@ export function ChatInterface() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Lock className="w-5 h-5 text-cyan-600" />
-              Đăng nhập để xem chi tiết
+              {t.chat.loginPromptTitle}
             </DialogTitle>
             <DialogDescription className="pt-4">
-              Để xem chi tiết trích dẫn luật, mức phạt và tải các văn bản pháp luật, vui lòng đăng nhập hoặc tạo tài khoản miễn phí.
+              {t.chat.loginPromptDescription}
             </DialogDescription>
           </DialogHeader>
 
@@ -375,7 +379,7 @@ export function ChatInterface() {
               size="lg"
             >
               <LogIn className="w-4 h-4 mr-2" />
-              Đăng nhập
+              {t.chat.loginButton}
             </Button>
 
             <Button
@@ -384,26 +388,26 @@ export function ChatInterface() {
               className="w-full border-cyan-600 text-cyan-600 hover:bg-cyan-50"
               size="lg"
             >
-              Tạo tài khoản miễn phí
+              {t.chat.registerButton}
             </Button>
           </div>
 
           <div className="pt-4 border-t">
             <p className="text-xs text-slate-500 text-center">
-              Tài khoản miễn phí bao gồm:
+              {t.chat.freeAccountIncludes}
             </p>
             <ul className="mt-2 text-xs text-slate-600 space-y-1">
               <li className="flex items-center gap-2">
                 <span className="w-1 h-1 bg-cyan-600 rounded-full"></span>
-                Xem chi tiết trích dẫn luật đầy đủ
+                {t.chat.benefit1}
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-1 h-1 bg-cyan-600 rounded-full"></span>
-                Tải văn bản Nghị định 24, 25, 26/2026
+                {t.chat.benefit2}
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-1 h-1 bg-cyan-600 rounded-full"></span>
-                Lưu lịch sử tra cứu
+                {t.chat.benefit3}
               </li>
             </ul>
           </div>

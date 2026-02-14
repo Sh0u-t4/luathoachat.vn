@@ -213,6 +213,31 @@ export interface Translation {
     roleAdmin: string;
     roleModerator: string;
   };
+  chat: {
+    title: string;
+    subtitle: string;
+    online: string;
+    offline: string;
+    emptyTitle: string;
+    emptyDescription: string;
+    suggestion1: string;
+    suggestion2: string;
+    suggestion3: string;
+    inputPlaceholder: string;
+    disclaimer1: string;
+    disclaimer2: string;
+    loginPromptTitle: string;
+    loginPromptDescription: string;
+    loginButton: string;
+    registerButton: string;
+    freeAccountIncludes: string;
+    benefit1: string;
+    benefit2: string;
+    benefit3: string;
+    loadingStage1: string;
+    loadingStage2: string;
+    loadingStage3: string;
+  };
   seo: {
     home: {
       title: string;
