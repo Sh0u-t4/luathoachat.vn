@@ -152,7 +152,7 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      return NextResponse.json({ rating: data });
+      return NextResponse.json({ rating: data?.rating_type || null });
     }
 
     // Get rating statistics for message
@@ -175,6 +175,70 @@ export async function GET(request: NextRequest) {
     console.error('Get rating error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { messageId, sessionId } = body;
+
+    console.log('[Rate Message DELETE] Request:', { messageId, sessionId });
+
+    // Validation
+    if (!messageId || !sessionId) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Get environment variables
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
+    // Create Supabase client
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
+
+    // Delete rating
+    const { error: deleteError } = await supabase
+      .from('message_ratings')
+      .delete()
+      .eq('message_id', messageId)
+      .eq('session_id', sessionId);
+
+    if (deleteError) {
+      console.error('[Rate Message DELETE] Error:', deleteError);
+      return NextResponse.json(
+        { error: 'Failed to delete rating', details: deleteError.message },
+        { status: 500 }
+      );
+    }
+
+    console.log('[Rate Message DELETE] Success');
+
+    return NextResponse.json({
+      success: true,
+      message: 'Rating deleted successfully',
+    });
+  } catch (error: any) {
+    console.error('[Rate Message DELETE] Unexpected error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', details: error?.message },
       { status: 500 }
     );
   }

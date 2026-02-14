@@ -8,7 +8,6 @@ import { useTypingEffect } from '@/hooks/use-typing-effect';
 import { LegalCitation } from './legal-citation';
 import { FeedbackDialog } from './feedback-dialog';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
 import type { ChatMessage } from '@/types';
 
 interface AssistantMessageProps {
@@ -91,20 +90,22 @@ export function AssistantMessage({
       console.log('[Rating] Loading existing rating for:', { messageId: message.id, sessionId });
 
       try {
-        const { data, error } = await supabase
-          .from('message_ratings')
-          .select('rating_type')
-          .eq('message_id', message.id)
-          .eq('session_id', sessionId)
-          .maybeSingle();
+        // Use API route instead of direct Supabase call
+        const response = await fetch(
+          `/api/rate-message?messageId=${message.id}&sessionId=${sessionId}`,
+          { method: 'GET' }
+        );
 
-        if (error) {
-          console.error('[Rating] Error loading rating:', error);
-        } else if (data) {
-          console.log('[Rating] Found existing rating:', data.rating_type);
-          setUserRating(data.rating_type as 'like' | 'dislike');
+        if (response.ok) {
+          const result = await response.json();
+          if (result.rating) {
+            console.log('[Rating] Found existing rating:', result.rating);
+            setUserRating(result.rating as 'like' | 'dislike');
+          } else {
+            console.log('[Rating] No existing rating found');
+          }
         } else {
-          console.log('[Rating] No existing rating found');
+          console.error('[Rating] Error loading rating:', await response.text());
         }
       } catch (error) {
         console.error('[Rating] Exception loading rating:', error);
@@ -139,15 +140,19 @@ export function AssistantMessage({
     if (userRating === ratingType) {
       setIsSubmittingRating(true);
       try {
-        const { error } = await supabase
-          .from('message_ratings')
-          .delete()
-          .eq('message_id', message.id)
-          .eq('session_id', sessionId);
+        // Use API route to delete rating
+        const response = await fetch('/api/rate-message', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messageId: message.id,
+            sessionId,
+          }),
+        });
 
-        if (error) {
-          console.error('Error removing rating:', error);
-          throw error;
+        if (!response.ok) {
+          const result = await response.json();
+          throw new Error(result.error || 'Failed to remove rating');
         }
 
         setUserRating(null);
@@ -166,14 +171,11 @@ export function AssistantMessage({
     // Submit new rating
     setIsSubmittingRating(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
+      // Don't call supabase.auth.getUser() - let API route handle it
       const payload = {
         messageId: message.id,
         sessionId,
-        userId: user?.id || null,
+        userId: null, // API route will get this from auth header if available
         ratingType,
       };
 
@@ -204,7 +206,7 @@ export function AssistantMessage({
     }
   };
 
-  // Handle detailed feedback (old system)
+  // Handle detailed feedback (old system - DEPRECATED, use rating system instead)
   const handleFeedback = async (rating: 'positive' | 'negative') => {
     if (!isAuthenticated) {
       toast.error('Vui lòng đăng nhập để gửi phản hồi');
@@ -217,38 +219,15 @@ export function AssistantMessage({
     }
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error('Vui lòng đăng nhập để gửi phản hồi');
-        return;
-      }
-
-      // Quick feedback without detailed comment
-      const { error } = await supabase.from('message_feedback').upsert(
-        {
-          message_id: message.id,
-          user_id: user.id,
-          session_id: sessionId,
-          rating,
-        },
-        {
-          onConflict: 'message_id,user_id',
-        }
-      );
-
-      if (error) throw error;
-
+      // TODO: Migrate to new rating API when needed
+      // For now, just show the dialog
       setFeedbackRating(rating);
+      setPendingRating(rating);
+      setShowFeedbackDialog(true);
+
       toast.success(
         rating === 'positive' ? 'Cảm ơn phản hồi tích cực!' : 'Cảm ơn phản hồi của bạn!'
       );
-
-      // Open detailed feedback dialog
-      setPendingRating(rating);
-      setShowFeedbackDialog(true);
     } catch (error) {
       console.error('Error submitting feedback:', error);
       toast.error('Không thể gửi phản hồi', {
