@@ -27,15 +27,31 @@ interface LegalDocument {
   summary: string;
 }
 
+interface VisibilitySettings {
+  download_buttons: boolean;
+  search_bar: boolean;
+  update_badge: boolean;
+  suggestions: boolean;
+  feature_cards: boolean;
+}
+
 export function HeroSection({ onSearch }: HeroSectionProps) {
   const [searchValue, setSearchValue] = useState('');
   const [documents, setDocuments] = useState<LegalDocument[]>([]);
   const [loading, setLoading] = useState(true);
+  const [visibility, setVisibility] = useState<VisibilitySettings>({
+    download_buttons: true,
+    search_bar: true,
+    update_badge: true,
+    suggestions: true,
+    feature_cards: true,
+  });
   const { sendMessage } = useChat();
   const { t } = useLanguage();
 
   useEffect(() => {
     fetchDocuments();
+    fetchVisibilitySettings();
   }, []);
 
   const fetchDocuments = async () => {
@@ -52,6 +68,36 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
       console.error('Error fetching documents:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchVisibilitySettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('landing_visibility_settings')
+        .select('section_name, is_visible');
+
+      if (error) throw error;
+
+      if (data) {
+        const settings: VisibilitySettings = {
+          download_buttons: true,
+          search_bar: true,
+          update_badge: true,
+          suggestions: true,
+          feature_cards: true,
+        };
+
+        data.forEach((item) => {
+          if (item.section_name in settings) {
+            settings[item.section_name as keyof VisibilitySettings] = item.is_visible;
+          }
+        });
+
+        setVisibility(settings);
+      }
+    } catch (error) {
+      console.error('Error fetching visibility settings:', error);
     }
   };
 
@@ -147,14 +193,15 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
           {t.hero.subtitle}
         </p>
 
-        <div className="flex flex-wrap justify-center gap-3 mb-10">
-          {loading ? (
-            <div className="text-slate-400">Đang tải văn bản...</div>
-          ) : (
-            <>
-              {documents
-                .filter((doc) => doc.document_type === 'law')
-                .map((doc) => (
+        {visibility.download_buttons && (
+          <div className="flex flex-wrap justify-center gap-3 mb-10">
+            {loading ? (
+              <div className="text-slate-400">Đang tải văn bản...</div>
+            ) : (
+              <>
+                {documents
+                  .filter((doc) => doc.document_type === 'law')
+                  .map((doc) => (
                   <a
                     key={doc.id}
                     href={getDownloadUrl(doc)}
@@ -228,9 +275,11 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
               )}
             </>
           )}
-        </div>
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="relative max-w-2xl mx-auto mb-4">
+        {visibility.search_bar && (
+          <form onSubmit={handleSubmit} className="relative max-w-2xl mx-auto mb-4">
           <div className="relative search-glow rounded-full bg-white/95 backdrop-blur transition-all duration-300">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
@@ -248,16 +297,20 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
-        </form>
+          </form>
+        )}
 
-        <div className="flex justify-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 text-xs bg-amber-500/10 text-amber-400 rounded-full border border-amber-500/20">
-            <Calendar className="w-3 h-3" />
-            <span>{t.common.dataUpdated}</span>
+        {visibility.update_badge && (
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 text-xs bg-amber-500/10 text-amber-400 rounded-full border border-amber-500/20">
+              <Calendar className="w-3 h-3" />
+              <span>{t.common.dataUpdated}</span>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
+        {visibility.suggestions && (
+          <div className="flex flex-wrap justify-center gap-3 mb-12">
           <span className="text-slate-500 text-sm">{t.common.suggestions}:</span>
           {suggestions.map((suggestion) => (
             <button
@@ -268,9 +321,11 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
               {suggestion}
             </button>
           ))}
-        </div>
+          </div>
+        )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+        {visibility.feature_cards && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
           <FeatureCard
             icon={ListChecks}
             title={t.features.penalties.title}
@@ -286,7 +341,8 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
             title={t.features.ghs.title}
             description={t.features.ghs.description}
           />
-        </div>
+          </div>
+        )}
       </div>
     </section>
   );
