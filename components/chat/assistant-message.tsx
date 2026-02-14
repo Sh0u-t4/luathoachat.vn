@@ -294,8 +294,8 @@ export function AssistantMessage({
       {/* Quick Rating Buttons - cho tất cả users (kể cả anonymous) */}
       {shouldShowUnblurred && (
         <div className="mt-6 pt-4 border-t border-slate-200">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-4">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-3">
               <span className="text-sm text-slate-600">Câu trả lời này có hữu ích không?</span>
               <div className="flex gap-2">
                 <Button
@@ -326,33 +326,29 @@ export function AssistantMessage({
                   <ThumbsDown className="w-4 h-4 mr-1.5" />
                   Chưa hữu ích
                 </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFeedbackDialog(true)}
+                  className="text-cyan-700 border-cyan-300 hover:bg-cyan-50 hover:text-cyan-800"
+                >
+                  <MessageSquare className="w-4 h-4 mr-1.5" />
+                  Phản hồi chi tiết
+                </Button>
               </div>
             </div>
-
-            {/* Detailed Feedback Button - hiển thị sau khi đã rate */}
-            {userRating && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowFeedbackDialog(true)}
-                className="w-fit text-cyan-700 border-cyan-300 hover:bg-cyan-50 hover:text-cyan-800"
-              >
-                <MessageSquare className="w-4 h-4 mr-1.5" />
-                Phản hồi chi tiết
-              </Button>
-            )}
           </div>
         </div>
       )}
 
       {/* Feedback Dialog */}
-      {userRating && message.id && (
+      {message.id && (
         <FeedbackDialog
           open={showFeedbackDialog}
           onOpenChange={setShowFeedbackDialog}
           messageId={message.id}
           sessionId={sessionId}
-          rating={userRating === 'like' ? 'positive' : 'negative'}
+          rating={userRating ? (userRating === 'like' ? 'positive' : 'negative') : undefined}
         />
       )}
     </div>

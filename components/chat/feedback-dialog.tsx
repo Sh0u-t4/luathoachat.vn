@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,14 +14,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface FeedbackDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   messageId: string;
   sessionId: string;
-  rating: 'positive' | 'negative';
+  rating?: 'positive' | 'negative';
 }
 
 export function FeedbackDialog({
@@ -29,10 +29,20 @@ export function FeedbackDialog({
   onOpenChange,
   messageId,
   sessionId,
-  rating,
+  rating: initialRating,
 }: FeedbackDialogProps) {
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedRating, setSelectedRating] = useState<'positive' | 'negative'>(
+    initialRating || 'positive'
+  );
+
+  // Update rating when initialRating changes
+  useEffect(() => {
+    if (initialRating) {
+      setSelectedRating(initialRating);
+    }
+  }, [initialRating]);
 
   const handleSubmit = async () => {
     if (!comment.trim()) {
@@ -57,7 +67,7 @@ export function FeedbackDialog({
           message_id: messageId,
           user_id: user.id,
           session_id: sessionId,
-          rating,
+          rating: selectedRating,
           comment: comment.trim(),
         },
         {
@@ -83,8 +93,8 @@ export function FeedbackDialog({
     }
   };
 
-  const ratingText = rating === 'positive' ? 'hữu ích' : 'chưa hữu ích';
-  const ratingColor = rating === 'positive' ? 'text-green-600' : 'text-red-600';
+  const ratingText = selectedRating === 'positive' ? 'hữu ích' : 'chưa hữu ích';
+  const ratingColor = selectedRating === 'positive' ? 'text-green-600' : 'text-red-600';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -92,19 +102,62 @@ export function FeedbackDialog({
         <DialogHeader>
           <DialogTitle>Gửi phản hồi chi tiết</DialogTitle>
           <DialogDescription>
-            Bạn đã đánh giá câu trả lời này là{' '}
-            <span className={`font-semibold ${ratingColor}`}>{ratingText}</span>. Hãy cho chúng
-            tôi biết thêm để cải thiện dịch vụ.
+            {initialRating ? (
+              <>
+                Bạn đã đánh giá câu trả lời này là{' '}
+                <span className={`font-semibold ${ratingColor}`}>{ratingText}</span>. Hãy cho chúng
+                tôi biết thêm để cải thiện dịch vụ.
+              </>
+            ) : (
+              'Hãy cho chúng tôi biết ý kiến của bạn về câu trả lời này để giúp chúng tôi cải thiện dịch vụ.'
+            )}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {/* Rating Selection - chỉ hiển thị nếu chưa có rating */}
+          {!initialRating && (
+            <div className="space-y-2">
+              <Label>Đánh giá của bạn *</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={selectedRating === 'positive' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedRating('positive')}
+                  className={`flex-1 ${
+                    selectedRating === 'positive'
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
+                      : 'hover:bg-green-50 hover:text-green-700'
+                  }`}
+                >
+                  <ThumbsUp className="w-4 h-4 mr-2" />
+                  Hữu ích
+                </Button>
+                <Button
+                  type="button"
+                  variant={selectedRating === 'negative' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedRating('negative')}
+                  className={`flex-1 ${
+                    selectedRating === 'negative'
+                      ? 'bg-red-600 hover:bg-red-700 text-white'
+                      : 'hover:bg-red-50 hover:text-red-700'
+                  }`}
+                >
+                  <ThumbsDown className="w-4 h-4 mr-2" />
+                  Chưa hữu ích
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="comment">Nhận xét của bạn *</Label>
             <Textarea
               id="comment"
               placeholder={
-                rating === 'positive'
+                selectedRating === 'positive'
                   ? 'Điều gì khiến câu trả lời này hữu ích? (VD: Thông tin chính xác, trích dẫn rõ ràng, giải thích dễ hiểu...)'
                   : 'Câu trả lời cần cải thiện gì? (VD: Thiếu thông tin, không đúng trọng tâm, khó hiểu...)'
               }
