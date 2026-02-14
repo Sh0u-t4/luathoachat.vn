@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { FlaskConical, Menu, Globe, User, LogOut, ChevronDown, ShieldCheck, UserCog } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -62,9 +63,16 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 shadow-sm">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-              <FlaskConical className="w-5 h-5 text-cyan-600" />
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 relative flex-shrink-0">
+              <Image
+                src="/logo_luathoachat.jpg"
+                alt="LuatHoaChat.vn Logo"
+                width={40}
+                height={40}
+                className="object-contain"
+                priority
+              />
             </div>
             <span className="text-lg font-bold text-slate-900">LuatHoaChat.vn</span>
           </Link>
