@@ -7,6 +7,7 @@ import { Lock, LogIn, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useTypingEffect } from '@/hooks/use-typing-effect';
 import { LegalCitation } from './legal-citation';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 import type { ChatMessage } from '@/types';
 
 interface AssistantMessageProps {
@@ -77,32 +78,27 @@ export function AssistantMessage({
   useEffect(() => {
     const loadExistingRating = async () => {
       if (!message.id || !sessionId || sessionId === 'no-session') {
-        console.log('[Rating] Skipping load - missing data:', { messageId: message.id, sessionId });
         return;
       }
 
-      console.log('[Rating] Loading existing rating for:', { messageId: message.id, sessionId });
-
       try {
-        // Use API route instead of direct Supabase call
-        const response = await fetch(
-          `/api/rate-message?messageId=${message.id}&sessionId=${sessionId}`,
-          { method: 'GET' }
-        );
+        const { data, error } = await supabase
+          .from('message_ratings')
+          .select('rating_type')
+          .eq('message_id', message.id)
+          .eq('session_id', sessionId)
+          .maybeSingle();
 
-        if (response.ok) {
-          const result = await response.json();
-          if (result.rating) {
-            console.log('[Rating] Found existing rating:', result.rating);
-            setUserRating(result.rating as 'like' | 'dislike');
-          } else {
-            console.log('[Rating] No existing rating found');
-          }
-        } else {
-          console.error('[Rating] Error loading rating:', await response.text());
+        if (error) {
+          console.error('[Rating] Error loading:', error);
+          return;
+        }
+
+        if (data) {
+          setUserRating(data.rating_type as 'like' | 'dislike');
         }
       } catch (error) {
-        console.error('[Rating] Exception loading rating:', error);
+        console.error('[Rating] Exception:', error);
       }
     };
 
@@ -111,113 +107,68 @@ export function AssistantMessage({
 
   // Handle quick rating (like/dislike)
   const handleRating = async (ratingType: 'like' | 'dislike') => {
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🎯 RATING DEBUG START');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('📌 Button clicked:', ratingType);
-    console.log('📌 Message ID:', message.id);
-    console.log('📌 Session ID:', sessionId);
-    console.log('📌 Current rating:', userRating);
-    console.log('📌 Is submitting:', isSubmittingRating);
-
     if (!message.id) {
-      console.error('❌ VALIDATION FAILED: Missing message.id');
       toast.error('Lỗi: Không tìm thấy ID tin nhắn');
       return;
     }
 
     if (!sessionId || sessionId === 'no-session') {
-      console.error('❌ VALIDATION FAILED: Invalid sessionId:', sessionId);
       toast.error('Lỗi: Session chưa được khởi tạo. Vui lòng tải lại trang.');
       return;
     }
 
     if (isSubmittingRating) {
-      console.log('⏸️  SKIPPED: Already submitting');
       return;
     }
-
-    console.log('✅ Validation passed, proceeding...');
 
     // If user clicks the same rating, remove it
     if (userRating === ratingType) {
       setIsSubmittingRating(true);
       try {
-        // Use API route to delete rating
-        const response = await fetch('/api/rate-message', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messageId: message.id,
-            sessionId,
-          }),
-        });
+        const { error } = await supabase
+          .from('message_ratings')
+          .delete()
+          .eq('message_id', message.id)
+          .eq('session_id', sessionId);
 
-        if (!response.ok) {
-          const result = await response.json();
-          throw new Error(result.error || 'Failed to remove rating');
-        }
+        if (error) throw error;
 
         setUserRating(null);
         toast.success('Đã xóa đánh giá');
       } catch (error: any) {
         console.error('Error removing rating:', error);
-        toast.error('Không thể xóa đánh giá', {
-          description: error?.message || 'Vui lòng thử lại sau.',
-        });
+        toast.error('Không thể xóa đánh giá');
       } finally {
         setIsSubmittingRating(false);
       }
       return;
     }
 
-    // Submit new rating
-    console.log('📤 Submitting new rating...');
+    // Submit new rating (upsert)
     setIsSubmittingRating(true);
     try {
-      // Don't call supabase.auth.getUser() - let API route handle it
-      const payload = {
-        messageId: message.id,
-        sessionId,
-        userId: null, // API route will get this from auth header if available
-        ratingType,
-      };
+      const { error } = await supabase
+        .from('message_ratings')
+        .upsert({
+          message_id: message.id,
+          session_id: sessionId,
+          rating_type: ratingType,
+          user_id: null,
+          ip_address: null,
+          user_agent: null,
+        }, {
+          onConflict: 'message_id,session_id'
+        });
 
-      console.log('📦 Payload:', JSON.stringify(payload, null, 2));
-      console.log('🌐 Fetching: POST /api/rate-message');
+      if (error) throw error;
 
-      const response = await fetch('/api/rate-message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      console.log('📡 Response status:', response.status, response.statusText);
-
-      const result = await response.json();
-      console.log('📥 Response body:', JSON.stringify(result, null, 2));
-
-      if (!response.ok) {
-        console.error('❌ API returned error:', result);
-        throw new Error(result.details || result.error || 'Failed to submit rating');
-      }
-
-      console.log('✅ Rating submitted successfully!');
       setUserRating(ratingType);
-      toast.success(ratingType === 'like' ? 'Cảm ơn phản hồi tích cực! 👍' : 'Cảm ơn phản hồi của bạn! 👎');
+      toast.success(ratingType === 'like' ? 'Cảm ơn phản hồi tích cực!' : 'Cảm ơn phản hồi của bạn!');
     } catch (error: any) {
-      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.error('❌ RATING ERROR:', error);
-      console.error('Error name:', error.name);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      toast.error('Không thể gửi đánh giá', {
-        description: error?.message || 'Vui lòng thử lại sau.',
-      });
+      console.error('Rating error:', error);
+      toast.error('Không thể gửi đánh giá');
     } finally {
       setIsSubmittingRating(false);
-      console.log('🏁 RATING DEBUG END');
     }
   };
 
