@@ -39,12 +39,13 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
   const [searchValue, setSearchValue] = useState('');
   const [documents, setDocuments] = useState<LegalDocument[]>([]);
   const [loading, setLoading] = useState(true);
+  const [visibilityLoading, setVisibilityLoading] = useState(true);
   const [visibility, setVisibility] = useState<VisibilitySettings>({
-    download_buttons: true,
-    search_bar: true,
-    update_badge: true,
-    suggestions: true,
-    feature_cards: true,
+    download_buttons: false,
+    search_bar: false,
+    update_badge: false,
+    suggestions: false,
+    feature_cards: false,
   });
   const { sendMessage } = useChat();
   const { t } = useLanguage();
@@ -98,6 +99,16 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
       }
     } catch (error) {
       console.error('Error fetching visibility settings:', error);
+      // Nếu lỗi, hiển thị tất cả (fallback an toàn)
+      setVisibility({
+        download_buttons: true,
+        search_bar: true,
+        update_badge: true,
+        suggestions: true,
+        feature_cards: true,
+      });
+    } finally {
+      setVisibilityLoading(false);
     }
   };
 
@@ -193,7 +204,7 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
           {t.hero.subtitle}
         </p>
 
-        {visibility.download_buttons && (
+        {!visibilityLoading && visibility.download_buttons && (
           <div className="flex flex-wrap justify-center gap-3 mb-10">
             {loading ? (
               <div className="text-slate-400">Đang tải văn bản...</div>
@@ -278,7 +289,7 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
           </div>
         )}
 
-        {visibility.search_bar && (
+        {!visibilityLoading && visibility.search_bar && (
           <form onSubmit={handleSubmit} className="relative max-w-2xl mx-auto mb-4">
           <div className="relative search-glow rounded-full bg-white/95 backdrop-blur transition-all duration-300">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -300,7 +311,7 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
           </form>
         )}
 
-        {visibility.update_badge && (
+        {!visibilityLoading && visibility.update_badge && (
           <div className="flex justify-center mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 text-xs bg-amber-500/10 text-amber-400 rounded-full border border-amber-500/20">
               <Calendar className="w-3 h-3" />
@@ -309,7 +320,7 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
           </div>
         )}
 
-        {visibility.suggestions && (
+        {!visibilityLoading && visibility.suggestions && (
           <div className="flex flex-wrap justify-center gap-3 mb-12">
           <span className="text-slate-500 text-sm">{t.common.suggestions}:</span>
           {suggestions.map((suggestion) => (
@@ -324,7 +335,7 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
           </div>
         )}
 
-        {visibility.feature_cards && (
+        {!visibilityLoading && visibility.feature_cards && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
           <FeatureCard
             icon={ListChecks}
