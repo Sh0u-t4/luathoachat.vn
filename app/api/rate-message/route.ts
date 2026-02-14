@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -13,7 +12,11 @@ export async function POST(request: NextRequest) {
 
     // Validation
     if (!messageId || !sessionId || !ratingType) {
-      console.error('[Rate Message] Missing fields:', { messageId, sessionId, ratingType });
+      console.error('❌ Validation failed - Missing fields:', {
+        messageId: !!messageId,
+        sessionId: !!sessionId,
+        ratingType: !!ratingType
+      });
       return NextResponse.json(
         { error: 'Missing required fields', details: { messageId: !!messageId, sessionId: !!sessionId, ratingType: !!ratingType } },
         { status: 400 }
@@ -21,33 +24,26 @@ export async function POST(request: NextRequest) {
     }
 
     if (!['like', 'dislike'].includes(ratingType)) {
-      console.error('[Rate Message] Invalid rating type:', ratingType);
+      console.error('❌ Validation failed - Invalid rating type:', ratingType);
       return NextResponse.json(
         { error: 'Invalid rating type' },
         { status: 400 }
       );
     }
 
-    // Get environment variables inside function to avoid edge cases
+    console.log('✅ Validation passed');
+
+    // Get environment variables
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    // Validate environment variables
     if (!supabaseUrl || !supabaseKey) {
-      console.error('[Rate Message] Missing Supabase config');
+      console.error('❌ Missing Supabase config');
       return NextResponse.json(
         { error: 'Server configuration error' },
         { status: 500 }
       );
     }
-
-    // Create Supabase client with explicit options to avoid Next.js conflicts
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    });
 
     // Get request metadata
     const ipAddress = request.headers.get('x-forwarded-for') ||
@@ -68,41 +64,56 @@ export async function POST(request: NextRequest) {
     console.log('💾 Upserting rating to database...');
     console.log('📋 Rating data:', JSON.stringify(ratingData, null, 2));
 
-    // Upsert rating (update if exists, insert if not)
-    const { data: rating, error: ratingError } = await supabase
-      .from('message_ratings')
-      .upsert(ratingData, {
-        onConflict: 'message_id,session_id',
-      })
-      .select()
-      .single();
+    // Use Supabase REST API directly instead of SDK to avoid Next.js conflicts
+    const supabaseRestUrl = `${supabaseUrl}/rest/v1/message_ratings`;
 
-    if (ratingError) {
+    console.log('🌐 Making REST request to:', supabaseRestUrl);
+
+    const response = await fetch(supabaseRestUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Prefer': 'resolution=merge-duplicates,return=representation',
+      },
+      body: JSON.stringify(ratingData),
+    });
+
+    console.log('📡 Supabase REST response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
       console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.error('❌ DATABASE ERROR');
-      console.error('Error code:', ratingError.code);
-      console.error('Error message:', ratingError.message);
-      console.error('Error details:', JSON.stringify(ratingError, null, 2));
+      console.error('❌ SUPABASE REST API ERROR');
+      console.error('Status:', response.status);
+      console.error('Response:', errorText);
       console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       return NextResponse.json(
         {
           error: 'Failed to save rating',
-          details: ratingError.message,
-          code: ratingError.code
+          details: errorText,
+          status: response.status
         },
         { status: 500 }
       );
     }
 
+    const savedRating = await response.json();
     console.log('✅ Database upsert successful!');
-    console.log('📦 Saved rating:', JSON.stringify(rating, null, 2));
+    console.log('📦 Saved rating:', JSON.stringify(savedRating, null, 2));
 
     return NextResponse.json({
       success: true,
-      rating: rating,
+      rating: Array.isArray(savedRating) ? savedRating[0] : savedRating,
     });
   } catch (error: any) {
-    console.error('[Rate Message] Unexpected error:', error);
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error('❌ UNEXPECTED ERROR');
+    console.error('Error name:', error?.name);
+    console.error('Error message:', error?.message);
+    console.error('Error stack:', error?.stack);
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     return NextResponse.json(
       {
         error: 'Internal server error',
@@ -126,7 +137,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get environment variables
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -137,48 +147,51 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Create Supabase client with explicit options
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    });
-
     // Get rating for specific message and session
     if (sessionId) {
-      const { data, error } = await supabase
-        .from('message_ratings')
-        .select('rating_type, created_at')
-        .eq('message_id', messageId)
-        .eq('session_id', sessionId)
-        .maybeSingle();
+      const url = `${supabaseUrl}/rest/v1/message_ratings?message_id=eq.${messageId}&session_id=eq.${sessionId}&select=rating_type,created_at`;
 
-      if (error) {
-        console.error('Error fetching rating:', error);
+      const response = await fetch(url, {
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.error('Error fetching rating:', await response.text());
         return NextResponse.json(
           { error: 'Failed to fetch rating' },
           { status: 500 }
         );
       }
 
-      return NextResponse.json({ rating: data?.rating_type || null });
+      const data = await response.json();
+      const rating = Array.isArray(data) && data.length > 0 ? data[0] : null;
+
+      return NextResponse.json({ rating: rating?.rating_type || null });
     }
 
-    // Get rating statistics for message
-    const { data: stats, error: statsError } = await supabase
-      .from('message_rating_stats')
-      .select('*')
-      .eq('message_id', messageId)
-      .maybeSingle();
+    // Get rating statistics for message (from materialized view if exists)
+    const statsUrl = `${supabaseUrl}/rest/v1/message_rating_stats?message_id=eq.${messageId}`;
 
-    if (statsError) {
-      console.error('Error fetching rating stats:', statsError);
+    const statsResponse = await fetch(statsUrl, {
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+      },
+    });
+
+    if (!statsResponse.ok) {
+      console.error('Error fetching rating stats:', await statsResponse.text());
       return NextResponse.json(
         { error: 'Failed to fetch rating statistics' },
         { status: 500 }
       );
     }
+
+    const statsData = await statsResponse.json();
+    const stats = Array.isArray(statsData) && statsData.length > 0 ? statsData[0] : null;
 
     return NextResponse.json({ stats: stats || { likes: 0, dislikes: 0, total_ratings: 0 } });
   } catch (error) {
@@ -197,7 +210,6 @@ export async function DELETE(request: NextRequest) {
 
     console.log('[Rate Message DELETE] Request:', { messageId, sessionId });
 
-    // Validation
     if (!messageId || !sessionId) {
       return NextResponse.json(
         { error: 'Missing required fields' },
@@ -205,7 +217,6 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Get environment variables
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -216,25 +227,22 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Create Supabase client
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
+    // Delete using REST API
+    const url = `${supabaseUrl}/rest/v1/message_ratings?message_id=eq.${messageId}&session_id=eq.${sessionId}`;
+
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
       },
     });
 
-    // Delete rating
-    const { error: deleteError } = await supabase
-      .from('message_ratings')
-      .delete()
-      .eq('message_id', messageId)
-      .eq('session_id', sessionId);
-
-    if (deleteError) {
-      console.error('[Rate Message DELETE] Error:', deleteError);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Rate Message DELETE] Error:', errorText);
       return NextResponse.json(
-        { error: 'Failed to delete rating', details: deleteError.message },
+        { error: 'Failed to delete rating', details: errorText },
         { status: 500 }
       );
     }
