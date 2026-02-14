@@ -5,6 +5,8 @@ import { Toaster } from '@/components/ui/sonner';
 import { LanguageProvider } from '@/lib/i18n/context';
 import { ChatProvider } from '@/components/chat/chat-context';
 import { AuthProvider } from '@/lib/auth/context';
+import { ErrorBoundary } from '@/components/error-boundary';
+import { ServiceWorkerRegistration } from '@/components/service-worker-registration';
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],
@@ -219,15 +221,51 @@ export default function RootLayout({
             `,
           }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Global chunk load error handler
+              window.addEventListener('error', function(e) {
+                const isChunkError = e.message && (
+                  e.message.includes('Loading chunk') ||
+                  e.message.includes('Failed to fetch dynamically imported module') ||
+                  e.message.includes('webpack')
+                );
+
+                if (isChunkError) {
+                  console.warn('[ChunkLoadError] Detected, reloading page...');
+                  // Store error info before reload
+                  sessionStorage.setItem('chunk_error_reload', 'true');
+                  // Reload after short delay
+                  setTimeout(function() {
+                    window.location.reload();
+                  }, 1500);
+                }
+              }, true);
+
+              // Prevent infinite reload loop
+              window.addEventListener('DOMContentLoaded', function() {
+                const hadError = sessionStorage.getItem('chunk_error_reload');
+                if (hadError) {
+                  sessionStorage.removeItem('chunk_error_reload');
+                  console.log('[ChunkLoadError] Page reloaded successfully');
+                }
+              });
+            `,
+          }}
+        />
       </head>
       <body className={`${inter.variable} font-sans`}>
-        <LanguageProvider>
-          <AuthProvider>
-            <ChatProvider>
-              {children}
-            </ChatProvider>
-          </AuthProvider>
-        </LanguageProvider>
+        <ServiceWorkerRegistration />
+        <ErrorBoundary>
+          <LanguageProvider>
+            <AuthProvider>
+              <ChatProvider>
+                {children}
+              </ChatProvider>
+            </AuthProvider>
+          </LanguageProvider>
+        </ErrorBoundary>
         <Toaster position="top-center" richColors />
       </body>
     </html>
