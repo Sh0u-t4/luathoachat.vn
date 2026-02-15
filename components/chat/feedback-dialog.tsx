@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { useLanguage } from '@/lib/i18n/context';
 import { Loader2, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface FeedbackDialogProps {
@@ -31,6 +32,7 @@ export function FeedbackDialog({
   sessionId,
   rating: initialRating,
 }: FeedbackDialogProps) {
+  const { t } = useLanguage();
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRating, setSelectedRating] = useState<'positive' | 'negative'>(
@@ -46,7 +48,7 @@ export function FeedbackDialog({
 
   const handleSubmit = async () => {
     if (!comment.trim()) {
-      toast.error('Vui lòng nhập nhận xét của bạn');
+      toast.error(t.chat.feedbackErrorEmpty);
       return;
     }
 
@@ -57,59 +59,59 @@ export function FeedbackDialog({
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (!user) {
-        toast.error('Vui lòng đăng nhập để gửi phản hồi');
-        return;
-      }
+      // Allow both authenticated and anonymous users to submit feedback
+      const feedbackData = {
+        message_id: messageId,
+        user_id: user?.id || null,
+        session_id: sessionId,
+        rating: selectedRating,
+        comment: comment.trim(),
+      };
 
       const { error } = await supabase.from('message_feedback').upsert(
+        feedbackData,
         {
-          message_id: messageId,
-          user_id: user.id,
-          session_id: sessionId,
-          rating: selectedRating,
-          comment: comment.trim(),
-        },
-        {
-          onConflict: 'message_id,user_id',
+          onConflict: 'message_id,session_id',
         }
       );
 
       if (error) throw error;
 
-      toast.success('Cảm ơn bạn đã gửi phản hồi!', {
-        description: 'Ý kiến của bạn giúp chúng tôi cải thiện dịch vụ.',
+      toast.success(t.chat.feedbackSuccessTitle, {
+        description: t.chat.feedbackSuccessDescription,
       });
 
       setComment('');
       onOpenChange(false);
     } catch (error) {
       console.error('Error submitting feedback:', error);
-      toast.error('Không thể gửi phản hồi', {
-        description: 'Vui lòng thử lại sau.',
+      toast.error(t.chat.feedbackErrorTitle, {
+        description: t.chat.feedbackErrorDescription,
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const ratingText = selectedRating === 'positive' ? 'hữu ích' : 'chưa hữu ích';
+  const ratingText = selectedRating === 'positive'
+    ? t.chat.feedbackRatingTextHelpful
+    : t.chat.feedbackRatingTextNotHelpful;
   const ratingColor = selectedRating === 'positive' ? 'text-green-600' : 'text-red-600';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>Gửi phản hồi chi tiết</DialogTitle>
+          <DialogTitle>{t.chat.feedbackDialogTitle}</DialogTitle>
           <DialogDescription>
             {initialRating ? (
               <>
-                Bạn đã đánh giá câu trả lời này là{' '}
-                <span className={`font-semibold ${ratingColor}`}>{ratingText}</span>. Hãy cho chúng
-                tôi biết thêm để cải thiện dịch vụ.
+                {t.chat.feedbackDescWithRatingPrefix}{' '}
+                <span className={`font-semibold ${ratingColor}`}>{ratingText}</span>
+                {t.chat.feedbackDescWithRatingSuffix}
               </>
             ) : (
-              'Hãy cho chúng tôi biết ý kiến của bạn về câu trả lời này để giúp chúng tôi cải thiện dịch vụ.'
+              t.chat.feedbackDescNoRating
             )}
           </DialogDescription>
         </DialogHeader>
@@ -118,7 +120,7 @@ export function FeedbackDialog({
           {/* Rating Selection - chỉ hiển thị nếu chưa có rating */}
           {!initialRating && (
             <div className="space-y-2">
-              <Label>Đánh giá của bạn *</Label>
+              <Label>{t.chat.feedbackRatingLabel}</Label>
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -132,7 +134,7 @@ export function FeedbackDialog({
                   }`}
                 >
                   <ThumbsUp className="w-4 h-4 mr-2" />
-                  Hữu ích
+                  {t.chat.feedbackHelpful}
                 </Button>
                 <Button
                   type="button"
@@ -146,20 +148,20 @@ export function FeedbackDialog({
                   }`}
                 >
                   <ThumbsDown className="w-4 h-4 mr-2" />
-                  Chưa hữu ích
+                  {t.chat.feedbackNotHelpful}
                 </Button>
               </div>
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="comment">Nhận xét của bạn *</Label>
+            <Label htmlFor="comment">{t.chat.feedbackCommentLabel}</Label>
             <Textarea
               id="comment"
               placeholder={
                 selectedRating === 'positive'
-                  ? 'Điều gì khiến câu trả lời này hữu ích? (VD: Thông tin chính xác, trích dẫn rõ ràng, giải thích dễ hiểu...)'
-                  : 'Câu trả lời cần cải thiện gì? (VD: Thiếu thông tin, không đúng trọng tâm, khó hiểu...)'
+                  ? t.chat.feedbackCommentPlaceholderPositive
+                  : t.chat.feedbackCommentPlaceholderNegative
               }
               value={comment}
               onChange={(e) => setComment(e.target.value)}
@@ -168,7 +170,7 @@ export function FeedbackDialog({
               disabled={isSubmitting}
             />
             <p className="text-xs text-muted-foreground">
-              Tối thiểu 10 ký tự. Phản hồi của bạn hoàn toàn ẩn danh.
+              {t.chat.feedbackCommentHint}
             </p>
           </div>
         </div>
@@ -180,7 +182,7 @@ export function FeedbackDialog({
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
-            Hủy
+            {t.chat.feedbackCancelButton}
           </Button>
           <Button
             type="button"
@@ -190,10 +192,10 @@ export function FeedbackDialog({
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Đang gửi...
+                {t.chat.feedbackSubmitting}
               </>
             ) : (
-              'Gửi phản hồi'
+              t.chat.feedbackSubmitButton
             )}
           </Button>
         </DialogFooter>

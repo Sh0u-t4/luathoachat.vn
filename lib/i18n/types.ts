@@ -243,6 +243,27 @@ export interface Translation {
     newChatButton: string;
     emptyHistory: string;
     historyHint: string;
+    feedbackDialogTitle: string;
+    feedbackRatingLabel: string;
+    feedbackHelpful: string;
+    feedbackNotHelpful: string;
+    feedbackCommentLabel: string;
+    feedbackCommentPlaceholderPositive: string;
+    feedbackCommentPlaceholderNegative: string;
+    feedbackCommentHint: string;
+    feedbackCancelButton: string;
+    feedbackSubmitButton: string;
+    feedbackSubmitting: string;
+    feedbackErrorEmpty: string;
+    feedbackSuccessTitle: string;
+    feedbackSuccessDescription: string;
+    feedbackErrorTitle: string;
+    feedbackErrorDescription: string;
+    feedbackRatingTextHelpful: string;
+    feedbackRatingTextNotHelpful: string;
+    feedbackDescWithRatingPrefix: string;
+    feedbackDescWithRatingSuffix: string;
+    feedbackDescNoRating: string;
   };
   seo: {
     home: {
