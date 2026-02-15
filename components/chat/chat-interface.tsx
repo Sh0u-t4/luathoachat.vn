@@ -10,10 +10,16 @@ import { AssistantMessage } from './assistant-message';
 import { EmailGateModal } from './email-gate-modal';
 import { LoginGateModal } from './login-gate-modal';
 import { OfflineBanner } from './offline-banner';
+import { MobileChatInput } from './mobile-chat-input';
+import { MobileChatHeader } from './mobile-chat-header';
+import { MobileBottomDrawer } from './mobile-bottom-drawer';
+import { MobileChatHistory } from './mobile-chat-history';
+import { MobileMessageCard } from './mobile-message-card';
 import { useOffline } from '@/hooks/use-offline';
 import { useFAQCache } from '@/hooks/use-faq-cache';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n/context';
+import { useMobile } from '@/lib/mobile/context';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +32,7 @@ import type { ChatMessage } from '@/types';
 export function ChatInterface() {
   const [inputValue, setInputValue] = useState('');
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [showMobileHistory, setShowMobileHistory] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const prevMessagesLengthRef = useRef(0);
@@ -34,6 +41,9 @@ export function ChatInterface() {
 
   // i18n
   const { t } = useLanguage();
+
+  // Mobile detection
+  const { shouldUseMobileUI } = useMobile();
 
   // Offline detection and FAQ cache
   const isOffline = useOffline();
@@ -55,6 +65,7 @@ export function ChatInterface() {
     currentQuery,
     clearCurrentQuery,
     sessionId,
+    chatSessions,
   } = useChat();
 
   // Track latest assistant message ID để apply typing effect
@@ -193,31 +204,52 @@ export function ChatInterface() {
 
   return (
     <>
+      {/* Mobile Chat Header (only on mobile) */}
+      {shouldUseMobileUI && (
+        <MobileChatHeader
+          onHistoryClick={() => setShowMobileHistory(true)}
+          chatSessionCount={chatSessions.length}
+        />
+      )}
+
       <Card
         id="chat-interface"
-        className="w-full max-w-4xl mx-auto overflow-hidden border-0 shadow-xl bg-white/95 backdrop-blur"
+        className={`
+          w-full max-w-4xl mx-auto overflow-hidden
+          ${shouldUseMobileUI ? 'border-0 shadow-none rounded-none min-h-screen' : 'border-0 shadow-xl bg-white/95 backdrop-blur'}
+        `}
       >
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
-              <Bot className="w-5 h-5 text-cyan-400" />
-            </div>
-            <div>
-              <h2 className="text-white font-semibold">{t.chat.title}</h2>
-              <p className="text-slate-400 text-sm">{t.chat.subtitle}</p>
-            </div>
-            <div className="ml-auto flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full animate-pulse ${isOffline ? 'bg-amber-400' : 'bg-green-400'}`} />
-              <span className={`text-sm ${isOffline ? 'text-amber-400' : 'text-green-400'}`}>
-                {isOffline ? t.chat.offline : t.chat.online}
-              </span>
+        {/* Desktop Header (hidden on mobile) */}
+        {!shouldUseMobileUI && (
+          <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                <Bot className="w-5 h-5 text-cyan-400" />
+              </div>
+              <div>
+                <h2 className="text-white font-semibold">{t.chat.title}</h2>
+                <p className="text-slate-400 text-sm">{t.chat.subtitle}</p>
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full animate-pulse ${isOffline ? 'bg-amber-400' : 'bg-green-400'}`} />
+                <span className={`text-sm ${isOffline ? 'text-amber-400' : 'text-green-400'}`}>
+                  {isOffline ? t.chat.offline : t.chat.online}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div
           ref={chatContainerRef}
-          className="h-[400px] md:h-[500px] overflow-y-auto p-4 md:p-6 space-y-4 bg-gradient-to-b from-slate-50 to-white scroll-smooth"
+          className={`
+            ${shouldUseMobileUI ? 'min-h-[calc(100vh-140px)]' : 'h-[400px] md:h-[500px]'}
+            overflow-y-auto
+            ${shouldUseMobileUI ? 'p-3' : 'p-4 md:p-6'}
+            space-y-3 md:space-y-4
+            bg-gradient-to-b from-slate-50 to-white
+            ${shouldUseMobileUI ? 'smooth-scroll-ios' : 'scroll-smooth'}
+          `}
         >
           {/* Offline Banner */}
           <OfflineBanner isVisible={isOffline} cachedFAQCount={faqs.length} />
@@ -332,33 +364,56 @@ export function ChatInterface() {
           )}
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="p-4 border-t border-slate-200 bg-white"
-        >
-          <div className="flex gap-3">
-            <Input
-              ref={inputRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder={t.chat.inputPlaceholder}
-              className="flex-1 border-slate-200 focus:border-cyan-500 focus:ring-cyan-500"
-              disabled={isTyping}
-            />
-            <Button
-              type="submit"
-              disabled={!inputValue.trim() || isTyping}
-              className="bg-cyan-600 hover:bg-cyan-700 text-white px-6"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-          <div className="text-xs text-slate-400 mt-2 text-center space-y-1">
-            <p>{t.chat.disclaimer1}</p>
-            <p>{t.chat.disclaimer2}</p>
-          </div>
-        </form>
+        {/* Conditional Input: Mobile vs Desktop */}
+        {shouldUseMobileUI ? (
+          <MobileChatInput
+            value={inputValue}
+            onChange={setInputValue}
+            onSubmit={handleSubmit}
+            disabled={isTyping}
+            placeholder={t.chat.inputPlaceholder}
+          />
+        ) : (
+          <form
+            onSubmit={handleSubmit}
+            className="p-4 border-t border-slate-200 bg-white"
+          >
+            <div className="flex gap-3">
+              <Input
+                ref={inputRef}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder={t.chat.inputPlaceholder}
+                className="flex-1 border-slate-200 focus:border-cyan-500 focus:ring-cyan-500"
+                disabled={isTyping}
+              />
+              <Button
+                type="submit"
+                disabled={!inputValue.trim() || isTyping}
+                className="bg-cyan-600 hover:bg-cyan-700 text-white px-6"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="text-xs text-slate-400 mt-2 text-center space-y-1">
+              <p>{t.chat.disclaimer1}</p>
+              <p>{t.chat.disclaimer2}</p>
+            </div>
+          </form>
+        )}
       </Card>
+
+      {/* Mobile Bottom Drawer for Chat History */}
+      {shouldUseMobileUI && (
+        <MobileBottomDrawer
+          isOpen={showMobileHistory}
+          onClose={() => setShowMobileHistory(false)}
+          title={t.chat.historyTitle}
+          height="full"
+        >
+          <MobileChatHistory onSessionSelect={() => setShowMobileHistory(false)} />
+        </MobileBottomDrawer>
+      )}
 
       <Dialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt}>
         <DialogContent className="sm:max-w-md">

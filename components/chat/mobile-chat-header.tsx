@@ -1,0 +1,111 @@
+'use client';
+
+import { Menu, History, MoreVertical, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/lib/i18n/context';
+import { useMobile } from '@/lib/mobile/context';
+import { useOffline } from '@/hooks/use-offline';
+import { hapticFeedback, HapticPatterns } from '@/lib/mobile/utils';
+
+interface MobileChatHeaderProps {
+  onMenuClick?: () => void;
+  onHistoryClick?: () => void;
+  onMoreClick?: () => void;
+  chatSessionCount?: number;
+}
+
+/**
+ * Mobile-optimized chat header với safe area support
+ */
+export function MobileChatHeader({
+  onMenuClick,
+  onHistoryClick,
+  onMoreClick,
+  chatSessionCount = 0,
+}: MobileChatHeaderProps) {
+  const { t } = useLanguage();
+  const { shouldUseMobileUI, device } = useMobile();
+  const isOffline = useOffline();
+
+  if (!shouldUseMobileUI) return null;
+
+  return (
+    <div
+      className={`
+        sticky top-0 z-30
+        bg-gradient-to-r from-slate-900 to-slate-800
+        ${device.hasNotch ? 'pt-safe pt-2' : 'pt-2'}
+        pb-2 px-4
+        shadow-md
+      `}
+    >
+      <div className="flex items-center justify-between max-w-4xl mx-auto">
+        {/* Left: Menu Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            hapticFeedback(HapticPatterns.light);
+            onMenuClick?.();
+          }}
+          className="touch-target text-white hover:bg-white/10"
+        >
+          <Menu className="w-5 h-5" />
+        </Button>
+
+        {/* Center: Title & Status */}
+        <div className="flex-1 flex flex-col items-center justify-center min-w-0 px-2">
+          <h1 className="text-white font-semibold text-base truncate w-full text-center">
+            {t.chat.title}
+          </h1>
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                isOffline ? 'bg-amber-400' : 'bg-green-400'
+              }`}
+            />
+            <span
+              className={`text-xs ${
+                isOffline ? 'text-amber-300' : 'text-green-300'
+              }`}
+            >
+              {isOffline ? t.chat.offline : t.chat.online}
+            </span>
+          </div>
+        </div>
+
+        {/* Right: History & More Buttons */}
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              hapticFeedback(HapticPatterns.light);
+              onHistoryClick?.();
+            }}
+            className="touch-target text-white hover:bg-white/10 relative"
+          >
+            <History className="w-5 h-5" />
+            {chatSessionCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                {chatSessionCount > 9 ? '9+' : chatSessionCount}
+              </span>
+            )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              hapticFeedback(HapticPatterns.light);
+              onMoreClick?.();
+            }}
+            className="touch-target text-white hover:bg-white/10"
+          >
+            <MoreVertical className="w-5 h-5" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

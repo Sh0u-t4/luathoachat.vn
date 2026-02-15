@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { LanguageProvider } from '@/lib/i18n/context';
 import { ChatProvider } from '@/components/chat/chat-context';
 import { AuthProvider } from '@/lib/auth/context';
+import { MobileProvider } from '@/lib/mobile/context';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { ServiceWorkerRegistration } from '@/components/service-worker-registration';
 
@@ -273,13 +274,15 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans`}>
         <ServiceWorkerRegistration />
         <ErrorBoundary>
-          <LanguageProvider>
-            <AuthProvider>
-              <ChatProvider>
-                {children}
-              </ChatProvider>
-            </AuthProvider>
-          </LanguageProvider>
+          <MobileProvider>
+            <LanguageProvider>
+              <AuthProvider>
+                <ChatProvider>
+                  {children}
+                </ChatProvider>
+              </AuthProvider>
+            </LanguageProvider>
+          </MobileProvider>
         </ErrorBoundary>
         <Toaster position="top-center" richColors />
       </body>
