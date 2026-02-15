@@ -221,6 +221,21 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* Google Analytics 4 - G-43DD3M8BC2 */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-43DD3M8BC2"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-43DD3M8BC2');
+            `,
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
