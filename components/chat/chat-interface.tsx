@@ -158,9 +158,21 @@ export function ChatInterface() {
   }, [checkIfNearBottom]);
 
   // Track typing state (includes both loading and typing effect)
+  const activeTypingMessagesRef = useRef(new Set<string>());
+
   useEffect(() => {
-    setIsAnyTyping(isTyping);
+    setIsAnyTyping(isTyping || activeTypingMessagesRef.current.size > 0);
   }, [isTyping]);
+
+  // Handle typing state changes from assistant messages
+  const handleTypingChange = useCallback((messageId: string, isTyping: boolean) => {
+    if (isTyping) {
+      activeTypingMessagesRef.current.add(messageId);
+    } else {
+      activeTypingMessagesRef.current.delete(messageId);
+    }
+    setIsAnyTyping(isTyping || activeTypingMessagesRef.current.size > 0);
+  }, []);
 
   // Smart Auto-scroll: Scroll when new message arrives OR content changes (typing effect)
   useEffect(() => {
@@ -393,6 +405,7 @@ export function ChatInterface() {
                       onUnlockClick={handleUnlockClick}
                       messageIndex={assistantMessageIndex}
                       sessionId={sessionId || 'no-session'}
+                      onTypingChange={(isTyping) => handleTypingChange(message.id, isTyping)}
                     />
                   ) : (
                     <p className="whitespace-pre-wrap">{message.content}</p>
