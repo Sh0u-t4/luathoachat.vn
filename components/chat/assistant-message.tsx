@@ -18,7 +18,6 @@ interface AssistantMessageProps {
   onUnlockClick: () => void;
   messageIndex: number; // Index của assistant message này (0-based)
   sessionId: string;
-  onTypingChange?: (isTyping: boolean) => void; // Callback to notify parent when typing state changes
 }
 
 // Helper function to validate if a string is a valid UUID
@@ -35,7 +34,6 @@ export function AssistantMessage({
   onUnlockClick,
   messageIndex,
   sessionId,
-  onTypingChange,
 }: AssistantMessageProps) {
   // Rating state - quick like/dislike
   const [userRating, setUserRating] = useState<'like' | 'dislike' | null>(null);
@@ -81,21 +79,13 @@ export function AssistantMessage({
   const { publicPart, lockedPart } = splitContent(fullContent);
 
   // Typing effect - chỉ apply cho message mới nhất
-  const { displayedText: displayedPublic, isTyping: isTypingPublic } = useTypingEffect(publicPart, isLatest, {
+  const { displayedText: displayedPublic } = useTypingEffect(publicPart, isLatest, {
     speed: 15,
   });
 
-  const { displayedText: displayedLocked, isTyping: isTypingLocked } = useTypingEffect(lockedPart, isLatest, {
+  const { displayedText: displayedLocked } = useTypingEffect(lockedPart, isLatest, {
     speed: 15,
   });
-
-  // Notify parent when typing state changes
-  const isCurrentlyTyping = isTypingPublic || isTypingLocked;
-  useEffect(() => {
-    if (onTypingChange) {
-      onTypingChange(isCurrentlyTyping);
-    }
-  }, [isCurrentlyTyping, onTypingChange]);
 
   // Nếu không phải latest message, hiển thị toàn bộ ngay
   const finalPublic = isLatest ? displayedPublic : publicPart;
