@@ -1,5 +1,5 @@
 // Service Worker for handling chunk load failures
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2-2026-02-15';
 const CACHE_NAME = `luathoachat-${CACHE_VERSION}`;
 
 // Files to cache on install
