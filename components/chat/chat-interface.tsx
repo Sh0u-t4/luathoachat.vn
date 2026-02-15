@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, LogIn, Lock, Search, BookOpen, Zap } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Send, Bot, User, Sparkles, LogIn, Lock, Search, BookOpen, Zap, ArrowDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -38,6 +38,13 @@ export function ChatInterface() {
   const prevMessagesLengthRef = useRef(0);
   const wasCleared = useRef(false);
   const router = useRouter();
+
+  // Smart Auto-Scroll States
+  const [isNearBottom, setIsNearBottom] = useState(true);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isAnyTyping, setIsAnyTyping] = useState(false);
+  const autoScrollEnabledRef = useRef(true);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
   // i18n
   const { t } = useLanguage();
@@ -113,36 +120,103 @@ export function ChatInterface() {
     }
   }, [messages.length]);
 
-  // Auto-scroll logic
+  // Check if user is near bottom (within 150px)
+  const checkIfNearBottom = useCallback(() => {
+    const container = chatContainerRef.current;
+    if (!container) return false;
+
+    const threshold = 150;
+    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+    return distanceFromBottom < threshold;
+  }, []);
+
+  // Scroll to bottom function
+  const scrollToBottom = useCallback((behavior: 'smooth' | 'auto' = 'smooth') => {
+    const container = chatContainerRef.current;
+    if (!container) return;
+
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior,
+    });
+  }, []);
+
+  // Handle scroll events to track position
+  useEffect(() => {
+    const container = chatContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const nearBottom = checkIfNearBottom();
+      setIsNearBottom(nearBottom);
+      setShowScrollButton(!nearBottom);
+      autoScrollEnabledRef.current = nearBottom;
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [checkIfNearBottom]);
+
+  // Track typing state (includes both loading and typing effect)
+  useEffect(() => {
+    setIsAnyTyping(isTyping);
+  }, [isTyping]);
+
+  // Smart Auto-scroll: Scroll when new message arrives OR content changes (typing effect)
   useEffect(() => {
     const hasNewMessage = messages.length > prevMessagesLengthRef.current;
     const isLoadingHistory = wasCleared.current && messages.length > 0;
 
-    if (hasNewMessage || isTyping) {
-      const timer = setTimeout(() => {
+    // If loading history, scroll to top to read from beginning
+    if (isLoadingHistory) {
+      setTimeout(() => {
         if (chatContainerRef.current) {
-          // Nếu đang load history, scroll lên top để xem từ đầu
-          // Nếu là message mới khi chat, scroll xuống bottom
-          if (isLoadingHistory) {
-            chatContainerRef.current.scrollTo({
-              top: 0,
-              behavior: 'smooth'
-            });
-            wasCleared.current = false;
-          } else {
-            chatContainerRef.current.scrollTo({
-              top: chatContainerRef.current.scrollHeight,
-              behavior: 'smooth'
-            });
-          }
+          chatContainerRef.current.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+          wasCleared.current = false;
         }
+      }, 100);
+      prevMessagesLengthRef.current = messages.length;
+      return;
+    }
+
+    // Smart scroll: Only scroll if user is near bottom OR if typing
+    if ((hasNewMessage || isTyping) && autoScrollEnabledRef.current) {
+      const timer = setTimeout(() => {
+        scrollToBottom('smooth');
       }, 100);
 
       prevMessagesLengthRef.current = messages.length;
-
       return () => clearTimeout(timer);
+    } else if (hasNewMessage) {
+      prevMessagesLengthRef.current = messages.length;
     }
-  }, [messages, isTyping]);
+  }, [messages, isTyping, scrollToBottom]);
+
+  // ResizeObserver: Auto-scroll when content height changes (typing effect)
+  useEffect(() => {
+    const container = chatContainerRef.current;
+    if (!container) return;
+
+    // Create ResizeObserver to watch content changes
+    resizeObserverRef.current = new ResizeObserver(() => {
+      // Only auto-scroll if user is near bottom
+      if (autoScrollEnabledRef.current && isAnyTyping) {
+        scrollToBottom('auto'); // Use 'auto' for smooth typing experience
+      }
+    });
+
+    // Observe the container's content changes
+    resizeObserverRef.current.observe(container);
+
+    return () => {
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+      }
+    };
+  }, [isAnyTyping, scrollToBottom]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,19 +314,20 @@ export function ChatInterface() {
           </div>
         )}
 
-        <div
-          ref={chatContainerRef}
-          className={`
-            ${shouldUseMobileUI ? 'min-h-[calc(100vh-140px)]' : 'h-[400px] md:h-[500px]'}
-            overflow-y-auto
-            ${shouldUseMobileUI ? 'p-3' : 'p-4 md:p-6'}
-            space-y-3 md:space-y-4
-            bg-gradient-to-b from-slate-50 to-white
-            ${shouldUseMobileUI ? 'smooth-scroll-ios' : 'scroll-smooth'}
-          `}
-        >
-          {/* Offline Banner */}
-          <OfflineBanner isVisible={isOffline} cachedFAQCount={faqs.length} />
+        <div className="relative">
+          <div
+            ref={chatContainerRef}
+            className={`
+              ${shouldUseMobileUI ? 'min-h-[calc(100vh-140px)]' : 'h-[400px] md:h-[500px]'}
+              overflow-y-auto
+              ${shouldUseMobileUI ? 'p-3' : 'p-4 md:p-6'}
+              space-y-3 md:space-y-4
+              bg-gradient-to-b from-slate-50 to-white
+              ${shouldUseMobileUI ? 'smooth-scroll-ios' : 'scroll-smooth'}
+            `}
+          >
+            {/* Offline Banner */}
+            <OfflineBanner isVisible={isOffline} cachedFAQCount={faqs.length} />
           {messages.length === 0 && !isTyping && (
             <div className="text-center py-12 animate-fade-in">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-cyan-100 flex items-center justify-center">
@@ -361,6 +436,37 @@ export function ChatInterface() {
                 </div>
               </div>
             </div>
+          )}
+          </div>
+
+          {/* AI Typing Indicator - Floating at top */}
+          {isAnyTyping && messages.length > 0 && (
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 animate-fade-in">
+              <div className="bg-cyan-600/95 backdrop-blur-sm text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm font-medium">AI đang trả lời...</span>
+              </div>
+            </div>
+          )}
+
+          {/* Scroll to Bottom Button - Floating at bottom-right */}
+          {showScrollButton && (
+            <button
+              onClick={() => scrollToBottom('smooth')}
+              className={`
+                absolute bottom-4 right-4 z-20
+                w-12 h-12 rounded-full
+                bg-cyan-600 hover:bg-cyan-700
+                text-white shadow-lg hover:shadow-xl
+                flex items-center justify-center
+                transition-all duration-300
+                animate-fade-in
+                ${shouldUseMobileUI ? 'bottom-6 right-6' : ''}
+              `}
+              aria-label="Scroll to bottom"
+            >
+              <ArrowDown className="w-5 h-5" />
+            </button>
           )}
         </div>
 
