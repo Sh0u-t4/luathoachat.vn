@@ -8,6 +8,7 @@ import { StatsSection } from '@/components/landing/stats-section';
 import { Footer } from '@/components/landing/footer';
 import { ChatInterface } from '@/components/chat/chat-interface';
 import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar';
+import { GoogleConversionTracker } from '@/components/google-conversion-tracker';
 
 export default function HomePage() {
   const chatRef = useRef<HTMLDivElement>(null);
@@ -18,6 +19,9 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
+      {/* Google Ads Conversion Tracking - Lượt xem trang */}
+      <GoogleConversionTracker />
+
       <Header />
       <ChatHistorySidebar />
 

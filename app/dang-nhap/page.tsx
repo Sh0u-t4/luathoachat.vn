@@ -10,11 +10,13 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/lib/auth/context';
 import { useLanguage } from '@/lib/i18n/context';
 import { toast } from 'sonner';
+import { useGoogleConversion, CONVERSION_LABELS } from '@/components/google-conversion-tracker';
 
 export default function LoginPage() {
   const router = useRouter();
   const { signIn } = useAuth();
   const { t } = useLanguage();
+  const { trackConversion } = useGoogleConversion();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -41,6 +43,9 @@ export default function LoginPage() {
       if (error) {
         toast.error(error);
       } else {
+        // Track Google Ads conversion for successful login
+        trackConversion(CONVERSION_LABELS.LOGIN, 1.0, 'VND');
+
         toast.success(t.auth.welcomeBack);
         router.push('/');
       }

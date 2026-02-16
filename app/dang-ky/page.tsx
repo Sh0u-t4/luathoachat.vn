@@ -25,12 +25,14 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/lib/auth/context';
 import { useLanguage } from '@/lib/i18n/context';
 import { toast } from 'sonner';
+import { useGoogleConversion, CONVERSION_LABELS } from '@/components/google-conversion-tracker';
 
 export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { signUp } = useAuth();
   const { t } = useLanguage();
+  const { trackConversion } = useGoogleConversion();
 
   // Get email and source from URL params
   const prefilledEmail = searchParams.get('email');
@@ -85,6 +87,9 @@ export default function RegisterPage() {
       if (error) {
         toast.error(error);
       } else {
+        // Track Google Ads conversion for successful registration
+        trackConversion(CONVERSION_LABELS.SIGN_UP, 1.0, 'VND');
+
         toast.success(t.auth.registerSuccess, {
           description: t.auth.registerSuccessDesc,
         });
