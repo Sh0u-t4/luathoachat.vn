@@ -166,7 +166,7 @@ export function MobileChatInput({
 
       {/* Emoji Picker Overlay */}
       {showEmojiPicker && shouldUseMobileUI && (
-        <div className="absolute bottom-full left-0 right-0 mb-2 p-3 bg-white rounded-2xl shadow-lg border border-slate-200 max-w-4xl mx-auto">
+        <div className="absolute bottom-full left-0 right-0 mb-2 p-3 bg-white rounded-2xl shadow-lg border border-slate-200 max-w-4xl mx-auto" suppressHydrationWarning>
           <div className="flex flex-wrap gap-2 justify-center">
             {commonEmojis.map((emoji) => (
               <button
@@ -174,6 +174,7 @@ export function MobileChatInput({
                 type="button"
                 onClick={() => insertEmoji(emoji)}
                 className="text-2xl p-2 hover:bg-slate-100 rounded-lg transition-colors touch-target-comfortable"
+                suppressHydrationWarning
               >
                 {emoji}
               </button>
@@ -183,6 +184,7 @@ export function MobileChatInput({
             type="button"
             onClick={() => setShowEmojiPicker(false)}
             className="w-full mt-2 py-2 text-sm text-slate-500 hover:text-slate-700"
+            suppressHydrationWarning
           >
             Đóng
           </button>
@@ -200,6 +202,7 @@ export function MobileChatInput({
             disabled={disabled}
             onClick={handleAttachmentClick}
             aria-label="Đính kèm file"
+            suppressHydrationWarning
           >
             <Paperclip className="w-5 h-5" />
           </Button>
@@ -250,6 +253,7 @@ export function MobileChatInput({
               disabled={disabled}
               onClick={handleEmojiClick}
               aria-label="Chọn emoji"
+              suppressHydrationWarning
             >
               <Smile className="w-5 h-5" />
             </button>
@@ -270,6 +274,7 @@ export function MobileChatInput({
             disabled={disabled}
             onClick={handleVoiceClick}
             aria-label={isRecording ? 'Dừng ghi âm' : 'Bắt đầu ghi âm'}
+            suppressHydrationWarning
           >
             <Mic className={`w-5 h-5 ${isRecording ? 'animate-pulse' : ''}`} />
           </Button>
@@ -287,6 +292,7 @@ export function MobileChatInput({
               disabled:bg-slate-300 disabled:text-slate-500
               touch-feedback
             `}
+            suppressHydrationWarning
           >
             <Send className={shouldUseMobileUI ? 'w-5 h-5' : 'w-4 h-4'} />
             {!shouldUseMobileUI && <span className="ml-2">Gửi</span>}

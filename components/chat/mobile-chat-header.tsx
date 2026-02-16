@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Menu, History, MoreVertical, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/lib/i18n/context';
@@ -26,13 +27,19 @@ export function MobileChatHeader({
   const { t } = useLanguage();
   const { device } = useMobile();
   const isOffline = useOffline();
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Fix hydration: Only apply dynamic classes after mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <div
       className={`
         sticky top-0 z-30
         bg-gradient-to-r from-slate-900 to-slate-800
-        ${device.hasNotch ? 'pt-safe pt-2' : 'pt-2'}
+        ${isMounted && device.hasNotch ? 'pt-safe pt-2' : 'pt-2'}
         pb-2 px-4
         shadow-md
       `}
@@ -48,6 +55,7 @@ export function MobileChatHeader({
             onMenuClick?.();
           }}
           className="touch-target text-white hover:bg-white/10"
+          suppressHydrationWarning
         >
           <Menu className="w-5 h-5" />
         </Button>
@@ -57,18 +65,20 @@ export function MobileChatHeader({
           <h1 className="text-white font-semibold text-base truncate w-full text-center">
             {t.chat.title}
           </h1>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5" suppressHydrationWarning>
             <span
-              className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-                isOffline ? 'bg-amber-400' : 'bg-green-400'
+              className={`w-1.5 h-1.5 rounded-full ${
+                isMounted ? 'animate-pulse' : ''
+              } ${
+                isMounted && isOffline ? 'bg-amber-400' : 'bg-green-400'
               }`}
             />
             <span
               className={`text-xs ${
-                isOffline ? 'text-amber-300' : 'text-green-300'
+                isMounted && isOffline ? 'text-amber-300' : 'text-green-300'
               }`}
             >
-              {isOffline ? t.chat.offline : t.chat.online}
+              {isMounted && isOffline ? t.chat.offline : t.chat.online}
             </span>
           </div>
         </div>
@@ -83,9 +93,10 @@ export function MobileChatHeader({
               onHistoryClick?.();
             }}
             className="touch-target text-white hover:bg-white/10 relative"
+            suppressHydrationWarning
           >
             <History className="w-5 h-5" />
-            {chatSessionCount > 0 && (
+            {isMounted && chatSessionCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                 {chatSessionCount > 9 ? '9+' : chatSessionCount}
               </span>
@@ -100,6 +111,7 @@ export function MobileChatHeader({
               onMoreClick?.();
             }}
             className="touch-target text-white hover:bg-white/10"
+            suppressHydrationWarning
           >
             <MoreVertical className="w-5 h-5" />
           </Button>
