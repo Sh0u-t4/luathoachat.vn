@@ -249,7 +249,8 @@ export function MobileChatInput({
             className={`
               w-full resize-none overflow-y-auto
               ${shouldUseMobileUI ? 'mobile-input text-base' : 'h-10 text-sm'}
-              px-4 py-3
+              ${shouldUseMobileUI ? 'pl-4 pr-12' : 'px-4'}
+              py-3
               border border-slate-200 rounded-2xl
               focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent
               disabled:bg-slate-50 disabled:text-slate-400
@@ -272,7 +273,7 @@ export function MobileChatInput({
           {shouldUseMobileUI && (
             <button
               type="button"
-              className={`absolute right-2 bottom-2 p-2 touch-feedback transition-all active:scale-95 ${
+              className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 touch-feedback transition-all active:scale-95 ${
                 showEmojiPicker
                   ? 'text-cyan-600 bg-cyan-50 rounded-lg'
                   : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg'
