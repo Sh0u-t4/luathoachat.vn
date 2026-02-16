@@ -308,14 +308,6 @@ export function MobileChatInput({
           {!shouldUseMobileUI && <span className="ml-2">Gửi</span>}
         </Button>
       </div>
-
-      {/* Disclaimer Text */}
-      {!isFocused && (
-        <div className="text-xs text-slate-400 mt-2 text-center space-y-1">
-          <p>{t.chat.disclaimer1}</p>
-          <p>{t.chat.disclaimer2}</p>
-        </div>
-      )}
     </form>
   );
 }

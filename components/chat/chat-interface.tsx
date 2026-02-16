@@ -15,11 +15,14 @@ import { MobileChatHeader } from './mobile-chat-header';
 import { MobileBottomDrawer } from './mobile-bottom-drawer';
 import { MobileChatHistory } from './mobile-chat-history';
 import { MobileMessageCard } from './mobile-message-card';
+import { DisclaimerToast } from './disclaimer-toast';
 import { useOffline } from '@/hooks/use-offline';
 import { useFAQCache } from '@/hooks/use-faq-cache';
+import { useFirstTimeDisclaimer } from '@/hooks/use-first-time-disclaimer';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n/context';
 import { useMobile } from '@/lib/mobile/context';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -61,6 +64,9 @@ export function ChatInterface() {
   // Offline detection and FAQ cache
   const isOffline = useOffline();
   const { faqs, searchFAQ, isLoading: isFAQLoading } = useFAQCache();
+
+  // First-time disclaimer
+  const { shouldShowDisclaimer, isReady, markDisclaimerAsSeen } = useFirstTimeDisclaimer();
 
   const {
     messages,
@@ -109,6 +115,31 @@ export function ChatInterface() {
 
     return () => clearInterval(interval);
   }, [isTyping]);
+
+  // Show first-time disclaimer toast
+  useEffect(() => {
+    if (!isMounted || !isReady || !shouldShowDisclaimer) return;
+
+    // Wait 1.5s for UI to settle before showing toast
+    const timer = setTimeout(() => {
+      // Only show if user hasn't started chatting yet
+      if (messages.length === 0) {
+        toast(
+          <DisclaimerToast
+            disclaimer1={t.chat.disclaimer1}
+            disclaimer2={t.chat.disclaimer2}
+          />,
+          {
+            duration: 6000,
+            onDismiss: markDisclaimerAsSeen,
+            onAutoClose: markDisclaimerAsSeen,
+          }
+        );
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [isMounted, isReady, shouldShowDisclaimer, messages.length, t.chat.disclaimer1, t.chat.disclaimer2, markDisclaimerAsSeen]);
 
   // Log messages changes để debug
   useEffect(() => {
