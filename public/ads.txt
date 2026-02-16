@@ -1,0 +1,17 @@
+# ads.txt for luathoachat.vn
+# File này xác thực các nhà cung cấp quảng cáo được phép bán không gian quảng cáo trên website
+
+# Google AdSense
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+
+# Lưu ý: Thay "pub-0000000000000000" bằng Publisher ID thực tế của bạn từ Google AdSense
+# Tìm Publisher ID tại: https://www.google.com/adsense -> Account -> Settings
+
+# Định dạng:
+# <domain>, <publisher-id>, <relationship>, <certification-authority-id>
+#
+# Trong đó:
+# - domain: Tên miền của ad network (vd: google.com)
+# - publisher-id: ID tài khoản publisher của bạn (vd: pub-1234567890)
+# - relationship: DIRECT (bán trực tiếp) hoặc RESELLER (bán qua trung gian)
+# - certification-authority-id: ID xác thực từ TAG (Trustworthy Accountability Group)

@@ -1,0 +1,34 @@
+# robots.txt for luathoachat.vn
+# Cấu hình cho Google Search, Google Ads, và các công cụ tìm kiếm khác
+
+# Cho phép tất cả các bot truy cập toàn bộ website
+User-agent: *
+Allow: /
+
+# Cho phép Google Ads Bot
+User-agent: AdsBot-Google
+Allow: /
+
+# Cho phép Google Ads Bot cho Mobile
+User-agent: AdsBot-Google-Mobile
+Allow: /
+
+# Cho phép Googlebot (Search)
+User-agent: Googlebot
+Allow: /
+
+# Cho phép Googlebot Image
+User-agent: Googlebot-Image
+Allow: /
+
+# Cho phép Googlebot Mobile
+User-agent: Googlebot-Mobile
+Allow: /
+
+# Chặn một số đường dẫn nội bộ (nếu cần)
+Disallow: /api/
+Disallow: /_next/
+Disallow: /clear-cache.html
+
+# Sitemap location
+Sitemap: https://luathoachat.vn/sitemap.xml
