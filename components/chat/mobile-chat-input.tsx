@@ -7,6 +7,7 @@ import { useLanguage } from '@/lib/i18n/context';
 import { useMobile } from '@/lib/mobile/context';
 import { hapticFeedback, HapticPatterns } from '@/lib/mobile/utils';
 import { toast } from 'sonner';
+import type { KeyboardState } from '@/hooks/use-keyboard-state';
 
 interface MobileChatInputProps {
   value: string;
@@ -14,6 +15,7 @@ interface MobileChatInputProps {
   onSubmit: (e: React.FormEvent) => void;
   disabled?: boolean;
   placeholder?: string;
+  keyboardState?: KeyboardState;
 }
 
 /**
@@ -25,13 +27,13 @@ export function MobileChatInput({
   onSubmit,
   disabled = false,
   placeholder,
+  keyboardState,
 }: MobileChatInputProps) {
   const { t } = useLanguage();
-  const { shouldUseMobileUI, viewport } = useMobile();
+  const { shouldUseMobileUI } = useMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   // Auto-resize textarea
@@ -42,26 +44,6 @@ export function MobileChatInput({
     textarea.style.height = 'auto';
     textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
   }, [value]);
-
-  // Handle virtual keyboard on iOS
-  useEffect(() => {
-    if (!shouldUseMobileUI) return;
-
-    const handleResize = () => {
-      if ('visualViewport' in window && window.visualViewport) {
-        const newHeight = window.innerHeight - window.visualViewport.height;
-        setKeyboardHeight(newHeight);
-      }
-    };
-
-    window.visualViewport?.addEventListener('resize', handleResize);
-    window.visualViewport?.addEventListener('scroll', handleResize);
-
-    return () => {
-      window.visualViewport?.removeEventListener('resize', handleResize);
-      window.visualViewport?.removeEventListener('scroll', handleResize);
-    };
-  }, [shouldUseMobileUI]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,13 +144,11 @@ export function MobileChatInput({
     <form
       onSubmit={handleSubmit}
       className={`
-        ${shouldUseMobileUI ? 'mobile-sticky-bottom' : 'border-t border-slate-200'}
+        ${shouldUseMobileUI ? 'flex-shrink-0 border-t border-slate-200' : 'border-t border-slate-200'}
         p-3 md:p-4 bg-white
         ${isFocused && shouldUseMobileUI ? 'shadow-[0_-4px_12px_rgba(0,0,0,0.1)]' : ''}
       `}
-      style={{
-        marginBottom: shouldUseMobileUI && keyboardHeight > 0 ? `${keyboardHeight}px` : '0',
-      }}
+      suppressHydrationWarning
     >
       {/* Hidden File Input */}
       <input

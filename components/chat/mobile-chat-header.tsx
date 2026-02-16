@@ -37,7 +37,7 @@ export function MobileChatHeader({
   return (
     <div
       className={`
-        sticky top-0 z-30
+        flex-shrink-0 z-30
         bg-gradient-to-r from-slate-900 to-slate-800
         ${isMounted && device.hasNotch ? 'pt-safe pt-2' : 'pt-2'}
         pb-2 px-4

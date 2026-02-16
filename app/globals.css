@@ -43,6 +43,24 @@
     /* Mobile Spacing */
     --mobile-padding: 16px;
     --mobile-gap: 12px;
+
+    /* Dynamic Viewport Height (for keyboard handling) */
+    --viewport-height: 100vh;
+    --keyboard-height: 0px;
+  }
+
+  /* Support for Dynamic Viewport Height Units */
+  @supports (height: 100dvh) {
+    :root {
+      --viewport-height: 100dvh;
+    }
+  }
+
+  /* Fallback for iOS Safari */
+  @supports (-webkit-touch-callout: none) {
+    :root {
+      --viewport-height: -webkit-fill-available;
+    }
   }
 
   .dark {
@@ -324,12 +342,24 @@
     }
   }
 
-  /* Sticky Bottom Bar for Mobile */
-  .mobile-sticky-bottom {
-    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40;
-    padding-bottom: var(--safe-area-bottom);
-    /* Prevent touch conflicts with scroll */
-    touch-action: none;
+  /* Mobile Viewport Container - Fixed height layout for keyboard handling */
+  .mobile-viewport-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    /* Prevent body scroll when keyboard is open */
+    overscroll-behavior: none;
+    /* iOS-specific: Prevent rubber band effect */
+    -webkit-overflow-scrolling: auto;
+  }
+
+  /* Fallback for older browsers that don't support dvh */
+  @supports not (height: 100dvh) {
+    .mobile-viewport-container {
+      height: 100vh;
+      /* iOS Safari fallback */
+      height: -webkit-fill-available;
+    }
   }
 
   /* Mobile Chat Container - Optimized for smooth scrolling */
@@ -358,15 +388,45 @@
 
   /* Prevent scroll conflicts on mobile */
   @media (max-width: 767px) {
-    /* Optimize body for better touch scrolling */
-    body {
-      touch-action: pan-y;
+    /* Lock body scroll on mobile when using viewport container */
+    body:has(.mobile-viewport-container) {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      /* iOS Safari specific */
+      -webkit-overflow-scrolling: auto;
     }
 
     /* Ensure chat container can scroll independently */
     .mobile-chat-container {
       isolation: isolate;
       -webkit-overflow-scrolling: touch;
+      /* Prevent overscroll within container */
+      overscroll-behavior-y: contain;
+    }
+  }
+
+  /* iOS-specific keyboard handling fixes */
+  @supports (-webkit-touch-callout: none) {
+    /* Prevent viewport zoom on input focus */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+      font-size: 16px !important;
+    }
+
+    /* Fix iOS Safari viewport height when keyboard is open */
+    .mobile-viewport-container {
+      min-height: -webkit-fill-available;
+    }
+
+    /* Prevent iOS scroll bounce on body */
+    body {
+      position: fixed;
+      width: 100%;
+      overscroll-behavior: none;
     }
   }
 
