@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Mic, Paperclip, Smile } from 'lucide-react';
+import { Send, Paperclip, Smile } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/lib/i18n/context';
 import { useMobile } from '@/lib/mobile/context';
@@ -33,7 +33,6 @@ export function MobileChatInput({
   const [isFocused, setIsFocused] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -154,40 +153,6 @@ export function MobileChatInput({
     setTimeout(() => {
       textareaRef.current?.focus();
     }, 100);
-  };
-
-  // Handle Voice Recording
-  const handleVoiceClick = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('🎤 Voice button clicked!');
-    hapticFeedback(HapticPatterns.medium);
-
-    if (isRecording) {
-      // Stop recording
-      setIsRecording(false);
-      toast.success('Đã dừng ghi âm', {
-        description: 'Tính năng ghi âm đang được phát triển',
-        duration: 3000,
-      });
-    } else {
-      // Start recording
-      setIsRecording(true);
-      toast.success('🎤 Đang ghi âm...', {
-        description: 'Sẽ tự động dừng sau 5 giây',
-        duration: 5000,
-      });
-
-      // Auto stop after 5 seconds (demo)
-      setTimeout(() => {
-        if (isRecording) {
-          setIsRecording(false);
-          toast.info('Đã dừng ghi âm tự động', {
-            duration: 2000,
-          });
-        }
-      }, 5000);
-    }
   };
 
   // Common emojis for quick access
@@ -324,46 +289,22 @@ export function MobileChatInput({
           )}
         </div>
 
-        {/* Voice Button (Mobile Only) */}
-        {shouldUseMobileUI && !value.trim() && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={`touch-target-comfortable flex-shrink-0 transition-all active:scale-95 ${
-              isRecording
-                ? 'text-red-600 bg-red-50 hover:bg-red-100 border-2 border-red-300'
-                : 'text-slate-500 hover:text-cyan-600 hover:bg-cyan-50'
-            }`}
-            disabled={disabled}
-            onClick={handleVoiceClick}
-            onTouchStart={() => hapticFeedback(HapticPatterns.medium)}
-            aria-label={isRecording ? 'Dừng ghi âm' : 'Bắt đầu ghi âm'}
-            title={isRecording ? 'Dừng ghi âm' : 'Bắt đầu ghi âm'}
-            suppressHydrationWarning
-          >
-            <Mic className={`w-5 h-5 ${isRecording ? 'animate-pulse' : ''}`} />
-          </Button>
-        )}
-
-        {/* Send Button */}
-        {(value.trim() || !shouldUseMobileUI) && (
-          <Button
-            type="submit"
-            disabled={!value.trim() || disabled}
-            className={`
-              ${shouldUseMobileUI ? 'touch-target-comfortable' : 'h-10 px-4'}
-              flex-shrink-0
-              bg-cyan-600 hover:bg-cyan-700 text-white
-              disabled:bg-slate-300 disabled:text-slate-500
-              touch-feedback
-            `}
-            suppressHydrationWarning
-          >
-            <Send className={shouldUseMobileUI ? 'w-5 h-5' : 'w-4 h-4'} />
-            {!shouldUseMobileUI && <span className="ml-2">Gửi</span>}
-          </Button>
-        )}
+        {/* Send Button - Always visible */}
+        <Button
+          type="submit"
+          disabled={!value.trim() || disabled}
+          className={`
+            ${shouldUseMobileUI ? 'touch-target-comfortable' : 'h-10 px-4'}
+            flex-shrink-0
+            bg-cyan-600 hover:bg-cyan-700 text-white
+            disabled:bg-slate-300 disabled:text-slate-500
+            touch-feedback
+          `}
+          suppressHydrationWarning
+        >
+          <Send className={shouldUseMobileUI ? 'w-5 h-5' : 'w-4 h-4'} />
+          {!shouldUseMobileUI && <span className="ml-2">Gửi</span>}
+        </Button>
       </div>
 
       {/* Disclaimer Text */}
