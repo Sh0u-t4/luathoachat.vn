@@ -386,18 +386,8 @@
     z-index: 1;
   }
 
-  /* Prevent scroll conflicts on mobile */
+  /* Mobile-specific optimizations */
   @media (max-width: 767px) {
-    /* Lock body scroll on mobile when using viewport container */
-    body:has(.mobile-viewport-container) {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      /* iOS Safari specific */
-      -webkit-overflow-scrolling: auto;
-    }
-
     /* Ensure chat container can scroll independently */
     .mobile-chat-container {
       isolation: isolate;
@@ -420,13 +410,6 @@
     /* Fix iOS Safari viewport height when keyboard is open */
     .mobile-viewport-container {
       min-height: -webkit-fill-available;
-    }
-
-    /* Prevent iOS scroll bounce on body */
-    body {
-      position: fixed;
-      width: 100%;
-      overscroll-behavior: none;
     }
   }
 
