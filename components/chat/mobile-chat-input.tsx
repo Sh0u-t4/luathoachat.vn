@@ -145,9 +145,16 @@ export function MobileChatInput({
       onSubmit={handleSubmit}
       className={`
         ${shouldUseMobileUI ? 'flex-shrink-0 border-t border-slate-200' : 'border-t border-slate-200'}
-        p-3 md:p-4 bg-white
+        ${shouldUseMobileUI ? 'px-3 pt-3' : 'p-4'}
+        ${shouldUseMobileUI && keyboardState?.isKeyboardOpen ? 'pb-1' : shouldUseMobileUI ? 'pb-3' : ''}
+        bg-white
         ${isFocused && shouldUseMobileUI ? 'shadow-[0_-4px_12px_rgba(0,0,0,0.1)]' : ''}
       `}
+      style={
+        shouldUseMobileUI && keyboardState?.isKeyboardOpen
+          ? { paddingBottom: '4px' }
+          : undefined
+      }
       suppressHydrationWarning
     >
       {/* Hidden File Input */}
