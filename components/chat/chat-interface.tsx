@@ -33,6 +33,7 @@ export function ChatInterface() {
   const [inputValue, setInputValue] = useState('');
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showMobileHistory, setShowMobileHistory] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const prevMessagesLengthRef = useRef(0);
@@ -51,6 +52,11 @@ export function ChatInterface() {
 
   // Mobile detection
   const { shouldUseMobileUI } = useMobile();
+
+  // Fix hydration: Only render mobile UI after mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Offline detection and FAQ cache
   const isOffline = useOffline();
@@ -280,7 +286,7 @@ export function ChatInterface() {
   return (
     <>
       {/* Mobile Chat Header (only on mobile) */}
-      {shouldUseMobileUI && (
+      {isMounted && shouldUseMobileUI && (
         <MobileChatHeader
           onHistoryClick={() => setShowMobileHistory(true)}
           chatSessionCount={chatSessions.length}
@@ -291,11 +297,12 @@ export function ChatInterface() {
         id="chat-interface"
         className={`
           w-full max-w-4xl mx-auto overflow-hidden
-          ${shouldUseMobileUI ? 'border-0 shadow-none rounded-none min-h-screen' : 'border-0 shadow-xl bg-white/95 backdrop-blur'}
+          ${isMounted && shouldUseMobileUI ? 'border-0 shadow-none rounded-none min-h-screen' : 'border-0 shadow-xl bg-white/95 backdrop-blur'}
         `}
+        suppressHydrationWarning
       >
         {/* Desktop Header (hidden on mobile) */}
-        {!shouldUseMobileUI && (
+        {(!isMounted || !shouldUseMobileUI) && (
           <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
@@ -319,13 +326,14 @@ export function ChatInterface() {
           <div
             ref={chatContainerRef}
             className={`
-              ${shouldUseMobileUI ? 'min-h-[calc(100vh-140px)]' : 'h-[400px] md:h-[500px]'}
+              ${isMounted && shouldUseMobileUI ? 'min-h-[calc(100vh-140px)]' : 'h-[400px] md:h-[500px]'}
               overflow-y-auto
-              ${shouldUseMobileUI ? 'p-3' : 'p-4 md:p-6'}
+              ${isMounted && shouldUseMobileUI ? 'p-3' : 'p-4 md:p-6'}
               space-y-3 md:space-y-4
               bg-gradient-to-b from-slate-50 to-white
-              ${shouldUseMobileUI ? 'smooth-scroll-ios' : 'scroll-smooth'}
+              ${isMounted && shouldUseMobileUI ? 'smooth-scroll-ios' : 'scroll-smooth'}
             `}
+            suppressHydrationWarning
           >
             {/* Offline Banner */}
             <OfflineBanner isVisible={isOffline} cachedFAQCount={faqs.length} />
@@ -462,9 +470,10 @@ export function ChatInterface() {
                 flex items-center justify-center
                 transition-all duration-300
                 animate-fade-in
-                ${shouldUseMobileUI ? 'bottom-6 right-6' : ''}
+                ${isMounted && shouldUseMobileUI ? 'bottom-6 right-6' : ''}
               `}
               aria-label="Scroll to bottom"
+              suppressHydrationWarning
             >
               <ArrowDown className="w-5 h-5" />
             </button>
@@ -472,7 +481,7 @@ export function ChatInterface() {
         </div>
 
         {/* Conditional Input: Mobile vs Desktop */}
-        {shouldUseMobileUI ? (
+        {isMounted && shouldUseMobileUI ? (
           <MobileChatInput
             value={inputValue}
             onChange={setInputValue}
@@ -511,7 +520,7 @@ export function ChatInterface() {
       </Card>
 
       {/* Mobile Bottom Drawer for Chat History */}
-      {shouldUseMobileUI && (
+      {isMounted && shouldUseMobileUI && (
         <MobileBottomDrawer
           isOpen={showMobileHistory}
           onClose={() => setShowMobileHistory(false)}

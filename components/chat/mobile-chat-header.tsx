@@ -24,10 +24,8 @@ export function MobileChatHeader({
   chatSessionCount = 0,
 }: MobileChatHeaderProps) {
   const { t } = useLanguage();
-  const { shouldUseMobileUI, device } = useMobile();
+  const { device } = useMobile();
   const isOffline = useOffline();
-
-  if (!shouldUseMobileUI) return null;
 
   return (
     <div
@@ -38,6 +36,7 @@ export function MobileChatHeader({
         pb-2 px-4
         shadow-md
       `}
+      suppressHydrationWarning
     >
       <div className="flex items-center justify-between max-w-4xl mx-auto">
         {/* Left: Menu Button */}
