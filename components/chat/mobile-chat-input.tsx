@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/lib/i18n/context';
 import { useMobile } from '@/lib/mobile/context';
 import { hapticFeedback, HapticPatterns } from '@/lib/mobile/utils';
+import { toast } from 'sonner';
 
 interface MobileChatInputProps {
   value: string;
@@ -28,8 +29,11 @@ export function MobileChatInput({
   const { t } = useLanguage();
   const { shouldUseMobileUI, viewport } = useMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -84,6 +88,60 @@ export function MobileChatInput({
     setIsFocused(false);
   };
 
+  // Handle Attachment
+  const handleAttachmentClick = () => {
+    hapticFeedback(HapticPatterns.light);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // TODO: Implement file upload logic
+    toast.info('Tính năng đính kèm file đang được phát triển');
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Handle Emoji
+  const handleEmojiClick = () => {
+    hapticFeedback(HapticPatterns.selection);
+    setShowEmojiPicker(!showEmojiPicker);
+  };
+
+  const insertEmoji = (emoji: string) => {
+    onChange(value + emoji);
+    setShowEmojiPicker(false);
+    textareaRef.current?.focus();
+  };
+
+  // Handle Voice Recording
+  const handleVoiceClick = async () => {
+    hapticFeedback(HapticPatterns.medium);
+
+    if (isRecording) {
+      // Stop recording
+      setIsRecording(false);
+      toast.info('Tính năng ghi âm đang được phát triển');
+    } else {
+      // Start recording
+      setIsRecording(true);
+      toast.info('Tính năng ghi âm đang được phát triển');
+
+      // Auto stop after 5 seconds (demo)
+      setTimeout(() => {
+        setIsRecording(false);
+      }, 5000);
+    }
+  };
+
+  // Common emojis for quick access
+  const commonEmojis = ['👍', '❤️', '😊', '🙏', '🤔', '👌', '🔥', '✅', '📝', '⚠️', '📄', '📋', '📊', '💡', '🎯'];
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -96,6 +154,41 @@ export function MobileChatInput({
         marginBottom: shouldUseMobileUI && keyboardHeight > 0 ? `${keyboardHeight}px` : '0',
       }}
     >
+      {/* Hidden File Input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,.pdf,.doc,.docx"
+        className="hidden"
+        onChange={handleFileChange}
+        multiple
+      />
+
+      {/* Emoji Picker Overlay */}
+      {showEmojiPicker && shouldUseMobileUI && (
+        <div className="absolute bottom-full left-0 right-0 mb-2 p-3 bg-white rounded-2xl shadow-lg border border-slate-200 max-w-4xl mx-auto">
+          <div className="flex flex-wrap gap-2 justify-center">
+            {commonEmojis.map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => insertEmoji(emoji)}
+                className="text-2xl p-2 hover:bg-slate-100 rounded-lg transition-colors touch-target-comfortable"
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowEmojiPicker(false)}
+            className="w-full mt-2 py-2 text-sm text-slate-500 hover:text-slate-700"
+          >
+            Đóng
+          </button>
+        </div>
+      )}
+
       <div className="flex items-end gap-2 max-w-4xl mx-auto">
         {/* Attachments Button (Mobile Only) */}
         {shouldUseMobileUI && (
@@ -105,7 +198,8 @@ export function MobileChatInput({
             size="icon"
             className="touch-target-comfortable flex-shrink-0 text-slate-500 hover:text-cyan-600 hover:bg-cyan-50"
             disabled={disabled}
-            onClick={() => hapticFeedback(HapticPatterns.light)}
+            onClick={handleAttachmentClick}
+            aria-label="Đính kèm file"
           >
             <Paperclip className="w-5 h-5" />
           </Button>
@@ -148,9 +242,14 @@ export function MobileChatInput({
           {shouldUseMobileUI && (
             <button
               type="button"
-              className="absolute right-2 bottom-2 p-2 text-slate-400 hover:text-slate-600 touch-feedback"
+              className={`absolute right-2 bottom-2 p-2 touch-feedback transition-colors ${
+                showEmojiPicker
+                  ? 'text-cyan-600'
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
               disabled={disabled}
-              onClick={() => hapticFeedback(HapticPatterns.selection)}
+              onClick={handleEmojiClick}
+              aria-label="Chọn emoji"
             >
               <Smile className="w-5 h-5" />
             </button>
@@ -163,11 +262,16 @@ export function MobileChatInput({
             type="button"
             variant="ghost"
             size="icon"
-            className="touch-target-comfortable flex-shrink-0 text-slate-500 hover:text-cyan-600 hover:bg-cyan-50"
+            className={`touch-target-comfortable flex-shrink-0 transition-colors ${
+              isRecording
+                ? 'text-red-600 bg-red-50 hover:bg-red-100'
+                : 'text-slate-500 hover:text-cyan-600 hover:bg-cyan-50'
+            }`}
             disabled={disabled}
-            onClick={() => hapticFeedback(HapticPatterns.medium)}
+            onClick={handleVoiceClick}
+            aria-label={isRecording ? 'Dừng ghi âm' : 'Bắt đầu ghi âm'}
           >
-            <Mic className="w-5 h-5" />
+            <Mic className={`w-5 h-5 ${isRecording ? 'animate-pulse' : ''}`} />
           </Button>
         )}
 
