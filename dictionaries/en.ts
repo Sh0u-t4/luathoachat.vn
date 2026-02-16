@@ -194,7 +194,7 @@ export const en: Translation = {
     suggestion1: 'What permit is required for HCl acid?',
     suggestion2: 'Is Methanol a precursor chemical?',
     suggestion3: 'What are the fire safety penalties?',
-    inputPlaceholder: 'Ask about chemical regulations...',
+    inputPlaceholder: 'Ask a question...',
     disclaimer1: 'Information is for reference only. Contact experts for specific consultation.',
     disclaimer2: 'AI Chatbot is under development. Please report any errors to help us improve the system.',
     loginPromptTitle: 'Login to view details',

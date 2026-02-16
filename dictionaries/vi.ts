@@ -194,7 +194,7 @@ export const vi: Translation = {
     suggestion1: 'Axit HCl cần giấy phép gì?',
     suggestion2: 'Methanol là tiền chất?',
     suggestion3: 'Mức phạt vi phạm PCCC?',
-    inputPlaceholder: 'Nhập câu hỏi về luật hóa chất...',
+    inputPlaceholder: 'Nhập câu hỏi...',
     disclaimer1: 'Thông tin chỉ mang tính tham khảo. Liên hệ chuyên gia để được tư vấn cụ thể.',
     disclaimer2: 'Hiện tại AI Chatbot đang được phát triển, nếu có phát hiện sai sót hãy thông báo và cùng phát triển hệ thống tốt hơn.',
     loginPromptTitle: 'Đăng nhập để xem chi tiết',
