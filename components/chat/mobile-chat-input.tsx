@@ -89,17 +89,34 @@ export function MobileChatInput({
   };
 
   // Handle Attachment
-  const handleAttachmentClick = () => {
+  const handleAttachmentClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('📎 Attachment button clicked!');
     hapticFeedback(HapticPatterns.light);
-    fileInputRef.current?.click();
+
+    toast.success('Đang mở trình chọn file...', {
+      duration: 2000,
+      position: 'top-center',
+    });
+
+    setTimeout(() => {
+      fileInputRef.current?.click();
+    }, 100);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
+    console.log('📎 Files selected:', files);
+
     if (!files || files.length === 0) return;
 
-    // TODO: Implement file upload logic
-    toast.info('Tính năng đính kèm file đang được phát triển');
+    const fileNames = Array.from(files).map(f => f.name).join(', ');
+
+    toast.success(`Đã chọn: ${fileNames}`, {
+      description: 'Tính năng upload đang được phát triển',
+      duration: 4000,
+    });
 
     // Reset input
     if (fileInputRef.current) {
@@ -108,33 +125,67 @@ export function MobileChatInput({
   };
 
   // Handle Emoji
-  const handleEmojiClick = () => {
+  const handleEmojiClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('😊 Emoji button clicked!');
     hapticFeedback(HapticPatterns.selection);
-    setShowEmojiPicker(!showEmojiPicker);
+
+    const newState = !showEmojiPicker;
+    setShowEmojiPicker(newState);
+
+    if (newState) {
+      toast.success('Chọn emoji bên dưới 👇', {
+        duration: 2000,
+      });
+    }
   };
 
   const insertEmoji = (emoji: string) => {
+    console.log('😊 Emoji selected:', emoji);
+    hapticFeedback(HapticPatterns.light);
     onChange(value + emoji);
     setShowEmojiPicker(false);
-    textareaRef.current?.focus();
+
+    toast.success(`Đã thêm ${emoji}`, {
+      duration: 1000,
+    });
+
+    setTimeout(() => {
+      textareaRef.current?.focus();
+    }, 100);
   };
 
   // Handle Voice Recording
-  const handleVoiceClick = async () => {
+  const handleVoiceClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('🎤 Voice button clicked!');
     hapticFeedback(HapticPatterns.medium);
 
     if (isRecording) {
       // Stop recording
       setIsRecording(false);
-      toast.info('Tính năng ghi âm đang được phát triển');
+      toast.success('Đã dừng ghi âm', {
+        description: 'Tính năng ghi âm đang được phát triển',
+        duration: 3000,
+      });
     } else {
       // Start recording
       setIsRecording(true);
-      toast.info('Tính năng ghi âm đang được phát triển');
+      toast.success('🎤 Đang ghi âm...', {
+        description: 'Sẽ tự động dừng sau 5 giây',
+        duration: 5000,
+      });
 
       // Auto stop after 5 seconds (demo)
       setTimeout(() => {
-        setIsRecording(false);
+        if (isRecording) {
+          setIsRecording(false);
+          toast.info('Đã dừng ghi âm tự động', {
+            duration: 2000,
+          });
+        }
       }, 5000);
     }
   };
@@ -166,14 +217,20 @@ export function MobileChatInput({
 
       {/* Emoji Picker Overlay */}
       {showEmojiPicker && shouldUseMobileUI && (
-        <div className="absolute bottom-full left-0 right-0 mb-2 p-3 bg-white rounded-2xl shadow-lg border border-slate-200 max-w-4xl mx-auto" suppressHydrationWarning>
-          <div className="flex flex-wrap gap-2 justify-center">
+        <div
+          className="absolute bottom-full left-0 right-0 mb-2 p-4 bg-white rounded-2xl shadow-2xl border-2 border-cyan-200 max-w-4xl mx-auto animate-in slide-in-from-bottom-4 duration-200"
+          suppressHydrationWarning
+        >
+          <div className="text-center mb-2">
+            <p className="text-sm font-medium text-cyan-600">Chọn Emoji 😊</p>
+          </div>
+          <div className="flex flex-wrap gap-3 justify-center mb-3">
             {commonEmojis.map((emoji) => (
               <button
                 key={emoji}
                 type="button"
                 onClick={() => insertEmoji(emoji)}
-                className="text-2xl p-2 hover:bg-slate-100 rounded-lg transition-colors touch-target-comfortable"
+                className="text-3xl p-3 hover:bg-cyan-50 active:bg-cyan-100 rounded-xl transition-all active:scale-110 touch-target-comfortable border border-transparent hover:border-cyan-200"
                 suppressHydrationWarning
               >
                 {emoji}
@@ -182,11 +239,14 @@ export function MobileChatInput({
           </div>
           <button
             type="button"
-            onClick={() => setShowEmojiPicker(false)}
-            className="w-full mt-2 py-2 text-sm text-slate-500 hover:text-slate-700"
+            onClick={() => {
+              setShowEmojiPicker(false);
+              toast.info('Đã đóng emoji picker');
+            }}
+            className="w-full py-3 text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
             suppressHydrationWarning
           >
-            Đóng
+            ✕ Đóng
           </button>
         </div>
       )}
@@ -198,11 +258,13 @@ export function MobileChatInput({
             type="button"
             variant="ghost"
             size="icon"
-            className="touch-target-comfortable flex-shrink-0 text-slate-500 hover:text-cyan-600 hover:bg-cyan-50"
+            className="touch-target-comfortable flex-shrink-0 text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 active:scale-95 transition-transform"
             disabled={disabled}
             onClick={handleAttachmentClick}
+            onTouchStart={() => hapticFeedback(HapticPatterns.light)}
             aria-label="Đính kèm file"
             suppressHydrationWarning
+            title="Đính kèm file"
           >
             <Paperclip className="w-5 h-5" />
           </Button>
@@ -245,14 +307,16 @@ export function MobileChatInput({
           {shouldUseMobileUI && (
             <button
               type="button"
-              className={`absolute right-2 bottom-2 p-2 touch-feedback transition-colors ${
+              className={`absolute right-2 bottom-2 p-2 touch-feedback transition-all active:scale-95 ${
                 showEmojiPicker
-                  ? 'text-cyan-600'
-                  : 'text-slate-400 hover:text-slate-600'
+                  ? 'text-cyan-600 bg-cyan-50 rounded-lg'
+                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg'
               }`}
               disabled={disabled}
               onClick={handleEmojiClick}
+              onTouchStart={() => hapticFeedback(HapticPatterns.selection)}
               aria-label="Chọn emoji"
+              title="Chọn emoji"
               suppressHydrationWarning
             >
               <Smile className="w-5 h-5" />
@@ -266,14 +330,16 @@ export function MobileChatInput({
             type="button"
             variant="ghost"
             size="icon"
-            className={`touch-target-comfortable flex-shrink-0 transition-colors ${
+            className={`touch-target-comfortable flex-shrink-0 transition-all active:scale-95 ${
               isRecording
-                ? 'text-red-600 bg-red-50 hover:bg-red-100'
+                ? 'text-red-600 bg-red-50 hover:bg-red-100 border-2 border-red-300'
                 : 'text-slate-500 hover:text-cyan-600 hover:bg-cyan-50'
             }`}
             disabled={disabled}
             onClick={handleVoiceClick}
+            onTouchStart={() => hapticFeedback(HapticPatterns.medium)}
             aria-label={isRecording ? 'Dừng ghi âm' : 'Bắt đầu ghi âm'}
+            title={isRecording ? 'Dừng ghi âm' : 'Bắt đầu ghi âm'}
             suppressHydrationWarning
           >
             <Mic className={`w-5 h-5 ${isRecording ? 'animate-pulse' : ''}`} />
