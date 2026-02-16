@@ -326,12 +326,11 @@ export function ChatInterface() {
           <div
             ref={chatContainerRef}
             className={`
-              ${isMounted && shouldUseMobileUI ? 'min-h-[calc(100vh-140px)]' : 'h-[400px] md:h-[500px]'}
+              ${isMounted && shouldUseMobileUI ? 'min-h-[calc(100vh-140px)] mobile-chat-container' : 'h-[400px] md:h-[500px] scroll-smooth'}
               overflow-y-auto
               ${isMounted && shouldUseMobileUI ? 'p-3' : 'p-4 md:p-6'}
               space-y-3 md:space-y-4
               bg-gradient-to-b from-slate-50 to-white
-              ${isMounted && shouldUseMobileUI ? 'smooth-scroll-ios' : 'scroll-smooth'}
             `}
             suppressHydrationWarning
           >

@@ -81,6 +81,9 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* Optimize body scrolling on mobile */
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   html {
@@ -89,6 +92,9 @@
     -webkit-text-size-adjust: 100%;
     /* Prevent double-tap zoom on iOS */
     touch-action: manipulation;
+    /* Smooth scrolling on mobile */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
   }
 
   /* Touch Device Optimizations */
@@ -230,10 +236,22 @@
     padding-bottom: calc(16px + var(--safe-area-bottom));
   }
 
-  /* Smooth iOS Momentum Scrolling */
+  /* Smooth iOS Momentum Scrolling - Optimized for better performance */
   .smooth-scroll-ios {
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+    /* Hardware acceleration for smooth scrolling */
+    will-change: scroll-position;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    /* Allow vertical scroll, prevent horizontal scroll */
+    overflow-x: hidden;
+    /* Smooth scroll behavior */
+    scroll-behavior: smooth;
+    /* Prevent scroll chaining to parent */
+    overscroll-behavior-y: contain;
+    overscroll-behavior-x: none;
+    /* Improve touch responsiveness */
+    touch-action: pan-y;
   }
 
   /* Hide on Mobile / Show on Mobile */
@@ -310,6 +328,46 @@
   .mobile-sticky-bottom {
     @apply fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40;
     padding-bottom: var(--safe-area-bottom);
+    /* Prevent touch conflicts with scroll */
+    touch-action: none;
+  }
+
+  /* Mobile Chat Container - Optimized for smooth scrolling */
+  .mobile-chat-container {
+    /* Enable momentum scrolling */
+    -webkit-overflow-scrolling: touch;
+    /* Hardware acceleration */
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+    /* Optimize for scroll */
+    will-change: scroll-position;
+    /* Prevent horizontal scroll */
+    overflow-x: hidden;
+    overflow-y: auto;
+    /* Allow only vertical pan gestures */
+    touch-action: pan-y;
+    /* Contain overscroll within element */
+    overscroll-behavior: contain;
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
+    /* Additional iOS optimizations */
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Prevent scroll conflicts on mobile */
+  @media (max-width: 767px) {
+    /* Optimize body for better touch scrolling */
+    body {
+      touch-action: pan-y;
+    }
+
+    /* Ensure chat container can scroll independently */
+    .mobile-chat-container {
+      isolation: isolate;
+      -webkit-overflow-scrolling: touch;
+    }
   }
 
   /* Pull to Refresh Indicator */

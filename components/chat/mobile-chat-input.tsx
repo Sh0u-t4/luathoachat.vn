@@ -259,6 +259,7 @@ export function MobileChatInput({
             style={{
               maxHeight: '120px',
               minHeight: shouldUseMobileUI ? '48px' : '40px',
+              touchAction: 'manipulation',
             }}
             onKeyDown={(e) => {
               // Submit on Enter (desktop only), Shift+Enter for new line
