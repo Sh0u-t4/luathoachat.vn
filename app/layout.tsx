@@ -135,6 +135,8 @@ export default function RootLayout({
         logo: {
           '@type': 'ImageObject',
           url: 'https://luathoachat.vn/logo.png',
+          width: 512,
+          height: 512,
         },
         contactPoint: {
           '@type': 'ContactPoint',
@@ -198,8 +200,10 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning>
       <head>
+        {/* Favicon - Scale balance icon representing justice and chemical law */}
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" href="/favicon.jpg" type="image/jpeg" sizes="32x32" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="alternate" hrefLang="vi" href="https://luathoachat.vn" />
         <link rel="alternate" hrefLang="en" href="https://luathoachat.vn/en" />
