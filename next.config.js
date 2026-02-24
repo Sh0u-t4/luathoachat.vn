@@ -11,6 +11,9 @@ const nextConfig = {
     ],
   },
 
+  // Output for Netlify deployment
+  output: 'standalone',
+
   // React strict mode
   reactStrictMode: true,
 
