@@ -105,8 +105,8 @@ LuatHoaChat.vn là hệ thống tư vấn pháp lý thông minh sử dụng **RA
 - **AI/ML:** OpenAI (Embedding + Generation)
 
 ### Infrastructure
-- **Hosting:** Netlify (Frontend) + Supabase (Backend)
-- **CDN:** Cloudflare (through Netlify)
+- **Hosting:** Bolt.new (Frontend) + Supabase (Backend)
+- **Runtime:** WebContainer-based deployment
 - **Analytics:** Supabase Analytics
 
 ---
@@ -283,18 +283,18 @@ curl -X POST 'https://[your-project].supabase.co/functions/v1/legal-ai-chat' \
 
 | Environment | Status | URL | Notes |
 |-------------|--------|-----|-------|
-| Production | 🟢 Ready | [luathoachat.vn](https://luathoachat.vn) | Netlify optimized |
+| Production | 🟢 Ready | [bolt.new hosting](https://bolt.new) | WebContainer optimized |
 | Staging | 🟡 Pending | - | Awaiting deployment |
 | Local Dev | ✅ Working | localhost:3000 | Verified build success |
 
 **Build Status:** ✅ All 14 pages compiled successfully
 
-**Deployment Options:**
-1. **Bolt.new** - Click "Update" button (Easiest)
-2. **GitHub** - Push to main branch, auto-deploy on Netlify
-3. **CLI** - `netlify deploy --prod` (Advanced)
+**Deployment Guide:** See [BOLT_DEPLOYMENT_GUIDE.md](./BOLT_DEPLOYMENT_GUIDE.md) for complete hosting instructions.
 
-**Quick Deploy:** See [DEPLOY_NOW_CHECKLIST.md](./DEPLOY_NOW_CHECKLIST.md) (3 minutes)
+**Deployment Process:**
+1. **Bolt.new** - Click "Deploy" or "Publish" button (Recommended)
+2. **GitHub Integration** - Push to main branch, import to Bolt.new
+3. **Environment Variables** - Configure in Bolt.new settings
 
 ---
 
@@ -316,9 +316,8 @@ curl -X POST 'https://[your-project].supabase.co/functions/v1/legal-ai-chat' \
 ### Deployment Guides
 | Document | Description |
 |----------|-------------|
-| [NETLIFY_DEPLOY_GUIDE.md](./NETLIFY_DEPLOY_GUIDE.md) | 📦 Hướng dẫn deploy chi tiết trên Netlify |
-| [DEPLOY_NOW_CHECKLIST.md](./DEPLOY_NOW_CHECKLIST.md) | ✅ Checklist triển khai nhanh (3 phút) |
-| [NETLIFY_FIX_SUMMARY.md](./NETLIFY_FIX_SUMMARY.md) | 🔧 Tổng hợp các fix deployment issues |
+| [BOLT_DEPLOYMENT_GUIDE.md](./BOLT_DEPLOYMENT_GUIDE.md) | 📦 Complete Bolt.new hosting guide |
+| [QUICK_START_GUIDE.md](./QUICK_START_GUIDE.md) | ✅ Quick start guide (3 minutes) |
 
 ---
 
