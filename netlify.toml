@@ -1,15 +1,13 @@
 [build]
-  command = "npm run build"
-  # ĐÃ XÓA: publish = ".next"
-  # Lý do: @netlify/plugin-nextjs tự động detect và handle output
-  # Việc set publish = ".next" gây conflict với plugin logic
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+command = "npx next build"
+publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "18"
-  NODE_OPTIONS = "--max-old-space-size=4096"
+NODE_VERSION = "18"
+NODE_OPTIONS = "--max-old-space-size=4096"
+
+[[plugins]]
+package = "@netlify/plugin-nextjs"
 
 [[headers]]
 for = "/*"
