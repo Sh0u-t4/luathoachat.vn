@@ -243,32 +243,45 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* Chunk Load Error Handler */}
+        {/* Chunk Load Error Handler - Disabled for Bolt.new */}
         <Script id="chunk-error-handler" strategy="afterInteractive">
           {`
-            window.addEventListener('error', function(e) {
-              const isChunkError = e.message && (
-                e.message.includes('Loading chunk') ||
-                e.message.includes('Failed to fetch dynamically imported module') ||
-                e.message.includes('webpack')
-              );
+            // Only enable on production non-Bolt hosting
+            const isBoltHosting = window.location.hostname.includes('.bolt.new') ||
+                                  window.location.hostname.includes('stackblitz.io');
 
-              if (isChunkError) {
-                console.warn('[ChunkLoadError] Detected, reloading page...');
-                sessionStorage.setItem('chunk_error_reload', 'true');
+            if (!isBoltHosting) {
+              window.addEventListener('error', function(e) {
+                const isChunkError = e.message && (
+                  e.message.includes('Loading chunk') ||
+                  e.message.includes('Failed to fetch dynamically imported module') ||
+                  e.message.includes('webpack')
+                );
+
+                if (isChunkError) {
+                  const reloadCount = parseInt(sessionStorage.getItem('chunk_reload_count') || '0');
+
+                  // Prevent infinite reload loop
+                  if (reloadCount < 3) {
+                    console.warn('[ChunkLoadError] Detected, attempt', reloadCount + 1);
+                    sessionStorage.setItem('chunk_reload_count', String(reloadCount + 1));
+                    setTimeout(function() {
+                      window.location.reload();
+                    }, 1500);
+                  } else {
+                    console.error('[ChunkLoadError] Max reload attempts reached');
+                    sessionStorage.removeItem('chunk_reload_count');
+                  }
+                }
+              }, true);
+
+              // Reset counter on successful load
+              window.addEventListener('DOMContentLoaded', function() {
                 setTimeout(function() {
-                  window.location.reload();
-                }, 1500);
-              }
-            }, true);
-
-            window.addEventListener('DOMContentLoaded', function() {
-              const hadError = sessionStorage.getItem('chunk_error_reload');
-              if (hadError) {
-                sessionStorage.removeItem('chunk_error_reload');
-                console.log('[ChunkLoadError] Page reloaded successfully');
-              }
-            });
+                  sessionStorage.removeItem('chunk_reload_count');
+                }, 5000);
+              });
+            }
           `}
         </Script>
 
