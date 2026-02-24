@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Output configuration for Netlify
+  output: 'standalone',
+
   // Image optimization
   images: {
     unoptimized: true,
@@ -16,6 +19,16 @@ const nextConfig = {
 
   // Use SWC minification
   swcMinify: true,
+
+  // Disable ESLint during build (optional - remove if you want strict checks)
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
+
+  // TypeScript check during build
+  typescript: {
+    ignoreBuildErrors: false,
+  },
 
   // Compiler optimizations
   compiler: {
