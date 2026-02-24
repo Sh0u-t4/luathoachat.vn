@@ -1,47 +1,30 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
+  // Image optimization
+  images: {
+    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+      },
+    ],
   },
-  images: { unoptimized: true },
-  // Optimize chunk loading strategy
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Improve chunk loading resilience
-      config.output = {
-        ...config.output,
-        // Ensure proper chunk naming for better caching
-        chunkFilename: 'static/chunks/[name].[contenthash].js',
-        // Set public path to ensure chunks load from correct location
-        publicPath: '/_next/',
-      };
 
-      // Optimize chunk splitting
-      config.optimization = {
-        ...config.optimization,
-        runtimeChunk: 'single',
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            // Vendor chunks for better caching
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              priority: 10,
-              reuseExistingChunk: true,
-            },
-            // Common chunks
-            common: {
-              minChunks: 2,
-              priority: 5,
-              reuseExistingChunk: true,
-            },
-          },
-        },
-      };
-    }
-    return config;
+  // React strict mode
+  reactStrictMode: true,
+
+  // Use SWC minification
+  swcMinify: true,
+
+  // Compiler optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
   },
+
+  // Headers for caching and security
   async headers() {
     return [
       {
@@ -57,7 +40,6 @@ const nextConfig = {
           },
         ],
       },
-      // Cache static chunks aggressively
       {
         source: '/_next/static/chunks/:path*',
         headers: [
@@ -67,13 +49,29 @@ const nextConfig = {
           },
         ],
       },
-      // Cache CSS and JS files
       {
         source: '/_next/static/css/:path*',
         headers: [
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
           },
         ],
       },
