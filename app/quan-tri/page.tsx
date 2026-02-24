@@ -3,17 +3,51 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { ShieldAlert, ArrowLeft, Loader2, FlaskConical, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/lib/auth/context';
 import { useLanguage } from '@/lib/i18n/context';
 import { supabase } from '@/lib/supabase';
-import { UserTable } from '@/components/admin/user-table';
-import { ChatLogsViewer } from '@/components/admin/chat-logs-viewer';
-import { DashboardOverview } from '@/components/admin/dashboard-overview';
-import { FeedbackViewer } from '@/components/admin/feedback-viewer';
 import { toast } from 'sonner';
+
+// Lazy load heavy components để giảm bundle size
+const UserTable = dynamic(() => import('@/components/admin/user-table').then(mod => ({ default: mod.UserTable })), {
+  loading: () => (
+    <div className="flex items-center justify-center py-24">
+      <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
+    </div>
+  ),
+  ssr: false
+});
+
+const ChatLogsViewer = dynamic(() => import('@/components/admin/chat-logs-viewer').then(mod => ({ default: mod.ChatLogsViewer })), {
+  loading: () => (
+    <div className="flex items-center justify-center py-24">
+      <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
+    </div>
+  ),
+  ssr: false
+});
+
+const DashboardOverview = dynamic(() => import('@/components/admin/dashboard-overview').then(mod => ({ default: mod.DashboardOverview })), {
+  loading: () => (
+    <div className="flex items-center justify-center py-24">
+      <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
+    </div>
+  ),
+  ssr: false
+});
+
+const FeedbackViewer = dynamic(() => import('@/components/admin/feedback-viewer').then(mod => ({ default: mod.FeedbackViewer })), {
+  loading: () => (
+    <div className="flex items-center justify-center py-24">
+      <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
+    </div>
+  ),
+  ssr: false
+});
 
 interface UserProfile {
   id: string;
