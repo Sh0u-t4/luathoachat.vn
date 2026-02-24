@@ -1,14 +1,9 @@
 [build]
-  command = "npm run build"
-  publish = ".next"
+command = "npx next build"
+publish = ".next"
 
 [[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-# Environment variables (set these in Netlify UI)
-# NEXT_PUBLIC_SUPABASE_URL
-# NEXT_PUBLIC_SUPABASE_ANON_KEY
-# SUPABASE_SERVICE_ROLE_KEY (if needed for server functions)
+package = "@netlify/plugin-nextjs"
 
 [functions]
-  node_bundler = "esbuild"
+node_bundler = "esbuild"
