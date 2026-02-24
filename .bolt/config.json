@@ -1,12 +1,21 @@
 {
   "deployment": {
-    "platform": "bolt",
-    "type": "static",
+    "platform": "bolt-native",
+    "framework": "nextjs",
     "buildCommand": "npm run build",
-    "outputDirectory": ".next"
+    "outputDirectory": ".next",
+    "installCommand": "npm install"
   },
   "hosting": {
-    "provider": "bolt-native",
-    "framework": "nextjs"
+    "type": "nextjs",
+    "provider": "bolt-cdn"
+  },
+  "environment": {
+    "NODE_ENV": "production"
+  },
+  "optimize": {
+    "minify": true,
+    "compress": true,
+    "sourcemap": false
   }
 }
