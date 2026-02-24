@@ -11,8 +11,8 @@ const nextConfig = {
     ],
   },
 
-  // Output mode removed for Netlify @netlify/plugin-nextjs compatibility
-  // The plugin automatically handles deployment without standalone mode
+  // Optimized for Bolt.new hosting environment
+  // Static export disabled for SSR and API routes support
 
   // React strict mode
   reactStrictMode: true,
