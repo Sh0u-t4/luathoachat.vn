@@ -282,14 +282,21 @@ git status
 
 **Objective:** Migrate exclusively to Bolt.new hosting platform
 
-### Files Deleted (4 files)
+### Files Deleted (7 files)
 1. ❌ **netlify.toml** - Netlify configuration
 2. ❌ **vercel.json** - Vercel configuration
 3. ❌ **verify-deployment-ready.sh** - Netlify verification script
 4. ❌ **verify-publish-ready.sh** - Netlify publish script
+5. ❌ **DEPLOYMENT_FIX_2024_02_24.md** - Old Netlify troubleshooting
+6. ❌ **DEPLOYMENT_SUCCESS_FIX.md** - Old Netlify fix documentation
+7. ❌ **FIX_DEPLOYMENT_FINAL.md** - Old Netlify final fixes
 
 ### Package.json Changes
 - ❌ Removed: `@netlify/plugin-nextjs` dependency
+
+### .env.example Changes
+- Updated deployment instructions from Netlify to Bolt.new
+- Removed Netlify-specific variable setup instructions
 
 ### New Files Created
 - ✅ **BOLT_DEPLOYMENT_GUIDE.md** - Complete Bolt.new hosting guide

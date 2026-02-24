@@ -289,7 +289,7 @@ curl -X POST 'https://[your-project].supabase.co/functions/v1/legal-ai-chat' \
 
 **Build Status:** ✅ All 14 pages compiled successfully
 
-**Deployment Guide:** See [BOLT_DEPLOYMENT_GUIDE.md](./BOLT_DEPLOYMENT_GUIDE.md) for complete hosting instructions.
+**Deployment Guide:** See [BOLT_DEPLOYMENT_COMPLETE.md](./BOLT_DEPLOYMENT_COMPLETE.md) for complete hosting instructions.
 
 **Deployment Process:**
 1. **Bolt.new** - Click "Deploy" or "Publish" button (Recommended)
@@ -316,8 +316,8 @@ curl -X POST 'https://[your-project].supabase.co/functions/v1/legal-ai-chat' \
 ### Deployment Guides
 | Document | Description |
 |----------|-------------|
-| [BOLT_DEPLOYMENT_GUIDE.md](./BOLT_DEPLOYMENT_GUIDE.md) | 📦 Complete Bolt.new hosting guide |
-| [QUICK_START_GUIDE.md](./QUICK_START_GUIDE.md) | ✅ Quick start guide (3 minutes) |
+| [BOLT_DEPLOYMENT_COMPLETE.md](./BOLT_DEPLOYMENT_COMPLETE.md) | 📦 Complete Bolt.new hosting guide |
+| [BOLT_HOSTING_READY.md](./BOLT_HOSTING_READY.md) | 🚀 Deployment readiness checklist |
 
 ---
 
