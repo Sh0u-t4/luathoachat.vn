@@ -11,8 +11,8 @@ const nextConfig = {
     ],
   },
 
-  // Output for Netlify deployment
-  output: 'standalone',
+  // Output mode removed for Netlify @netlify/plugin-nextjs compatibility
+  // The plugin automatically handles deployment without standalone mode
 
   // React strict mode
   reactStrictMode: true,
