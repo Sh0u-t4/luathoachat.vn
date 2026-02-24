@@ -52,6 +52,7 @@ export function ChatLogsViewer() {
   useEffect(() => {
     loadUsers();
     loadChatLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, selectedUser]);
 
   const loadUsers = async () => {
