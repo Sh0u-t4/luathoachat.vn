@@ -1,8 +1,6 @@
-# This file is for Netlify deployment only
-# If deploying to Bolt.new, this file is ignored
 [build]
-  command = "npm run build"
-  publish = ".next"
+command = "npx next build"
+publish = ".next"
 
 [[plugins]]
-  package = "@netlify/plugin-nextjs"
+package = "@netlify/plugin-nextjs"
