@@ -1,6 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import { Toaster } from '@/components/ui/sonner';
 import { LanguageProvider } from '@/lib/i18n/context';
 import { ChatProvider } from '@/components/chat/chat-context';
@@ -212,70 +213,65 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=AW-17948518438"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'AW-17948518438');
-            `,
-          }}
-        />
-        {/* Google Analytics 4 - G-43DD3M8BC2 */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-43DD3M8BC2"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-43DD3M8BC2');
-            `,
-          }}
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Global chunk load error handler
-              window.addEventListener('error', function(e) {
-                const isChunkError = e.message && (
-                  e.message.includes('Loading chunk') ||
-                  e.message.includes('Failed to fetch dynamically imported module') ||
-                  e.message.includes('webpack')
-                );
-
-                if (isChunkError) {
-                  console.warn('[ChunkLoadError] Detected, reloading page...');
-                  // Store error info before reload
-                  sessionStorage.setItem('chunk_error_reload', 'true');
-                  // Reload after short delay
-                  setTimeout(function() {
-                    window.location.reload();
-                  }, 1500);
-                }
-              }, true);
-
-              // Prevent infinite reload loop
-              window.addEventListener('DOMContentLoaded', function() {
-                const hadError = sessionStorage.getItem('chunk_error_reload');
-                if (hadError) {
-                  sessionStorage.removeItem('chunk_error_reload');
-                  console.log('[ChunkLoadError] Page reloaded successfully');
-                }
-              });
-            `,
-          }}
-        />
       </head>
       <body className={`${inter.variable} font-sans`}>
+        {/* Google Ads Conversion Tracking */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17948518438"
+          strategy="afterInteractive"
+        />
+        <Script id="google-ads-config" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17948518438');
+          `}
+        </Script>
+
+        {/* Google Analytics 4 */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-43DD3M8BC2"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics-config" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-43DD3M8BC2');
+          `}
+        </Script>
+
+        {/* Chunk Load Error Handler */}
+        <Script id="chunk-error-handler" strategy="afterInteractive">
+          {`
+            window.addEventListener('error', function(e) {
+              const isChunkError = e.message && (
+                e.message.includes('Loading chunk') ||
+                e.message.includes('Failed to fetch dynamically imported module') ||
+                e.message.includes('webpack')
+              );
+
+              if (isChunkError) {
+                console.warn('[ChunkLoadError] Detected, reloading page...');
+                sessionStorage.setItem('chunk_error_reload', 'true');
+                setTimeout(function() {
+                  window.location.reload();
+                }, 1500);
+              }
+            }, true);
+
+            window.addEventListener('DOMContentLoaded', function() {
+              const hadError = sessionStorage.getItem('chunk_error_reload');
+              if (hadError) {
+                sessionStorage.removeItem('chunk_error_reload');
+                console.log('[ChunkLoadError] Page reloaded successfully');
+              }
+            });
+          `}
+        </Script>
+
         <ServiceWorkerRegistration />
         <ErrorBoundary>
           <MobileProvider>
