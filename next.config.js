@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Output configuration for Netlify
-  output: 'standalone',
-
   // Image optimization
   images: {
     unoptimized: true,
