@@ -103,12 +103,12 @@ Route Summary:
 ## TECHNOLOGY STACK
 
 ### Framework:
-- **Next.js 13.5.1** (App Router)
-- **React 18.2.0**
-- **TypeScript 5.2.2**
+- **Next.js 14.2.35** (App Router) - Latest Stable
+- **React 18.3.0**
+- **TypeScript 5.6.0**
 
 ### Styling:
-- **Tailwind CSS 3.3.3**
+- **Tailwind CSS 3.4.0**
 - **Radix UI** (Components)
 - **Lucide React** (Icons)
 
