@@ -281,11 +281,13 @@ curl -X POST 'https://[your-project].supabase.co/functions/v1/legal-ai-chat' \
 
 | Document | Description |
 |----------|-------------|
-| [BACKEND_RAG_IMPLEMENTATION.md](./BACKEND_RAG_IMPLEMENTATION.md) | Chi tiết kỹ thuật đầy đủ về RAG architecture |
-| [QUICK_START_GUIDE.md](./QUICK_START_GUIDE.md) | Hướng dẫn kích hoạt hệ thống trong 3 bước |
-| [OPENAI_SETUP_GUIDE.md](./OPENAI_SETUP_GUIDE.md) | Cấu hình OpenAI API key |
-| [DEPLOYMENT_STATUS.md](./DEPLOYMENT_STATUS.md) | Trạng thái triển khai hiện tại |
-| [AI_SYSTEM_DOCUMENTATION.md](./AI_SYSTEM_DOCUMENTATION.md) | Chi tiết về AI system prompts |
+| [AI_SYSTEM_DOCUMENTATION.md](./AI_SYSTEM_DOCUMENTATION.md) | Chi tiết về AI system prompts & architecture |
+| [BACKEND_RAG_IMPLEMENTATION.md](./BACKEND_RAG_IMPLEMENTATION.md) | Chi tiết kỹ thuật đầy đủ về RAG implementation |
+| [QUICK_START_GUIDE.md](./QUICK_START_GUIDE.md) | Hướng dẫn khởi động nhanh trong 3 bước |
+| [I18N_README.md](./I18N_README.md) | Hướng dẫn hệ thống đa ngôn ngữ |
+| [N8N_INTEGRATION_GUIDE.md](./N8N_INTEGRATION_GUIDE.md) | Tích hợp với n8n workflow automation |
+| [NETLIFY_FIX_SUMMARY.md](./NETLIFY_FIX_SUMMARY.md) | Fix deployment issues trên Netlify |
+| [DEPLOY_NOW_CHECKLIST.md](./DEPLOY_NOW_CHECKLIST.md) | Checklist triển khai production |
 
 ---
 
