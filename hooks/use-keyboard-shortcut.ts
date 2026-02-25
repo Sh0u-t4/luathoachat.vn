@@ -69,6 +69,9 @@ export function useKeyboardShortcut(
 /**
  * Hook for global search shortcut (Cmd/Ctrl + K)
  * Common pattern for quick search access
+ *
+ * @param onActivate - Callback when shortcut is triggered
+ * @param enabled - Whether shortcut is active (default: true, set to false during SSR)
  */
 export function useGlobalSearchShortcut(onActivate: () => void, enabled: boolean = true) {
   useKeyboardShortcut(

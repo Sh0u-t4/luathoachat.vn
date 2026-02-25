@@ -17,21 +17,26 @@ const MAX_CHARS = 500;
 export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
   const [inputValue, setInputValue] = useState('');
   const [showRecentSearches, setShowRecentSearches] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { sendMessage } = useChat();
   const { t } = useLanguage();
   const { recentSearches, addSearch, removeSearch } = useRecentSearches();
 
-  // Auto-focus on mount
+  // Hydration fix: Only run client-side logic after mount
   useEffect(() => {
+    setIsMounted(true);
+    // Auto-focus after hydration
     inputRef.current?.focus();
   }, []);
 
-  // Global keyboard shortcut (Cmd/Ctrl + K)
+  // Global keyboard shortcut (Cmd/Ctrl + K) - only after mount
   useGlobalSearchShortcut(() => {
-    inputRef.current?.focus();
-    setShowRecentSearches(true);
-  });
+    if (isMounted) {
+      inputRef.current?.focus();
+      setShowRecentSearches(true);
+    }
+  }, isMounted);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,15 +148,16 @@ export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
                   value={inputValue}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
-                  onFocus={() => setShowRecentSearches(true)}
-                  onBlur={() => setTimeout(() => setShowRecentSearches(false), 200)}
-                  placeholder="Hỏi về Luật Hóa chất, khai báo, giấy phép... (Cmd/Ctrl+K)"
+                  onFocus={() => isMounted && setShowRecentSearches(true)}
+                  onBlur={() => isMounted && setTimeout(() => setShowRecentSearches(false), 200)}
+                  placeholder="Hỏi về Luật Hóa chất, khai báo, giấy phép..."
                   maxLength={MAX_CHARS}
                   className="flex-1 bg-transparent text-white placeholder:text-slate-500 px-4 py-3 text-base focus:outline-none"
+                  aria-label="Search input - Press Cmd/Ctrl+K to focus"
                 />
 
-                {/* Character Counter */}
-                {showCharCounter && (
+                {/* Character Counter - Only show after mount */}
+                {isMounted && showCharCounter && (
                   <span className={`text-xs px-2 ${charCount >= MAX_CHARS ? 'text-red-400' : 'text-slate-400'}`}>
                     {charCount}/{MAX_CHARS}
                   </span>
@@ -168,8 +174,8 @@ export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
                 </Button>
               </div>
 
-              {/* Recent Searches Dropdown */}
-              {showRecentSearches && recentSearches.length > 0 && (
+              {/* Recent Searches Dropdown - Only render after hydration */}
+              {isMounted && showRecentSearches && recentSearches.length > 0 && (
                 <div className="border-t border-slate-700/50 p-2">
                   <div className="flex items-center justify-between px-2 py-1 mb-1">
                     <span className="text-xs text-slate-400 flex items-center gap-1">
