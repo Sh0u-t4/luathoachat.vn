@@ -33,14 +33,7 @@ export function MobileChatInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
 
-  // Auto-resize textarea with increased max height
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    textarea.style.height = 'auto';
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
-  }, [value]);
+  // Remove auto-resize for fixed height input
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,36 +76,33 @@ export function MobileChatInput({
       }
       suppressHydrationWarning
     >
-      <div className="flex items-end gap-3 max-w-4xl mx-auto">
-        {/* Text Input */}
+      <div className="flex items-center gap-3 max-w-4xl mx-auto">
+        {/* Text Input - Single line, same height as button */}
         <div className="flex-1 relative">
-          <textarea
-            ref={textareaRef}
+          <input
+            ref={textareaRef as any}
+            type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onFocus={handleFocus}
             onBlur={handleBlur}
             placeholder={placeholder || t.chat.inputPlaceholder}
             disabled={disabled}
-            rows={shouldUseMobileUI ? 2 : 1}
             className={`
-              w-full resize-none overflow-y-auto
-              ${shouldUseMobileUI ? 'mobile-input text-base' : 'h-10 text-sm'}
+              w-full
+              ${shouldUseMobileUI ? 'h-12 text-base mobile-input' : 'h-10 text-sm'}
               px-4
-              ${shouldUseMobileUI ? 'py-4' : 'py-3'}
-              border border-slate-200 rounded-2xl
+              border border-slate-200 rounded-xl
               focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent
               disabled:bg-slate-50 disabled:text-slate-400
               placeholder:text-slate-400
             `}
             style={{
-              maxHeight: shouldUseMobileUI ? '160px' : '120px',
-              minHeight: shouldUseMobileUI ? '56px' : '40px',
               touchAction: 'manipulation',
             }}
             onKeyDown={(e) => {
-              // Submit on Enter (desktop only), Shift+Enter for new line
-              if (e.key === 'Enter' && !e.shiftKey && !shouldUseMobileUI) {
+              // Submit on Enter
+              if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleSubmit(e);
               }
@@ -120,22 +110,24 @@ export function MobileChatInput({
           />
         </div>
 
-        {/* Send Button - Always visible with larger touch target */}
+        {/* Send Button - Same height as input */}
         <Button
           type="submit"
           disabled={!value.trim() || disabled}
           className={`
-            ${shouldUseMobileUI ? 'h-12 w-12 p-0 rounded-xl shadow-lg' : 'h-10 px-4'}
+            ${shouldUseMobileUI ? 'h-12 w-12' : 'h-10 w-10'}
+            p-0
+            rounded-xl
             flex-shrink-0
             bg-cyan-600 hover:bg-cyan-700 text-white
             disabled:bg-slate-300 disabled:text-slate-500
             touch-feedback
             transition-all active:scale-95
+            shadow-md
           `}
           suppressHydrationWarning
         >
-          <Send className={shouldUseMobileUI ? 'w-5 h-5' : 'w-4 h-4'} />
-          {!shouldUseMobileUI && <span className="ml-2">Gửi</span>}
+          <Send className="w-5 h-5" />
         </Button>
       </div>
     </form>
