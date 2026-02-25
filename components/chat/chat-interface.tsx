@@ -17,11 +17,16 @@ import { MobileChatHistory } from './mobile-chat-history';
 import { MobileMessageCard } from './mobile-message-card';
 import { MobileDisclaimer } from './mobile-disclaimer';
 import { DisclaimerToast } from './disclaimer-toast';
+import { VoiceInputButton } from './voice-input-button';
+// import { MessageSearch } from './message-search';
+// import { ExportChatDialog } from './export-chat-dialog';
+// import { DarkModeToggle } from './dark-mode-toggle';
 import { useOffline } from '@/hooks/use-offline';
 import { useFAQCache } from '@/hooks/use-faq-cache';
 import { useFirstTimeDisclaimer } from '@/hooks/use-first-time-disclaimer';
 import { useKeyboardState } from '@/hooks/use-keyboard-state';
 import { useScrollLock } from '@/hooks/use-scroll-lock';
+// import { useMessageSearch } from '@/hooks/use-message-search';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n/context';
 import { useMobile } from '@/lib/mobile/context';
@@ -687,29 +692,53 @@ export function ChatInterface() {
             )}
           </div>
 
-          {/* Desktop Input Form */}
+          {/* Desktop Input Form - Redesigned to match search bar style */}
           <form
             onSubmit={handleSubmit}
-            className="p-4 border-t border-slate-200 bg-white"
+            role="search"
+            aria-label="Send message"
+            className="p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
           >
-            <div className="flex gap-3">
-              <Input
-                ref={inputRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder={t.chat.inputPlaceholder}
-                className="flex-1 border-slate-200 focus:border-cyan-500 focus:ring-cyan-500"
-                disabled={isTyping}
-              />
+            <div className="flex gap-3 items-center max-w-5xl mx-auto">
+              {/* Large Dark Input Field */}
+              <div className="flex-1 relative">
+                <Input
+                  ref={inputRef}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Hỏi về Luật Hóa chất, khai báo, giấy phép..."
+                  aria-label="Message input"
+                  aria-describedby="chat-input-hint"
+                  className="h-14 px-6 text-base bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-400 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 transition-all"
+                  disabled={isTyping}
+                />
+              </div>
+
+              {/* Voice Input Button */}
+              {isMounted && (
+                <VoiceInputButton
+                  onTranscript={(text) => {
+                    setInputValue((prev) => prev + (prev ? ' ' : '') + text);
+                    inputRef.current?.focus();
+                  }}
+                  disabled={isTyping}
+                  lang="vi-VN"
+                />
+              )}
+
+              {/* Gradient Submit Button - "Tư vấn ngay" style */}
               <Button
                 type="submit"
                 disabled={!inputValue.trim() || isTyping}
-                className="bg-cyan-600 hover:bg-cyan-700 text-white px-6"
+                aria-label="Send message"
+                className="h-14 px-8 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-700 hover:to-cyan-600 text-white font-semibold rounded-xl shadow-lg shadow-cyan-500/30 transition-all duration-300 hover:shadow-cyan-500/50 disabled:opacity-50 disabled:shadow-none flex items-center gap-2"
               >
-                <Send className="w-4 h-4" />
+                <Send className="w-5 h-5" />
+                <span className="hidden sm:inline">Tư vấn ngay</span>
+                <span className="sm:hidden">Gửi</span>
               </Button>
             </div>
-            <div className="text-xs text-slate-400 mt-2 text-center space-y-1">
+            <div id="chat-input-hint" className="text-xs text-slate-400 mt-3 text-center space-y-1 max-w-5xl mx-auto">
               <p>{t.chat.disclaimer1}</p>
               <p>{t.chat.disclaimer2}</p>
             </div>

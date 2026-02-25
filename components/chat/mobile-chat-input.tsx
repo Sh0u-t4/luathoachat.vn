@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/lib/i18n/context';
 import { useMobile } from '@/lib/mobile/context';
 import { hapticFeedback, HapticPatterns } from '@/lib/mobile/utils';
+import { VoiceInputButton } from './voice-input-button';
 import type { KeyboardState } from '@/hooks/use-keyboard-state';
 
 interface MobileChatInputProps {
@@ -63,21 +64,21 @@ export function MobileChatInput({
     <form
       onSubmit={handleSubmit}
       className={`
-        ${shouldUseMobileUI ? 'flex-shrink-0 border-t border-slate-200' : 'border-t border-slate-200'}
-        ${shouldUseMobileUI ? 'px-3 pt-3' : 'p-4'}
-        ${shouldUseMobileUI && keyboardState?.isKeyboardOpen ? 'pb-1' : shouldUseMobileUI ? 'pb-3' : ''}
-        bg-white
-        ${isFocused && shouldUseMobileUI ? 'shadow-[0_-4px_12px_rgba(0,0,0,0.1)]' : ''}
+        ${shouldUseMobileUI ? 'flex-shrink-0' : ''}
+        ${shouldUseMobileUI ? 'px-4 pt-4' : 'p-4'}
+        ${shouldUseMobileUI && keyboardState?.isKeyboardOpen ? 'pb-2' : shouldUseMobileUI ? 'pb-4' : ''}
+        bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900
+        ${isFocused && shouldUseMobileUI ? 'shadow-[0_-4px_12px_rgba(0,0,0,0.3)]' : ''}
       `}
       style={
         shouldUseMobileUI && keyboardState?.isKeyboardOpen
-          ? { paddingBottom: '4px' }
+          ? { paddingBottom: '8px' }
           : undefined
       }
       suppressHydrationWarning
     >
-      <div className="flex items-center gap-3 max-w-4xl mx-auto">
-        {/* Text Input - Single line, same height as button */}
+      <div className="flex items-center gap-2 max-w-4xl mx-auto">
+        {/* Dark Text Input - Larger for mobile */}
         <div className="flex-1 relative">
           <input
             ref={textareaRef as any}
@@ -86,16 +87,18 @@ export function MobileChatInput({
             onChange={(e) => onChange(e.target.value)}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            placeholder={placeholder || t.chat.inputPlaceholder}
+            placeholder="Hỏi về Luật Hóa chất..."
             disabled={disabled}
             className={`
               w-full
-              ${shouldUseMobileUI ? 'h-12 text-base mobile-input' : 'h-10 text-sm'}
-              px-4
-              border border-slate-200 rounded-xl
-              focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent
-              disabled:bg-slate-50 disabled:text-slate-400
-              placeholder:text-slate-400
+              ${shouldUseMobileUI ? 'h-14 text-base mobile-input' : 'h-12 text-sm'}
+              px-5
+              bg-slate-800/50 border border-slate-700
+              text-white placeholder:text-slate-400
+              rounded-xl
+              focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500
+              disabled:bg-slate-900/50 disabled:text-slate-500
+              transition-all
             `}
             style={{
               touchAction: 'manipulation',
@@ -110,24 +113,37 @@ export function MobileChatInput({
           />
         </div>
 
-        {/* Send Button - Same height as input */}
+        {/* Voice Input Button */}
+        <VoiceInputButton
+          onTranscript={(text) => {
+            onChange(value + (value ? ' ' : '') + text);
+            textareaRef.current?.focus();
+          }}
+          disabled={disabled}
+          lang="vi-VN"
+        />
+
+        {/* Gradient Send Button */}
         <Button
           type="submit"
           disabled={!value.trim() || disabled}
           className={`
-            ${shouldUseMobileUI ? 'h-12 w-12' : 'h-10 w-10'}
-            p-0
+            ${shouldUseMobileUI ? 'h-14 px-6' : 'h-12 px-5'}
             rounded-xl
             flex-shrink-0
-            bg-cyan-600 hover:bg-cyan-700 text-white
-            disabled:bg-slate-300 disabled:text-slate-500
+            bg-gradient-to-r from-cyan-600 to-cyan-500
+            hover:from-cyan-700 hover:to-cyan-600
+            text-white font-semibold
+            disabled:opacity-50 disabled:from-slate-700 disabled:to-slate-700
             touch-feedback
             transition-all active:scale-95
-            shadow-md
+            shadow-lg shadow-cyan-500/30
+            flex items-center gap-2
           `}
           suppressHydrationWarning
         >
           <Send className="w-5 h-5" />
+          <span className="text-sm">Gửi</span>
         </Button>
       </div>
     </form>
