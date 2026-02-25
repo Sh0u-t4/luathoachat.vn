@@ -15,6 +15,7 @@ import { MobileChatHeader } from './mobile-chat-header';
 import { MobileBottomDrawer } from './mobile-bottom-drawer';
 import { MobileChatHistory } from './mobile-chat-history';
 import { MobileMessageCard } from './mobile-message-card';
+import { MobileDisclaimer } from './mobile-disclaimer';
 import { DisclaimerToast } from './disclaimer-toast';
 import { useOffline } from '@/hooks/use-offline';
 import { useFAQCache } from '@/hooks/use-faq-cache';
@@ -184,16 +185,19 @@ export function ChatInterface() {
     return distanceFromBottom < threshold;
   }, []);
 
-  // Scroll to bottom function
+  // Scroll to bottom function with mobile optimization
   const scrollToBottom = useCallback((behavior: 'smooth' | 'auto' = 'smooth') => {
     const container = chatContainerRef.current;
     if (!container) return;
 
+    // Add offset for mobile to keep disclaimer visible
+    const offset = shouldUseMobileUI ? 200 : 0;
+
     container.scrollTo({
-      top: container.scrollHeight,
+      top: container.scrollHeight - offset,
       behavior,
     });
-  }, []);
+  }, [shouldUseMobileUI]);
 
   // Handle scroll events to track position
   useEffect(() => {
@@ -355,7 +359,7 @@ export function ChatInterface() {
               ref={chatContainerRef}
               className="flex-1 overflow-y-auto mobile-chat-container p-3 space-y-3"
               style={{
-                paddingBottom: keyboardState.isKeyboardOpen ? '0px' : '0px',
+                paddingBottom: keyboardState.isKeyboardOpen ? '20px' : '80px',
               }}
               suppressHydrationWarning
             >
@@ -494,15 +498,21 @@ export function ChatInterface() {
             )}
           </div>
 
-          {/* Mobile Chat Input - Fixed at bottom */}
-          <MobileChatInput
-            value={inputValue}
-            onChange={setInputValue}
-            onSubmit={handleSubmit}
-            disabled={isTyping}
-            placeholder={t.chat.inputPlaceholder}
-            keyboardState={keyboardState}
-          />
+          {/* Mobile Chat Input & Disclaimer - Fixed at bottom */}
+          <div className="flex-shrink-0">
+            <MobileChatInput
+              value={inputValue}
+              onChange={setInputValue}
+              onSubmit={handleSubmit}
+              disabled={isTyping}
+              placeholder={t.chat.inputPlaceholder}
+              keyboardState={keyboardState}
+            />
+            <MobileDisclaimer
+              disclaimer1={t.chat.disclaimer1}
+              disclaimer2={t.chat.disclaimer2}
+            />
+          </div>
         </div>
       ) : (
         <Card

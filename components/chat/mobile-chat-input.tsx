@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, Smile } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/lib/i18n/context';
 import { useMobile } from '@/lib/mobile/context';
 import { hapticFeedback, HapticPatterns } from '@/lib/mobile/utils';
-import { toast } from 'sonner';
 import type { KeyboardState } from '@/hooks/use-keyboard-state';
 
 interface MobileChatInputProps {
@@ -32,17 +31,15 @@ export function MobileChatInput({
   const { t } = useLanguage();
   const { shouldUseMobileUI } = useMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-  // Auto-resize textarea
+  // Auto-resize textarea with increased max height
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
     textarea.style.height = 'auto';
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
   }, [value]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -69,77 +66,6 @@ export function MobileChatInput({
     setIsFocused(false);
   };
 
-  // Handle Attachment
-  const handleAttachmentClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('📎 Attachment button clicked!');
-    hapticFeedback(HapticPatterns.light);
-
-    toast.success('Đang mở trình chọn file...', {
-      duration: 2000,
-      position: 'top-center',
-    });
-
-    setTimeout(() => {
-      fileInputRef.current?.click();
-    }, 100);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    console.log('📎 Files selected:', files);
-
-    if (!files || files.length === 0) return;
-
-    const fileNames = Array.from(files).map(f => f.name).join(', ');
-
-    toast.success(`Đã chọn: ${fileNames}`, {
-      description: 'Tính năng upload đang được phát triển',
-      duration: 4000,
-    });
-
-    // Reset input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  // Handle Emoji
-  const handleEmojiClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('😊 Emoji button clicked!');
-    hapticFeedback(HapticPatterns.selection);
-
-    const newState = !showEmojiPicker;
-    setShowEmojiPicker(newState);
-
-    if (newState) {
-      toast.success('Chọn emoji bên dưới 👇', {
-        duration: 2000,
-      });
-    }
-  };
-
-  const insertEmoji = (emoji: string) => {
-    console.log('😊 Emoji selected:', emoji);
-    hapticFeedback(HapticPatterns.light);
-    onChange(value + emoji);
-    setShowEmojiPicker(false);
-
-    toast.success(`Đã thêm ${emoji}`, {
-      duration: 1000,
-    });
-
-    setTimeout(() => {
-      textareaRef.current?.focus();
-    }, 100);
-  };
-
-  // Common emojis for quick access
-  const commonEmojis = ['👍', '❤️', '😊', '🙏', '🤔', '👌', '🔥', '✅', '📝', '⚠️', '📄', '📋', '📊', '💡', '🎯'];
-
   return (
     <form
       onSubmit={handleSubmit}
@@ -157,71 +83,7 @@ export function MobileChatInput({
       }
       suppressHydrationWarning
     >
-      {/* Hidden File Input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*,.pdf,.doc,.docx"
-        className="hidden"
-        onChange={handleFileChange}
-        multiple
-      />
-
-      {/* Emoji Picker Overlay */}
-      {showEmojiPicker && shouldUseMobileUI && (
-        <div
-          className="absolute bottom-full left-0 right-0 mb-2 p-4 bg-white rounded-2xl shadow-2xl border-2 border-cyan-200 max-w-4xl mx-auto animate-in slide-in-from-bottom-4 duration-200"
-          suppressHydrationWarning
-        >
-          <div className="text-center mb-2">
-            <p className="text-sm font-medium text-cyan-600">Chọn Emoji 😊</p>
-          </div>
-          <div className="flex flex-wrap gap-3 justify-center mb-3">
-            {commonEmojis.map((emoji) => (
-              <button
-                key={emoji}
-                type="button"
-                onClick={() => insertEmoji(emoji)}
-                className="text-3xl p-3 hover:bg-cyan-50 active:bg-cyan-100 rounded-xl transition-all active:scale-110 touch-target-comfortable border border-transparent hover:border-cyan-200"
-                suppressHydrationWarning
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setShowEmojiPicker(false);
-              toast.info('Đã đóng emoji picker');
-            }}
-            className="w-full py-3 text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
-            suppressHydrationWarning
-          >
-            ✕ Đóng
-          </button>
-        </div>
-      )}
-
-      <div className="flex items-end gap-2 max-w-4xl mx-auto">
-        {/* Attachments Button (Mobile Only) */}
-        {shouldUseMobileUI && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="touch-target-comfortable flex-shrink-0 text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 active:scale-95 transition-transform"
-            disabled={disabled}
-            onClick={handleAttachmentClick}
-            onTouchStart={() => hapticFeedback(HapticPatterns.light)}
-            aria-label="Đính kèm file"
-            suppressHydrationWarning
-            title="Đính kèm file"
-          >
-            <Paperclip className="w-5 h-5" />
-          </Button>
-        )}
-
+      <div className="flex items-end gap-3 max-w-4xl mx-auto">
         {/* Text Input */}
         <div className="flex-1 relative">
           <textarea
@@ -232,20 +94,20 @@ export function MobileChatInput({
             onBlur={handleBlur}
             placeholder={placeholder || t.chat.inputPlaceholder}
             disabled={disabled}
-            rows={1}
+            rows={shouldUseMobileUI ? 2 : 1}
             className={`
               w-full resize-none overflow-y-auto
               ${shouldUseMobileUI ? 'mobile-input text-base' : 'h-10 text-sm'}
-              ${shouldUseMobileUI ? 'pl-4 pr-12' : 'px-4'}
-              py-3
+              px-4
+              ${shouldUseMobileUI ? 'py-4' : 'py-3'}
               border border-slate-200 rounded-2xl
               focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent
               disabled:bg-slate-50 disabled:text-slate-400
               placeholder:text-slate-400
             `}
             style={{
-              maxHeight: '120px',
-              minHeight: shouldUseMobileUI ? '48px' : '40px',
+              maxHeight: shouldUseMobileUI ? '160px' : '120px',
+              minHeight: shouldUseMobileUI ? '56px' : '40px',
               touchAction: 'manipulation',
             }}
             onKeyDown={(e) => {
@@ -256,38 +118,19 @@ export function MobileChatInput({
               }
             }}
           />
-
-          {/* Emoji Button (Mobile, inside input) */}
-          {shouldUseMobileUI && (
-            <button
-              type="button"
-              className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 touch-feedback transition-all active:scale-95 ${
-                showEmojiPicker
-                  ? 'text-cyan-600 bg-cyan-50 rounded-lg'
-                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg'
-              }`}
-              disabled={disabled}
-              onClick={handleEmojiClick}
-              onTouchStart={() => hapticFeedback(HapticPatterns.selection)}
-              aria-label="Chọn emoji"
-              title="Chọn emoji"
-              suppressHydrationWarning
-            >
-              <Smile className="w-5 h-5" />
-            </button>
-          )}
         </div>
 
-        {/* Send Button - Always visible */}
+        {/* Send Button - Always visible with larger touch target */}
         <Button
           type="submit"
           disabled={!value.trim() || disabled}
           className={`
-            ${shouldUseMobileUI ? 'touch-target-comfortable' : 'h-10 px-4'}
+            ${shouldUseMobileUI ? 'h-12 w-12 p-0 rounded-xl shadow-lg' : 'h-10 px-4'}
             flex-shrink-0
             bg-cyan-600 hover:bg-cyan-700 text-white
             disabled:bg-slate-300 disabled:text-slate-500
             touch-feedback
+            transition-all active:scale-95
           `}
           suppressHydrationWarning
         >
