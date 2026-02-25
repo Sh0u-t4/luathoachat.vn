@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/lib/i18n/context';
 import { useMobile } from '@/lib/mobile/context';
 import { hapticFeedback, HapticPatterns } from '@/lib/mobile/utils';
-import { VoiceInputButton } from './voice-input-button';
 import type { KeyboardState } from '@/hooks/use-keyboard-state';
 
 interface MobileChatInputProps {
@@ -112,16 +111,6 @@ export function MobileChatInput({
             }}
           />
         </div>
-
-        {/* Voice Input Button */}
-        <VoiceInputButton
-          onTranscript={(text) => {
-            onChange(value + (value ? ' ' : '') + text);
-            textareaRef.current?.focus();
-          }}
-          disabled={disabled}
-          lang="vi-VN"
-        />
 
         {/* Gradient Send Button */}
         <Button

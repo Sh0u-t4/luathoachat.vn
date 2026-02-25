@@ -17,16 +17,11 @@ import { MobileChatHistory } from './mobile-chat-history';
 import { MobileMessageCard } from './mobile-message-card';
 import { MobileDisclaimer } from './mobile-disclaimer';
 import { DisclaimerToast } from './disclaimer-toast';
-import { VoiceInputButton } from './voice-input-button';
-// import { MessageSearch } from './message-search';
-// import { ExportChatDialog } from './export-chat-dialog';
-// import { DarkModeToggle } from './dark-mode-toggle';
 import { useOffline } from '@/hooks/use-offline';
 import { useFAQCache } from '@/hooks/use-faq-cache';
 import { useFirstTimeDisclaimer } from '@/hooks/use-first-time-disclaimer';
 import { useKeyboardState } from '@/hooks/use-keyboard-state';
 import { useScrollLock } from '@/hooks/use-scroll-lock';
-// import { useMessageSearch } from '@/hooks/use-message-search';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n/context';
 import { useMobile } from '@/lib/mobile/context';
@@ -713,18 +708,6 @@ export function ChatInterface() {
                   disabled={isTyping}
                 />
               </div>
-
-              {/* Voice Input Button */}
-              {isMounted && (
-                <VoiceInputButton
-                  onTranscript={(text) => {
-                    setInputValue((prev) => prev + (prev ? ' ' : '') + text);
-                    inputRef.current?.focus();
-                  }}
-                  disabled={isTyping}
-                  lang="vi-VN"
-                />
-              )}
 
               {/* Gradient Submit Button - "Tư vấn ngay" style */}
               <Button
