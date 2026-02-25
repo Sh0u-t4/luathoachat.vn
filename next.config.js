@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
+const isBoltDev = process.env.BOLT_ENV === 'true';
+const isProduction = process.env.NODE_ENV === 'production';
+
 const nextConfig = {
-  // Image optimization
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -11,33 +13,23 @@ const nextConfig = {
     ],
   },
 
-  // Optimized for Bolt.new hosting environment
-  // Static export disabled for SSR and API routes support
-
-  // React strict mode
   reactStrictMode: true,
-
-  // Use SWC minification
   swcMinify: true,
 
-  // Disable ESLint during build to speed up WebContainer builds
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: isBoltDev,
   },
 
-  // Disable TypeScript errors during build to avoid EAGAIN issues
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: isBoltDev,
   },
 
-  // Compiler optimizations
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? {
+    removeConsole: isProduction ? {
       exclude: ['error', 'warn'],
     } : false,
   },
 
-  // Headers for caching and security
   async headers() {
     return [
       {
@@ -91,20 +83,16 @@ const nextConfig = {
     ];
   },
 
-  // WebContainer/Bolt.new optimization: Fix EAGAIN errors
-  webpack: (config, { isServer }) => {
-    // Reduce parallelism to avoid "EAGAIN: resource temporarily unavailable"
-    // This serializes file operations in WebContainer environment
-    config.parallelism = 1;
+  webpack: (config, { isServer, dev }) => {
+    if (isBoltDev && dev) {
+      config.parallelism = 1;
+      config.cache = false;
+    }
 
-    // Disable cache to reduce file handle pressure
-    config.cache = false;
-
-    // Reduce concurrent module processing
     config.optimization = {
       ...config.optimization,
       moduleIds: 'deterministic',
-      minimize: process.env.NODE_ENV === 'production',
+      minimize: isProduction,
     };
 
     return config;
