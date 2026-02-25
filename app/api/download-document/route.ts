@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
 
-// Force dynamic rendering to avoid Next.js static optimization issues
-export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -20,12 +16,25 @@ export async function GET(request: NextRequest) {
     }
 
     const normalizedPath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
-    const fullPath = join(process.cwd(), 'public', normalizedPath);
+    const baseUrl = request.nextUrl.origin;
+    const fileUrl = `${baseUrl}/${normalizedPath}`;
 
-    console.log('Download request:', { filePath, normalizedPath, fullPath });
+    console.log('Download request:', { filePath, normalizedPath, fileUrl });
 
-    const fileBuffer = await readFile(fullPath);
+    const fileResponse = await fetch(fileUrl);
 
+    if (!fileResponse.ok) {
+      return NextResponse.json(
+        {
+          error: 'File not found',
+          details: `Unable to fetch file at ${normalizedPath}`,
+          status: fileResponse.status
+        },
+        { status: 404 }
+      );
+    }
+
+    const fileBuffer = await fileResponse.arrayBuffer();
     const downloadName = fileName || filePath.split('/').pop() || 'document.pdf';
 
     const asciiFilename = downloadName.replace(/[^\x00-\x7F]/g, '');
@@ -36,22 +45,19 @@ export async function GET(request: NextRequest) {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
-        'Content-Length': fileBuffer.length.toString(),
+        'Content-Length': fileBuffer.byteLength.toString(),
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
     });
   } catch (error: any) {
     console.error('Download error:', {
       message: error.message,
-      code: error.code,
-      path: error.path,
       stack: error.stack
     });
     return NextResponse.json(
       {
         error: 'File not found or cannot be read',
-        details: error.message,
-        path: error.path
+        details: error.message
       },
       { status: 404 }
     );
