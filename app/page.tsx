@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 import { Header } from '@/components/landing/header';
-import { HeroSection } from '@/components/landing/hero-section';
+import { HeroSectionWithChat } from '@/components/landing/hero-section-with-chat';
 import { FeaturesSection } from '@/components/landing/features-section';
 import { StatsSection } from '@/components/landing/stats-section';
 import { Footer } from '@/components/landing/footer';
@@ -25,10 +25,11 @@ export default function HomePage() {
       <Header />
       <ChatHistorySidebar />
 
-      <main className="pt-16">
-        <HeroSection onSearch={handleSearch} />
+      <main>
+        {/* Hero với Chat Input tích hợp */}
+        <HeroSectionWithChat onSearch={handleSearch} />
 
-        {/* Chatbox luôn hiển thị */}
+        {/* Chatbox hiển thị kết quả */}
         <section ref={chatRef} className="py-16 px-4 bg-white" id="chat">
           <ChatInterface />
         </section>
