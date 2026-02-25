@@ -429,6 +429,10 @@ export function ChatInterface() {
                           onUnlockClick={handleUnlockClick}
                           messageIndex={assistantMessageIndex}
                           sessionId={sessionId || 'no-session'}
+                          onQuickReply={(reply) => {
+                            setInputValue(reply);
+                            inputRef.current?.focus();
+                          }}
                         />
                       ) : (
                         <p className="whitespace-pre-wrap">{message.content}</p>
@@ -610,6 +614,10 @@ export function ChatInterface() {
                           onUnlockClick={handleUnlockClick}
                           messageIndex={assistantMessageIndex}
                           sessionId={sessionId || 'no-session'}
+                          onQuickReply={(reply) => {
+                            setInputValue(reply);
+                            inputRef.current?.focus();
+                          }}
                         />
                       ) : (
                         <p className="whitespace-pre-wrap">{message.content}</p>

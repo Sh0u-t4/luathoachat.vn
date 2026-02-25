@@ -1,27 +1,47 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { Send, Sparkles } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Send, Sparkles, X, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChat } from '@/components/chat/chat-context';
 import { useLanguage } from '@/lib/i18n/context';
+import { useGlobalSearchShortcut } from '@/hooks/use-keyboard-shortcut';
+import { useRecentSearches } from '@/hooks/use-recent-searches';
 
 interface HeroSectionWithChatProps {
   onSearch: (query: string) => void;
 }
 
+const MAX_CHARS = 500;
+
 export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
   const [inputValue, setInputValue] = useState('');
+  const [showRecentSearches, setShowRecentSearches] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { sendMessage } = useChat();
   const { t } = useLanguage();
+  const { recentSearches, addSearch, removeSearch } = useRecentSearches();
+
+  // Auto-focus on mount
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  // Global keyboard shortcut (Cmd/Ctrl + K)
+  useGlobalSearchShortcut(() => {
+    inputRef.current?.focus();
+    setShowRecentSearches(true);
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputValue.trim()) {
-      sendMessage(inputValue.trim());
-      onSearch(inputValue.trim());
+      const query = inputValue.trim();
+      sendMessage(query);
+      onSearch(query);
+      addSearch(query); // Save to recent searches
       setInputValue('');
+      setShowRecentSearches(false);
     }
   };
 
@@ -30,7 +50,27 @@ export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
       e.preventDefault();
       handleSubmit(e);
     }
+    // Hide recent searches on Escape
+    if (e.key === 'Escape') {
+      setShowRecentSearches(false);
+    }
   };
+
+  const handleRecentSearchClick = (query: string) => {
+    setInputValue(query);
+    inputRef.current?.focus();
+    setShowRecentSearches(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= MAX_CHARS) {
+      setInputValue(value);
+    }
+  };
+
+  const charCount = inputValue.length;
+  const showCharCounter = charCount > MAX_CHARS * 0.8; // Show when 80% full
 
   return (
     <section className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
@@ -95,26 +135,73 @@ export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-300" />
 
-            <div className="relative flex items-center gap-3 bg-slate-800/90 backdrop-blur-xl rounded-2xl p-2 border border-slate-700/50 shadow-2xl">
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Hỏi về Luật Hóa chất, khai báo, giấy phép..."
-                className="flex-1 bg-transparent text-white placeholder:text-slate-500 px-4 py-3 text-base focus:outline-none"
-              />
+            <div className="relative flex flex-col bg-slate-800/90 backdrop-blur-xl rounded-2xl border border-slate-700/50 shadow-2xl">
+              <div className="flex items-center gap-3 p-2">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => setShowRecentSearches(true)}
+                  onBlur={() => setTimeout(() => setShowRecentSearches(false), 200)}
+                  placeholder="Hỏi về Luật Hóa chất, khai báo, giấy phép... (Cmd/Ctrl+K)"
+                  maxLength={MAX_CHARS}
+                  className="flex-1 bg-transparent text-white placeholder:text-slate-500 px-4 py-3 text-base focus:outline-none"
+                />
 
-              <Button
-                type="submit"
-                disabled={!inputValue.trim()}
-                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl px-6 py-3 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-              >
-                <span className="hidden sm:inline">Tư vấn ngay</span>
-                <span className="sm:hidden">Gửi</span>
-                <Send className="w-4 h-4 ml-2" />
-              </Button>
+                {/* Character Counter */}
+                {showCharCounter && (
+                  <span className={`text-xs px-2 ${charCount >= MAX_CHARS ? 'text-red-400' : 'text-slate-400'}`}>
+                    {charCount}/{MAX_CHARS}
+                  </span>
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={!inputValue.trim()}
+                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl px-6 py-3 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                >
+                  <span className="hidden sm:inline">Tư vấn ngay</span>
+                  <span className="sm:hidden">Gửi</span>
+                  <Send className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+
+              {/* Recent Searches Dropdown */}
+              {showRecentSearches && recentSearches.length > 0 && (
+                <div className="border-t border-slate-700/50 p-2">
+                  <div className="flex items-center justify-between px-2 py-1 mb-1">
+                    <span className="text-xs text-slate-400 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      Tìm kiếm gần đây
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {recentSearches.map((search) => (
+                      <div
+                        key={search.id}
+                        className="flex items-center justify-between gap-2 px-3 py-2 hover:bg-slate-700/50 rounded-lg cursor-pointer group"
+                        onClick={() => handleRecentSearchClick(search.query)}
+                      >
+                        <span className="text-sm text-slate-300 flex-1 truncate">
+                          {search.query}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeSearch(search.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-600 rounded"
+                        >
+                          <X className="w-3 h-3 text-slate-400" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </form>
