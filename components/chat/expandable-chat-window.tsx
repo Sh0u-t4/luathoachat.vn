@@ -120,7 +120,7 @@ export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: Expand
 
         {/* Chat Content */}
         <div className="h-[calc(100vh-80px)] overflow-hidden">
-          <ChatInterface initialMessage={initialMessage} />
+          <ChatInterface initialMessage={initialMessage} hideDisclaimer={true} />
         </div>
       </div>
     </>

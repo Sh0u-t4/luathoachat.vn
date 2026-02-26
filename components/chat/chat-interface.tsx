@@ -37,9 +37,10 @@ import type { ChatMessage } from '@/types';
 
 interface ChatInterfaceProps {
   initialMessage?: string;
+  hideDisclaimer?: boolean;
 }
 
-export function ChatInterface({ initialMessage }: ChatInterfaceProps = {}) {
+export function ChatInterface({ initialMessage, hideDisclaimer = false }: ChatInterfaceProps = {}) {
   const [inputValue, setInputValue] = useState('');
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showMobileHistory, setShowMobileHistory] = useState(false);
@@ -523,7 +524,7 @@ export function ChatInterface({ initialMessage }: ChatInterfaceProps = {}) {
               disabled={isTyping}
               placeholder={t.chat.inputPlaceholder}
               keyboardState={keyboardState}
-              disclaimer={t.chat.disclaimer1}
+              disclaimer={hideDisclaimer ? undefined : t.chat.disclaimer1}
             />
           </div>
         </div>
@@ -730,9 +731,11 @@ export function ChatInterface({ initialMessage }: ChatInterfaceProps = {}) {
                 <span className="sm:hidden">Gửi</span>
               </Button>
             </div>
-            <div id="chat-input-hint" className="text-xs text-slate-400 mt-3 text-center max-w-5xl mx-auto">
-              <p>{t.chat.disclaimer1}</p>
-            </div>
+            {!hideDisclaimer && (
+              <div id="chat-input-hint" className="text-xs text-slate-400 mt-3 text-center max-w-5xl mx-auto">
+                <p>{t.chat.disclaimer1}</p>
+              </div>
+            )}
           </form>
         </Card>
       )}
