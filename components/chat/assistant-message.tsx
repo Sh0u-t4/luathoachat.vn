@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lock, LogIn, ThumbsUp, ThumbsDown, MessageSquare, Copy, Check, Share2 } from 'lucide-react';
+import { Lock, LogIn, ThumbsUp, ThumbsDown, MessageSquare, Copy, Check } from 'lucide-react';
 import { useTypingEffect } from '@/hooks/use-typing-effect';
 import { LegalCitation } from './legal-citation';
 import { FeedbackDialog } from './feedback-dialog';
 import { QuickReplyButtons, generateQuickReplies } from './quick-reply-buttons';
-import { ShareMessageDialog } from './share-message-dialog';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import type { ChatMessage } from '@/types';
@@ -49,8 +48,6 @@ export function AssistantMessage({
   // Feedback dialog state
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
 
-  // Share dialog state
-  const [showShareDialog, setShowShareDialog] = useState(false);
 
   // Copy state
   const [isCopied, setIsCopied] = useState(false);
@@ -402,15 +399,6 @@ export function AssistantMessage({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowShareDialog(true)}
-                  className="text-blue-700 border-blue-300 hover:bg-blue-50 hover:text-blue-800"
-                >
-                  <Share2 className="w-4 h-4 mr-1.5" />
-                  Chia sẻ
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
                   onClick={() => setShowFeedbackDialog(true)}
                   disabled={!hasValidMessageId}
                   className="text-cyan-700 border-cyan-300 hover:bg-cyan-50 hover:text-cyan-800"
@@ -434,13 +422,6 @@ export function AssistantMessage({
         />
       )}
 
-      {/* Share Dialog */}
-      <ShareMessageDialog
-        open={showShareDialog}
-        onOpenChange={setShowShareDialog}
-        messageContent={fullContent}
-        messageId={hasValidMessageId ? message.id : undefined}
-      />
 
       {/* Feedback Dialog - Only render if message has valid UUID */}
       {hasValidMessageId && (
