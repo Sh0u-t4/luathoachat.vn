@@ -3,7 +3,7 @@
 import { Header } from '@/components/landing/header';
 import { HeroSectionSearch } from '@/components/landing/hero-section-search';
 import { FeaturesSection } from '@/components/landing/features-section';
-import { StatsSection } from '@/components/landing/stats-section';
+import { PromptLibrary } from '@/components/landing/prompt-library';
 import { Footer } from '@/components/landing/footer';
 import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar';
 import { GoogleConversionTracker } from '@/components/google-conversion-tracker';
@@ -30,7 +30,9 @@ function HomePageContent() {
         {/* Hero với Smart Search Bar */}
         <HeroSectionSearch onSearch={handleSearch} />
 
-        <StatsSection />
+        {/* Prompt Library - Thư viện câu hỏi mẫu */}
+        <PromptLibrary onPromptSelect={handleSearch} />
+
         <FeaturesSection />
       </main>
 
