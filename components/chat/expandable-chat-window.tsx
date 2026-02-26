@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Maximize2, Minimize2 } from 'lucide-react';
+import { X, Maximize2, Minimize2, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ChatInterface } from './chat-interface';
 import { hapticFeedback, HapticPatterns } from '@/lib/mobile/utils';
@@ -126,6 +126,3 @@ export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: Expand
     </>
   );
 }
-
-// Import MessageCircle locally
-import { MessageCircle } from 'lucide-react';
