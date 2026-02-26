@@ -140,9 +140,9 @@ export function MobileChatInput({
 
       {/* Disclaimer text */}
       {disclaimer && (
-        <div className="text-xs text-slate-400 mt-3 text-center max-w-4xl mx-auto">
-          <p>{disclaimer}</p>
-        </div>
+        <p className="text-xs text-slate-400 mt-3 text-center max-w-4xl mx-auto">
+          {disclaimer}
+        </p>
       )}
     </form>
   );

@@ -732,9 +732,9 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false }: ChatIn
               </Button>
             </div>
             {!hideDisclaimer && (
-              <div id="chat-input-hint" className="text-xs text-slate-400 mt-3 text-center max-w-5xl mx-auto">
-                <p>{t.chat.disclaimer1}</p>
-              </div>
+              <p id="chat-input-hint" className="text-xs text-slate-400 mt-3 text-center max-w-5xl mx-auto">
+                {t.chat.disclaimer1}
+              </p>
             )}
           </form>
         </Card>
