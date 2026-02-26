@@ -11,10 +11,16 @@ interface SmartSearchBarProps {
 }
 
 const SUGGESTED_TOPICS = [
-  { icon: FileText, text: 'Nghị định 24/2026/NĐ-CP', category: 'Phân loại' },
-  { icon: FileText, text: 'Nghị định 25/2026/NĐ-CP', category: 'Kinh doanh' },
-  { icon: FileText, text: 'Nghị định 26/2026/NĐ-CP', category: 'Quản lý' },
+  { icon: FileText, text: 'Nghị định 24/2026/NĐ-CP - Phân loại hóa chất', category: 'Phân loại' },
+  { icon: FileText, text: 'Nghị định 25/2026/NĐ-CP - Sản xuất, kinh doanh', category: 'Kinh doanh' },
+  { icon: FileText, text: 'Nghị định 26/2026/NĐ-CP - Quản lý hóa chất nguy hiểm', category: 'Quản lý' },
   { icon: Scale, text: 'Luật Hóa chất số 69/2025/QH15', category: 'Luật' },
+  { icon: FileText, text: 'Thông tư 01/2026/TT-BCT - Hướng dẫn luật hóa chất', category: 'Thông tư' },
+  { icon: FileText, text: 'Thông tư 02/2026/TT-BCT - Quy định mới', category: 'Thông tư' },
+  { icon: Scale, text: 'Hóa chất nào cần giấy phép kinh doanh?', category: 'Câu hỏi' },
+  { icon: Scale, text: 'Quy trình cấp phép sản xuất hóa chất', category: 'Câu hỏi' },
+  { icon: Scale, text: 'Hóa chất tiền chất là gì?', category: 'Câu hỏi' },
+  { icon: Scale, text: 'Mức phạt vi phạm về hóa chất', category: 'Câu hỏi' },
 ];
 
 /**
@@ -113,31 +119,31 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
 
       {/* Suggestions Dropdown */}
       {showSuggestions && (
-        <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[500px] flex flex-col">
           {/* Header */}
-          <div className="px-6 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+          <div className="px-6 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-shrink-0">
             <TrendingUp className="w-4 h-4 text-cyan-600" />
             <span className="text-sm font-semibold text-slate-700">Chủ đề phổ biến</span>
           </div>
 
-          {/* Suggestions List */}
-          <div className="py-2">
+          {/* Suggestions List - Scrollable */}
+          <div className="py-2 overflow-y-auto">
             {SUGGESTED_TOPICS.map((topic, index) => (
               <button
                 key={index}
                 onClick={() => handleSuggestionClick(topic.text)}
                 className="w-full px-6 py-3 flex items-center gap-4 hover:bg-slate-50 transition-colors group"
               >
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center group-hover:from-cyan-100 group-hover:to-blue-100 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center group-hover:from-cyan-100 group-hover:to-blue-100 transition-colors flex-shrink-0">
                   <topic.icon className="w-5 h-5 text-cyan-600" />
                 </div>
-                <div className="flex-1 text-left">
-                  <div className="text-sm font-medium text-slate-900 group-hover:text-cyan-700 transition-colors">
+                <div className="flex-1 text-left min-w-0">
+                  <div className="text-sm font-medium text-slate-900 group-hover:text-cyan-700 transition-colors truncate">
                     {topic.text}
                   </div>
                   <div className="text-xs text-slate-500">{topic.category}</div>
                 </div>
-                <Search className="w-4 h-4 text-slate-300 group-hover:text-cyan-500 transition-colors" />
+                <Search className="w-4 h-4 text-slate-300 group-hover:text-cyan-500 transition-colors flex-shrink-0" />
               </button>
             ))}
           </div>
