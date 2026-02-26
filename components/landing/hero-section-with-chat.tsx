@@ -143,9 +143,9 @@ export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
                   aria-label="Search input - Press Cmd/Ctrl+K to focus"
                 />
 
-                {/* Character Counter - Only show after mount */}
-                {isMounted && showCharCounter && (
-                  <span className={`text-xs px-2 ${charCount >= MAX_CHARS ? 'text-red-400' : 'text-slate-400'}`}>
+                {/* Character Counter */}
+                {showCharCounter && (
+                  <span className={`text-xs px-2 ${charCount >= MAX_CHARS ? 'text-red-400' : 'text-slate-400'}`} suppressHydrationWarning>
                     {charCount}/{MAX_CHARS}
                   </span>
                 )}
@@ -161,9 +161,9 @@ export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
                 </Button>
               </div>
 
-              {/* Recent Searches Dropdown - Only render after hydration */}
-              {isMounted && showRecentSearches && recentSearches.length > 0 && (
-                <div className="border-t border-slate-700/50 p-2">
+              {/* Recent Searches Dropdown - Client-side only */}
+              {showRecentSearches && recentSearches.length > 0 && (
+                <div className="border-t border-slate-700/50 p-2" suppressHydrationWarning>
                   <div className="flex items-center justify-between px-2 py-1 mb-1">
                     <span className="text-xs text-slate-400 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
