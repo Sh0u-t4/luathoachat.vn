@@ -84,18 +84,10 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             placeholder={placeholder || 'Hỏi chuyên gia AI về Nghị định 24, 25, 26/2026/NĐ-CP...'}
-            className="flex-1 py-5 text-lg text-slate-900 placeholder:text-slate-400 bg-transparent outline-none"
+            className="flex-1 py-5 pr-40 text-lg text-slate-900 placeholder:text-slate-400 bg-transparent outline-none"
           />
 
-          {/* AI Badge */}
-          <div className="pr-4 flex items-center gap-2">
-            <div className="flex items-center gap-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>AI</span>
-            </div>
-          </div>
-
-          {/* Submit Button */}
+          {/* Submit Button - Position absolute */}
           <Button
             type="submit"
             disabled={!query.trim()}
@@ -111,8 +103,8 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
               flex items-center gap-2
             "
           >
+            <Sparkles className="w-4 h-4" />
             <span>Tư vấn ngay</span>
-            <Search className="w-4 h-4" />
           </Button>
         </div>
       </form>
