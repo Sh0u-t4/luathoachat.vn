@@ -145,7 +145,6 @@ export function ChatInterface() {
         toast(
           <DisclaimerToast
             disclaimer1={t.chat.disclaimer1}
-            disclaimer2={t.chat.disclaimer2}
           />,
           {
             duration: 6000,
@@ -157,7 +156,7 @@ export function ChatInterface() {
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [isMounted, isReady, shouldShowDisclaimer, messages.length, t.chat.disclaimer1, t.chat.disclaimer2, markDisclaimerAsSeen]);
+  }, [isMounted, isReady, shouldShowDisclaimer, messages.length, t.chat.disclaimer1, markDisclaimerAsSeen]);
 
   // Log messages changes để debug
   useEffect(() => {
@@ -514,7 +513,6 @@ export function ChatInterface() {
             />
             <MobileDisclaimer
               disclaimer1={t.chat.disclaimer1}
-              disclaimer2={t.chat.disclaimer2}
             />
           </div>
         </div>
@@ -721,9 +719,8 @@ export function ChatInterface() {
                 <span className="sm:hidden">Gửi</span>
               </Button>
             </div>
-            <div id="chat-input-hint" className="text-xs text-slate-400 mt-3 text-center space-y-1 max-w-5xl mx-auto">
+            <div id="chat-input-hint" className="text-xs text-slate-400 mt-3 text-center max-w-5xl mx-auto">
               <p>{t.chat.disclaimer1}</p>
-              <p>{t.chat.disclaimer2}</p>
             </div>
           </form>
         </Card>
