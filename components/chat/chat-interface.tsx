@@ -501,7 +501,7 @@ export function ChatInterface() {
             )}
           </div>
 
-          {/* Mobile Chat Input & Disclaimer - Fixed at bottom */}
+          {/* Mobile Chat Input with Disclaimer - Fixed at bottom */}
           <div className="flex-shrink-0">
             <MobileChatInput
               value={inputValue}
@@ -510,9 +510,7 @@ export function ChatInterface() {
               disabled={isTyping}
               placeholder={t.chat.inputPlaceholder}
               keyboardState={keyboardState}
-            />
-            <MobileDisclaimer
-              disclaimer1={t.chat.disclaimer1}
+              disclaimer={t.chat.disclaimer1}
             />
           </div>
         </div>

@@ -15,6 +15,7 @@ interface MobileChatInputProps {
   disabled?: boolean;
   placeholder?: string;
   keyboardState?: KeyboardState;
+  disclaimer?: string;
 }
 
 /**
@@ -27,6 +28,7 @@ export function MobileChatInput({
   disabled = false,
   placeholder,
   keyboardState,
+  disclaimer,
 }: MobileChatInputProps) {
   const { t } = useLanguage();
   const { shouldUseMobileUI } = useMobile();
@@ -135,6 +137,13 @@ export function MobileChatInput({
           <span className="text-sm">Gửi</span>
         </Button>
       </div>
+
+      {/* Disclaimer text */}
+      {disclaimer && (
+        <div className="text-xs text-slate-400 mt-3 text-center max-w-4xl mx-auto">
+          <p>{disclaimer}</p>
+        </div>
+      )}
     </form>
   );
 }
