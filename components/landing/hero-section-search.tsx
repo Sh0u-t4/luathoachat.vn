@@ -50,22 +50,6 @@ export function HeroSectionSearch({ onSearch }: HeroSectionSearchProps) {
             placeholder="Hỏi chuyên gia AI về Nghị định 24, 25, 26/2026/NĐ-CP..."
           />
         </div>
-
-        {/* Trust Indicators */}
-        <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-slate-400 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 text-green-500">✓</div>
-            <span>Miễn phí 100%</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 text-cyan-500">🔒</div>
-            <span>Bảo mật dữ liệu</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 text-blue-500">👥</div>
-            <span>Hơn 1,000+ doanh nghiệp tin dùng</span>
-          </div>
-        </div>
       </div>
 
       {/* Custom Gradient Animation */}
