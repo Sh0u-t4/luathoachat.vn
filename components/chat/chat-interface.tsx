@@ -158,7 +158,7 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false }: ChatIn
       if (messages.length === 0) {
         toast(
           <DisclaimerToast
-            disclaimer1={t.chat.disclaimer1}
+            disclaimer={t.chat.disclaimer}
           />,
           {
             duration: 6000,
@@ -170,7 +170,7 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false }: ChatIn
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [isMounted, isReady, shouldShowDisclaimer, messages.length, t.chat.disclaimer1, markDisclaimerAsSeen]);
+  }, [isMounted, isReady, shouldShowDisclaimer, messages.length, t.chat.disclaimer, markDisclaimerAsSeen]);
 
   // Log messages changes để debug
   useEffect(() => {
@@ -524,7 +524,7 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false }: ChatIn
               disabled={isTyping}
               placeholder={t.chat.inputPlaceholder}
               keyboardState={keyboardState}
-              disclaimer={hideDisclaimer ? undefined : t.chat.disclaimer1}
+              disclaimer={hideDisclaimer ? undefined : t.chat.disclaimer}
             />
           </div>
         </div>
@@ -733,7 +733,7 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false }: ChatIn
             </div>
             {!hideDisclaimer && (
               <p id="chat-input-hint" className="text-xs text-slate-400 mt-3 text-center max-w-5xl mx-auto">
-                {t.chat.disclaimer1}
+                {t.chat.disclaimer}
               </p>
             )}
           </form>

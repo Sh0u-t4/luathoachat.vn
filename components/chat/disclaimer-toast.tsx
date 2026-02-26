@@ -1,10 +1,10 @@
 import { Info } from 'lucide-react';
 
 interface DisclaimerToastProps {
-  disclaimer1: string;
+  disclaimer: string;
 }
 
-export function DisclaimerToast({ disclaimer1 }: DisclaimerToastProps) {
+export function DisclaimerToast({ disclaimer }: DisclaimerToastProps) {
   return (
     <div className="flex gap-3 items-start">
       <div className="flex-shrink-0 mt-0.5">
@@ -15,7 +15,7 @@ export function DisclaimerToast({ disclaimer1 }: DisclaimerToastProps) {
           Lưu ý quan trọng
         </div>
         <div className="text-slate-700 text-[15px] leading-relaxed">
-          <p>{disclaimer1}</p>
+          <p>{disclaimer}</p>
         </div>
       </div>
     </div>
