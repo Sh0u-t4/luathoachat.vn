@@ -4,7 +4,6 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Bot, User, Sparkles, LogIn, Lock, Search, BookOpen, Zap, ArrowDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
 import { useChat } from './chat-context';
 import { AssistantMessage } from './assistant-message';
 import { EmailGateModal } from './email-gate-modal';
@@ -532,9 +531,12 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
           </div>
         </div>
       ) : (
-        <Card
+        <div
           id="chat-interface"
-          className="w-full max-w-4xl mx-auto overflow-hidden border-0 shadow-xl bg-white/95 backdrop-blur"
+          className={hideHeader
+            ? "flex flex-col h-full w-full overflow-hidden bg-white"
+            : "w-full max-w-4xl mx-auto overflow-hidden border-0 shadow-xl bg-white/95 backdrop-blur rounded-lg"
+          }
           suppressHydrationWarning
         >
           {/* Desktop Header */}
@@ -558,10 +560,13 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
             </div>
           )}
 
-          <div className="relative">
+          <div className={hideHeader ? "flex-1 relative overflow-hidden" : "relative"}>
             <div
               ref={chatContainerRef}
-              className="h-[400px] md:h-[500px] overflow-y-auto scroll-smooth p-4 md:p-6 space-y-3 md:space-y-4 bg-gradient-to-b from-slate-50 to-white"
+              className={hideHeader
+                ? "h-full overflow-y-auto scroll-smooth p-4 md:p-6 space-y-3 md:space-y-4 bg-gradient-to-b from-slate-50 to-white"
+                : "h-[400px] md:h-[500px] overflow-y-auto scroll-smooth p-4 md:p-6 space-y-3 md:space-y-4 bg-gradient-to-b from-slate-50 to-white"
+              }
               suppressHydrationWarning
             >
               {/* Offline Banner */}
@@ -742,7 +747,7 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
               </p>
             )}
           </form>
-        </Card>
+        </div>
       )}
 
       {/* Mobile Bottom Drawer for Chat History */}
