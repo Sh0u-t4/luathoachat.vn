@@ -1,0 +1,148 @@
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import { Search, Sparkles, TrendingUp, FileText, Scale } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { hapticFeedback, HapticPatterns } from '@/lib/mobile/utils';
+
+interface SmartSearchBarProps {
+  onSearch: (query: string) => void;
+  placeholder?: string;
+}
+
+const SUGGESTED_TOPICS = [
+  { icon: FileText, text: 'Nghị định 24/2026/NĐ-CP', category: 'Phân loại' },
+  { icon: FileText, text: 'Nghị định 25/2026/NĐ-CP', category: 'Kinh doanh' },
+  { icon: FileText, text: 'Nghị định 26/2026/NĐ-CP', category: 'Quản lý' },
+  { icon: Scale, text: 'Luật Hóa chất số 69/2025/QH15', category: 'Luật' },
+];
+
+/**
+ * Smart Search Bar - Thanh tìm kiếm thông minh cho Hero Section
+ * Hiển thị suggestions, trending topics
+ * Khi Enter -> Mở chat window với query
+ */
+export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
+  const [query, setQuery] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setShowSuggestions(isFocused && query.length === 0);
+  }, [isFocused, query]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+
+    hapticFeedback(HapticPatterns.success);
+    onSearch(query);
+    setQuery('');
+    inputRef.current?.blur();
+  };
+
+  const handleSuggestionClick = (text: string) => {
+    hapticFeedback(HapticPatterns.light);
+    onSearch(text);
+    setQuery('');
+    setShowSuggestions(false);
+  };
+
+  return (
+    <div className="w-full max-w-4xl mx-auto relative">
+      {/* Main Search Bar */}
+      <form onSubmit={handleSubmit} className="relative">
+        <div
+          className={`
+            relative flex items-center gap-3
+            bg-white rounded-2xl shadow-2xl
+            border-2 transition-all duration-300
+            ${isFocused
+              ? 'border-cyan-500 shadow-cyan-500/30 scale-[1.02]'
+              : 'border-slate-200 hover:border-slate-300'
+            }
+          `}
+        >
+          {/* Search Icon */}
+          <div className="pl-6 flex-shrink-0">
+            <Search className={`w-6 h-6 transition-colors ${isFocused ? 'text-cyan-600' : 'text-slate-400'}`} />
+          </div>
+
+          {/* Input Field */}
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+            placeholder={placeholder || 'Hỏi chuyên gia AI về Nghị định 24, 25, 26/2026/NĐ-CP...'}
+            className="flex-1 py-5 text-lg text-slate-900 placeholder:text-slate-400 bg-transparent outline-none"
+          />
+
+          {/* AI Badge */}
+          <div className="pr-4 flex items-center gap-2">
+            <div className="flex items-center gap-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>AI</span>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            disabled={!query.trim()}
+            className="
+              absolute right-2 top-1/2 -translate-y-1/2
+              h-12 px-6 rounded-xl
+              bg-gradient-to-r from-cyan-600 to-blue-600
+              hover:from-cyan-700 hover:to-blue-700
+              text-white font-semibold
+              disabled:opacity-50 disabled:from-slate-400 disabled:to-slate-400
+              shadow-lg hover:shadow-xl
+              transition-all duration-200
+              flex items-center gap-2
+            "
+          >
+            <span>Tư vấn ngay</span>
+            <Search className="w-4 h-4" />
+          </Button>
+        </div>
+      </form>
+
+      {/* Suggestions Dropdown */}
+      {showSuggestions && (
+        <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+          {/* Header */}
+          <div className="px-6 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-cyan-600" />
+            <span className="text-sm font-semibold text-slate-700">Chủ đề phổ biến</span>
+          </div>
+
+          {/* Suggestions List */}
+          <div className="py-2">
+            {SUGGESTED_TOPICS.map((topic, index) => (
+              <button
+                key={index}
+                onClick={() => handleSuggestionClick(topic.text)}
+                className="w-full px-6 py-3 flex items-center gap-4 hover:bg-slate-50 transition-colors group"
+              >
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center group-hover:from-cyan-100 group-hover:to-blue-100 transition-colors">
+                  <topic.icon className="w-5 h-5 text-cyan-600" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="text-sm font-medium text-slate-900 group-hover:text-cyan-700 transition-colors">
+                    {topic.text}
+                  </div>
+                  <div className="text-xs text-slate-500">{topic.category}</div>
+                </div>
+                <Search className="w-4 h-4 text-slate-300 group-hover:text-cyan-500 transition-colors" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

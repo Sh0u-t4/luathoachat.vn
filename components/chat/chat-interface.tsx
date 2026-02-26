@@ -35,7 +35,11 @@ import {
 } from '@/components/ui/dialog';
 import type { ChatMessage } from '@/types';
 
-export function ChatInterface() {
+interface ChatInterfaceProps {
+  initialMessage?: string;
+}
+
+export function ChatInterface({ initialMessage }: ChatInterfaceProps = {}) {
   const [inputValue, setInputValue] = useState('');
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showMobileHistory, setShowMobileHistory] = useState(false);
@@ -133,6 +137,15 @@ export function ChatInterface() {
 
     return () => clearInterval(interval);
   }, [isTyping]);
+
+  // Auto-submit initialMessage from Smart Search Bar
+  const initialMessageSent = useRef(false);
+  useEffect(() => {
+    if (initialMessage && !initialMessageSent.current && isMounted) {
+      initialMessageSent.current = true;
+      sendMessage(initialMessage);
+    }
+  }, [initialMessage, isMounted, sendMessage]);
 
   // Show first-time disclaimer toast
   useEffect(() => {
