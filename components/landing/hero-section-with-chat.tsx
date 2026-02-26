@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, X, Clock } from 'lucide-react';
+import { Send, X, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChat } from '@/components/chat/chat-context';
 import { useLanguage } from '@/lib/i18n/context';
@@ -122,19 +122,6 @@ export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
           Trợ lý AI thông minh giúp doanh nghiệp tuân thủ Luật Hóa chất 69/2025 và các Nghị định 2026.
         </p>
 
-        {/* Token Counter (Mock) */}
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <p className="text-sm text-slate-400">
-            85.6M câu hỏi đã được trả lời.
-          </p>
-          <a
-            href="/dang-ky"
-            className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
-          >
-            Dùng thử Miễn phí →
-          </a>
-        </div>
-
         {/* Chat Input Box (Centered) */}
         <form onSubmit={handleSubmit} className="max-w-2xl mx-auto mb-8">
           <div className="relative group">
@@ -211,15 +198,6 @@ export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
             </div>
           </div>
         </form>
-
-        {/* Quick Actions / Alternative Start Points */}
-        <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-slate-500">
-          <span>hoặc bắt đầu từ</span>
-          <button className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-700/50 transition-colors">
-            <Sparkles className="w-4 h-4" />
-            Câu hỏi thông minh
-          </button>
-        </div>
       </div>
 
       {/* Custom Gradient Animation */}
