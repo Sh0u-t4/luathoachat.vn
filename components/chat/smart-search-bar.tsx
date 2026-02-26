@@ -32,11 +32,18 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setShowSuggestions(isFocused && query.length === 0);
-  }, [isFocused, query]);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      setShowSuggestions(isFocused && query.length === 0);
+    }
+  }, [isFocused, query, mounted]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,7 +117,7 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
       </form>
 
       {/* Suggestions Dropdown */}
-      {showSuggestions && (
+      {mounted && showSuggestions && (
         <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[500px] flex flex-col">
           {/* Header */}
           <div className="px-6 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-shrink-0">
