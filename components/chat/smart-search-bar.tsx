@@ -33,15 +33,10 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setMounted(true);
-    const checkMobile = () => setIsMobile(window.innerWidth < 640);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   useEffect(() => {
@@ -95,11 +90,8 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-            placeholder={
-              placeholder ||
-              (isMobile ? 'Hỏi chuyên gia AI về Nghị định...' : 'Hỏi chuyên gia AI về Nghị định 24, 25, 26/2026/NĐ-CP...')
-            }
-            className="flex-1 py-4 md:py-5 pr-24 md:pr-40 text-base md:text-lg text-slate-900 placeholder:text-slate-400 bg-transparent outline-none"
+            placeholder={placeholder || 'Hỏi chuyên gia AI về Luật Hóa chất...'}
+            className="flex-1 py-4 md:py-5 pr-16 sm:pr-32 md:pr-40 text-base md:text-lg text-slate-900 placeholder:text-slate-400 bg-transparent outline-none"
           />
 
           {/* Submit Button - Position absolute */}
@@ -108,19 +100,18 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
             disabled={!query.trim()}
             className="
               absolute right-2 top-1/2 -translate-y-1/2
-              h-10 md:h-12 px-3 md:px-6 rounded-xl
+              h-9 sm:h-10 md:h-12 px-2.5 sm:px-4 md:px-6 rounded-lg md:rounded-xl
               bg-gradient-to-r from-cyan-600 to-blue-600
               hover:from-cyan-700 hover:to-blue-700
-              text-white font-semibold text-sm md:text-base
+              text-white font-semibold text-xs sm:text-sm md:text-base
               disabled:opacity-50 disabled:from-slate-400 disabled:to-slate-400
               shadow-lg hover:shadow-xl
               transition-all duration-200
               flex items-center gap-1 md:gap-2
             "
           >
-            <Sparkles className="w-4 h-4" />
-            <span className="hidden sm:inline">Tư vấn ngay</span>
-            <span className="sm:hidden">Hỏi</span>
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>Hỏi AI</span>
           </Button>
         </div>
       </form>

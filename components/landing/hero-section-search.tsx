@@ -47,7 +47,7 @@ export function HeroSectionSearch({ onSearch }: HeroSectionSearchProps) {
         <div className="mt-12">
           <SmartSearchBar
             onSearch={onSearch}
-            placeholder="Hỏi chuyên gia AI về Nghị định 24, 25, 26/2026/NĐ-CP..."
+            placeholder="Hỏi chuyên gia AI về Luật Hóa chất..."
           />
         </div>
       </div>
