@@ -63,7 +63,7 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto relative">
+    <div className="w-full max-w-4xl mx-auto relative px-4 sm:px-0">
       {/* Main Search Bar */}
       <form onSubmit={handleSubmit} className="relative">
         <div
@@ -90,7 +90,7 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-            placeholder={placeholder || 'Hỏi chuyên gia AI về Luật Hóa chất...'}
+            placeholder=""
             className="flex-1 py-4 md:py-5 pr-16 sm:pr-32 md:pr-40 text-base md:text-lg text-slate-900 placeholder:text-slate-400 bg-transparent outline-none"
           />
 
@@ -118,9 +118,9 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
 
       {/* Suggestions Dropdown */}
       {mounted && showSuggestions && (
-        <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[500px] flex flex-col">
+        <div className="absolute top-full left-4 right-4 sm:left-0 sm:right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[70vh] sm:max-h-[500px] flex flex-col">
           {/* Header */}
-          <div className="px-6 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-shrink-0">
+          <div className="px-4 sm:px-6 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-shrink-0">
             <TrendingUp className="w-4 h-4 text-cyan-600" />
             <span className="text-sm font-semibold text-slate-700">Chủ đề phổ biến</span>
           </div>
@@ -131,13 +131,13 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
               <button
                 key={index}
                 onClick={() => handleSuggestionClick(topic.text)}
-                className="w-full px-6 py-3 flex items-center gap-4 hover:bg-slate-50 transition-colors group"
+                className="w-full px-4 sm:px-6 py-3 flex items-center gap-3 sm:gap-4 hover:bg-slate-50 transition-colors group"
               >
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center group-hover:from-cyan-100 group-hover:to-blue-100 transition-colors flex-shrink-0">
-                  <topic.icon className="w-5 h-5 text-cyan-600" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center group-hover:from-cyan-100 group-hover:to-blue-100 transition-colors flex-shrink-0">
+                  <topic.icon className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-600" />
                 </div>
                 <div className="flex-1 text-left min-w-0">
-                  <div className="text-sm font-medium text-slate-900 group-hover:text-cyan-700 transition-colors truncate">
+                  <div className="text-xs sm:text-sm font-medium text-slate-900 group-hover:text-cyan-700 transition-colors line-clamp-2 sm:truncate">
                     {topic.text}
                   </div>
                   <div className="text-xs text-slate-500">{topic.category}</div>

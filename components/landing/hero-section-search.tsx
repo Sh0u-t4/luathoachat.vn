@@ -45,10 +45,7 @@ export function HeroSectionSearch({ onSearch }: HeroSectionSearchProps) {
 
         {/* Smart Search Bar */}
         <div className="mt-12">
-          <SmartSearchBar
-            onSearch={onSearch}
-            placeholder="Hỏi chuyên gia AI về Luật Hóa chất..."
-          />
+          <SmartSearchBar onSearch={onSearch} />
         </div>
       </div>
 
