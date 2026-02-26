@@ -38,9 +38,10 @@ import type { ChatMessage } from '@/types';
 interface ChatInterfaceProps {
   initialMessage?: string;
   hideDisclaimer?: boolean;
+  hideHeader?: boolean;
 }
 
-export function ChatInterface({ initialMessage, hideDisclaimer = false }: ChatInterfaceProps = {}) {
+export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHeader = false }: ChatInterfaceProps = {}) {
   const [inputValue, setInputValue] = useState('');
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showMobileHistory, setShowMobileHistory] = useState(false);
@@ -360,10 +361,12 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false }: ChatIn
           }}
         >
           {/* Mobile Chat Header - Fixed */}
-          <MobileChatHeader
-            onHistoryClick={() => setShowMobileHistory(true)}
-            chatSessionCount={chatSessions.length}
-          />
+          {!hideHeader && (
+            <MobileChatHeader
+              onHistoryClick={() => setShowMobileHistory(true)}
+              chatSessionCount={chatSessions.length}
+            />
+          )}
 
           {/* Chat Content - Flexible */}
           <div className="flex-1 flex flex-col overflow-hidden bg-gradient-to-b from-slate-50 to-white">
@@ -535,23 +538,25 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false }: ChatIn
           suppressHydrationWarning
         >
           {/* Desktop Header */}
-          <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
-                <Bot className="w-5 h-5 text-cyan-400" />
-              </div>
-              <div>
-                <h2 className="text-white font-semibold">{t.chat.title}</h2>
-                <p className="text-slate-400 text-sm">{t.chat.subtitle}</p>
-              </div>
-              <div className="ml-auto flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full animate-pulse ${isOffline ? 'bg-amber-400' : 'bg-green-400'}`} />
-                <span className={`text-sm ${isOffline ? 'text-amber-400' : 'text-green-400'}`}>
-                  {isOffline ? t.chat.offline : t.chat.online}
-                </span>
+          {!hideHeader && (
+            <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-cyan-400" />
+                </div>
+                <div>
+                  <h2 className="text-white font-semibold">{t.chat.title}</h2>
+                  <p className="text-slate-400 text-sm">{t.chat.subtitle}</p>
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full animate-pulse ${isOffline ? 'bg-amber-400' : 'bg-green-400'}`} />
+                  <span className={`text-sm ${isOffline ? 'text-amber-400' : 'text-green-400'}`}>
+                    {isOffline ? t.chat.offline : t.chat.online}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="relative">
             <div
