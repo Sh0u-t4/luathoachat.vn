@@ -227,7 +227,15 @@ export function PromptLibrary({ onPromptSelect }: PromptLibraryProps) {
         <div className="text-center mt-12">
           <p className="text-sm text-slate-500">
             Không tìm thấy câu hỏi phù hợp?{' '}
-            <span className="text-cyan-600 font-semibold">Hỏi AI bất kỳ điều gì ở khung chat bên dưới</span>
+            <button
+              onClick={() => {
+                hapticFeedback(HapticPatterns.light);
+                onPromptSelect('');
+              }}
+              className="text-cyan-600 font-semibold hover:text-cyan-700 hover:underline transition-colors cursor-pointer inline"
+            >
+              Hỏi AI bất kỳ điều gì ở khung chat bên dưới
+            </button>
           </p>
         </div>
       </div>
