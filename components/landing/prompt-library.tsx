@@ -234,7 +234,7 @@ export function PromptLibrary({ onPromptSelect }: PromptLibraryProps) {
               }}
               className="text-cyan-600 font-semibold hover:text-cyan-700 hover:underline transition-colors cursor-pointer inline"
             >
-              Hỏi AI bất kỳ điều gì ở khung chat bên dưới
+              Ấn vào đây để mở khung chat
             </button>
           </p>
         </div>
