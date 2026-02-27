@@ -7,12 +7,14 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { useChat } from './chat-context';
+import { useChatUI } from '@/lib/chat/chat-ui-context';
 import { useLanguage } from '@/lib/i18n/context';
 import { formatDistanceToNow } from 'date-fns';
 import { vi, enUS } from 'date-fns/locale';
 
 export function ChatHistorySidebar() {
   const { chatSessions, loadChatHistory, isAuthenticated, clearMessages } = useChat();
+  const { openChat } = useChatUI();
   const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
@@ -44,6 +46,10 @@ export function ChatHistorySidebar() {
 
       console.log('🔵 handleLoadSession SUCCESS - Chat history loaded');
 
+      // Open chat window to display the loaded conversation
+      console.log('🔵 Step 3: Opening chat window...');
+      openChat();
+
       // Đóng sidebar
       setIsOpen(false);
 
@@ -64,6 +70,10 @@ export function ChatHistorySidebar() {
   const handleNewChat = () => {
     setSelectedSession(null);
     clearMessages();
+
+    // Open chat window for new conversation
+    openChat();
+
     setIsOpen(false);
 
     // Scroll xuống phần chat
