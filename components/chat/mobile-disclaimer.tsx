@@ -1,15 +1,14 @@
 'use client';
 
 interface MobileDisclaimerProps {
-  disclaimer1: string;
-  disclaimer2: string;
+  disclaimer: string;
 }
 
 /**
  * Mobile Disclaimer Component
- * Hiển thị 2 dòng disclaimer dưới chatbox cho mobile
+ * Hiển thị disclaimer dưới chatbox cho mobile
  */
-export function MobileDisclaimer({ disclaimer1, disclaimer2 }: MobileDisclaimerProps) {
+export function MobileDisclaimer({ disclaimer }: MobileDisclaimerProps) {
   return (
     <div
       className="bg-white/95 backdrop-blur-sm border-t border-slate-200"
@@ -17,15 +16,9 @@ export function MobileDisclaimer({ disclaimer1, disclaimer2 }: MobileDisclaimerP
         paddingBottom: 'calc(12px + env(safe-area-inset-bottom))'
       }}
     >
-      <div className="px-4 py-2.5 max-w-4xl mx-auto space-y-1">
-        {/* Disclaimer 1 */}
+      <div className="px-4 py-2.5 max-w-4xl mx-auto">
         <p className="text-center text-[11px] leading-relaxed text-slate-600">
-          {disclaimer1}
-        </p>
-
-        {/* Disclaimer 2 */}
-        <p className="text-center text-[11px] leading-relaxed text-slate-500">
-          {disclaimer2}
+          {disclaimer}
         </p>
       </div>
     </div>

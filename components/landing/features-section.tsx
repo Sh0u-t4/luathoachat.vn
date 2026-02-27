@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import {
   ListChecks,
   FlaskConical,
@@ -16,6 +17,11 @@ import { useLanguage } from '@/lib/i18n/context';
 
 export function FeaturesSection() {
   const { language } = useLanguage();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const features = language === 'vi' ? [
     // {
@@ -88,6 +94,10 @@ export function FeaturesSection() {
   const sectionTitle = language === 'vi'
     ? { badge: 'Công cụ hỗ trợ toàn diện', title: 'Tất cả những gì bạn cần', subtitle: 'Bộ công cụ đầy đủ giúp doanh nghiệp tuân thủ Luật Hóa chất 69/2025 và các Nghị định hướng dẫn.', cta: 'Truy cập ngay' }
     : { badge: 'Comprehensive tools', title: 'Everything you need', subtitle: 'Complete toolkit to help businesses comply with Chemical Law 69/2025 and implementing decrees.', cta: 'Access now' };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <section className="py-20 px-4 bg-slate-50">

@@ -4,7 +4,6 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Bot, User, Sparkles, LogIn, Lock, Search, BookOpen, Zap, ArrowDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
 import { useChat } from './chat-context';
 import { AssistantMessage } from './assistant-message';
 import { EmailGateModal } from './email-gate-modal';
@@ -35,7 +34,13 @@ import {
 } from '@/components/ui/dialog';
 import type { ChatMessage } from '@/types';
 
-export function ChatInterface() {
+interface ChatInterfaceProps {
+  initialMessage?: string;
+  hideDisclaimer?: boolean;
+  hideHeader?: boolean;
+}
+
+export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHeader = false }: ChatInterfaceProps = {}) {
   const [inputValue, setInputValue] = useState('');
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showMobileHistory, setShowMobileHistory] = useState(false);
@@ -134,6 +139,15 @@ export function ChatInterface() {
     return () => clearInterval(interval);
   }, [isTyping]);
 
+  // Auto-submit initialMessage from Smart Search Bar
+  const initialMessageSent = useRef(false);
+  useEffect(() => {
+    if (initialMessage && !initialMessageSent.current && isMounted) {
+      initialMessageSent.current = true;
+      sendMessage(initialMessage);
+    }
+  }, [initialMessage, isMounted, sendMessage]);
+
   // Show first-time disclaimer toast
   useEffect(() => {
     if (!isMounted || !isReady || !shouldShowDisclaimer) return;
@@ -144,8 +158,7 @@ export function ChatInterface() {
       if (messages.length === 0) {
         toast(
           <DisclaimerToast
-            disclaimer1={t.chat.disclaimer1}
-            disclaimer2={t.chat.disclaimer2}
+            disclaimer={t.chat.disclaimer}
           />,
           {
             duration: 6000,
@@ -157,7 +170,7 @@ export function ChatInterface() {
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [isMounted, isReady, shouldShowDisclaimer, messages.length, t.chat.disclaimer1, t.chat.disclaimer2, markDisclaimerAsSeen]);
+  }, [isMounted, isReady, shouldShowDisclaimer, messages.length, t.chat.disclaimer, markDisclaimerAsSeen]);
 
   // Log messages changes để debug
   useEffect(() => {
@@ -347,10 +360,12 @@ export function ChatInterface() {
           }}
         >
           {/* Mobile Chat Header - Fixed */}
-          <MobileChatHeader
-            onHistoryClick={() => setShowMobileHistory(true)}
-            chatSessionCount={chatSessions.length}
-          />
+          {!hideHeader && (
+            <MobileChatHeader
+              onHistoryClick={() => setShowMobileHistory(true)}
+              chatSessionCount={chatSessions.length}
+            />
+          )}
 
           {/* Chat Content - Flexible */}
           <div className="flex-1 flex flex-col overflow-hidden bg-gradient-to-b from-slate-50 to-white">
@@ -429,6 +444,10 @@ export function ChatInterface() {
                           onUnlockClick={handleUnlockClick}
                           messageIndex={assistantMessageIndex}
                           sessionId={sessionId || 'no-session'}
+                          onQuickReply={(reply) => {
+                            setInputValue(reply);
+                            inputRef.current?.focus();
+                          }}
                         />
                       ) : (
                         <p className="whitespace-pre-wrap">{message.content}</p>
@@ -475,16 +494,6 @@ export function ChatInterface() {
               )}
             </div>
 
-            {/* AI Typing Indicator - Floating at top */}
-            {isAnyTyping && messages.length > 0 && (
-              <div className="absolute top-16 left-1/2 -translate-x-1/2 z-10 animate-fade-in">
-                <div className="bg-cyan-600/95 backdrop-blur-sm text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm font-medium">AI đang trả lời...</span>
-                </div>
-              </div>
-            )}
-
             {/* Scroll to Bottom Button - Floating at bottom-right */}
             {showScrollButton && (
               <button
@@ -498,7 +507,17 @@ export function ChatInterface() {
             )}
           </div>
 
-          {/* Mobile Chat Input & Disclaimer - Fixed at bottom */}
+          {/* AI Typing Indicator - Above input */}
+          {isAnyTyping && messages.length > 0 && (
+            <div className="px-4 py-2 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+                <span className="text-sm font-medium text-cyan-400">AI đang trả lời...</span>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile Chat Input with Disclaimer - Fixed at bottom */}
           <div className="flex-shrink-0">
             <MobileChatInput
               value={inputValue}
@@ -507,42 +526,47 @@ export function ChatInterface() {
               disabled={isTyping}
               placeholder={t.chat.inputPlaceholder}
               keyboardState={keyboardState}
-            />
-            <MobileDisclaimer
-              disclaimer1={t.chat.disclaimer1}
-              disclaimer2={t.chat.disclaimer2}
+              disclaimer={hideDisclaimer ? undefined : t.chat.disclaimer}
             />
           </div>
         </div>
       ) : (
-        <Card
+        <div
           id="chat-interface"
-          className="w-full max-w-4xl mx-auto overflow-hidden border-0 shadow-xl bg-white/95 backdrop-blur"
+          className={hideHeader
+            ? "flex flex-col h-full w-full overflow-hidden bg-white"
+            : "w-full max-w-4xl mx-auto overflow-hidden border-0 shadow-xl bg-white/95 backdrop-blur rounded-lg"
+          }
           suppressHydrationWarning
         >
           {/* Desktop Header */}
-          <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
-                <Bot className="w-5 h-5 text-cyan-400" />
-              </div>
-              <div>
-                <h2 className="text-white font-semibold">{t.chat.title}</h2>
-                <p className="text-slate-400 text-sm">{t.chat.subtitle}</p>
-              </div>
-              <div className="ml-auto flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full animate-pulse ${isOffline ? 'bg-amber-400' : 'bg-green-400'}`} />
-                <span className={`text-sm ${isOffline ? 'text-amber-400' : 'text-green-400'}`}>
-                  {isOffline ? t.chat.offline : t.chat.online}
-                </span>
+          {!hideHeader && (
+            <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-cyan-400" />
+                </div>
+                <div>
+                  <h2 className="text-white font-semibold">{t.chat.title}</h2>
+                  <p className="text-slate-400 text-sm">{t.chat.subtitle}</p>
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full animate-pulse ${isOffline ? 'bg-amber-400' : 'bg-green-400'}`} />
+                  <span className={`text-sm ${isOffline ? 'text-amber-400' : 'text-green-400'}`}>
+                    {isOffline ? t.chat.offline : t.chat.online}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          <div className="relative">
+          <div className={hideHeader ? "flex-1 relative overflow-hidden" : "relative"}>
             <div
               ref={chatContainerRef}
-              className="h-[400px] md:h-[500px] overflow-y-auto scroll-smooth p-4 md:p-6 space-y-3 md:space-y-4 bg-gradient-to-b from-slate-50 to-white"
+              className={hideHeader
+                ? "h-full overflow-y-auto scroll-smooth p-4 md:p-6 space-y-3 md:space-y-4 bg-gradient-to-b from-slate-50 to-white"
+                : "h-[400px] md:h-[500px] overflow-y-auto scroll-smooth p-4 md:p-6 space-y-3 md:space-y-4 bg-gradient-to-b from-slate-50 to-white"
+              }
               suppressHydrationWarning
             >
               {/* Offline Banner */}
@@ -610,6 +634,10 @@ export function ChatInterface() {
                           onUnlockClick={handleUnlockClick}
                           messageIndex={assistantMessageIndex}
                           sessionId={sessionId || 'no-session'}
+                          onQuickReply={(reply) => {
+                            setInputValue(reply);
+                            inputRef.current?.focus();
+                          }}
                         />
                       ) : (
                         <p className="whitespace-pre-wrap">{message.content}</p>
@@ -656,16 +684,6 @@ export function ChatInterface() {
               )}
             </div>
 
-            {/* AI Typing Indicator - Floating at top */}
-            {isAnyTyping && messages.length > 0 && (
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 animate-fade-in">
-                <div className="bg-cyan-600/95 backdrop-blur-sm text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm font-medium">AI đang trả lời...</span>
-                </div>
-              </div>
-            )}
-
             {/* Scroll to Bottom Button - Floating at bottom-right */}
             {showScrollButton && (
               <button
@@ -679,34 +697,57 @@ export function ChatInterface() {
             )}
           </div>
 
-          {/* Desktop Input Form */}
+          {/* AI Typing Indicator - Above input */}
+          {isAnyTyping && messages.length > 0 && (
+            <div className="px-6 py-2 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-t border-slate-700">
+              <div className="flex items-center justify-center gap-2 max-w-5xl mx-auto">
+                <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+                <span className="text-sm font-medium text-cyan-400">AI đang trả lời...</span>
+              </div>
+            </div>
+          )}
+
+          {/* Desktop Input Form - Redesigned to match search bar style */}
           <form
             onSubmit={handleSubmit}
-            className="p-4 border-t border-slate-200 bg-white"
+            role="search"
+            aria-label="Send message"
+            className="p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
           >
-            <div className="flex gap-3">
-              <Input
-                ref={inputRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder={t.chat.inputPlaceholder}
-                className="flex-1 border-slate-200 focus:border-cyan-500 focus:ring-cyan-500"
-                disabled={isTyping}
-              />
+            <div className="flex gap-3 items-center max-w-5xl mx-auto">
+              {/* Large Dark Input Field */}
+              <div className="flex-1 relative">
+                <Input
+                  ref={inputRef}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Hỏi về Luật Hóa chất, khai báo, giấy phép..."
+                  aria-label="Message input"
+                  aria-describedby="chat-input-hint"
+                  className="h-14 px-6 text-base bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-400 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 transition-all"
+                  disabled={isTyping}
+                />
+              </div>
+
+              {/* Gradient Submit Button - "Tư vấn ngay" style */}
               <Button
                 type="submit"
                 disabled={!inputValue.trim() || isTyping}
-                className="bg-cyan-600 hover:bg-cyan-700 text-white px-6"
+                aria-label="Send message"
+                className="h-14 px-8 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-700 hover:to-cyan-600 text-white font-semibold rounded-xl shadow-lg shadow-cyan-500/30 transition-all duration-300 hover:shadow-cyan-500/50 disabled:opacity-50 disabled:shadow-none flex items-center gap-2"
               >
-                <Send className="w-4 h-4" />
+                <Send className="w-5 h-5" />
+                <span className="hidden sm:inline">Tư vấn ngay</span>
+                <span className="sm:hidden">Gửi</span>
               </Button>
             </div>
-            <div className="text-xs text-slate-400 mt-2 text-center space-y-1">
-              <p>{t.chat.disclaimer1}</p>
-              <p>{t.chat.disclaimer2}</p>
-            </div>
+            {!hideDisclaimer && (
+              <p id="chat-input-hint" className="text-xs text-slate-400 mt-3 text-center max-w-5xl mx-auto">
+                {t.chat.disclaimer}
+              </p>
+            )}
           </form>
-        </Card>
+        </div>
       )}
 
       {/* Mobile Bottom Drawer for Chat History */}

@@ -1,20 +1,21 @@
 'use client';
 
-import { useRef } from 'react';
 import { Header } from '@/components/landing/header';
-import { HeroSection } from '@/components/landing/hero-section';
+import { HeroSectionSearch } from '@/components/landing/hero-section-search';
 import { FeaturesSection } from '@/components/landing/features-section';
-import { StatsSection } from '@/components/landing/stats-section';
+import { PromptLibrary } from '@/components/landing/prompt-library';
 import { Footer } from '@/components/landing/footer';
-import { ChatInterface } from '@/components/chat/chat-interface';
 import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar';
 import { GoogleConversionTracker } from '@/components/google-conversion-tracker';
+import { FloatingChatBubble } from '@/components/chat/floating-chat-bubble';
+import { ExpandableChatWindow } from '@/components/chat/expandable-chat-window';
+import { ChatUIProvider, useChatUI } from '@/lib/chat/chat-ui-context';
 
-export default function HomePage() {
-  const chatRef = useRef<HTMLDivElement>(null);
+function HomePageContent() {
+  const { isChatOpen, openChat, closeChat, toggleChat, initialMessage } = useChatUI();
 
-  const handleSearch = () => {
-    chatRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const handleSearch = (query: string) => {
+    openChat(query);
   };
 
   return (
@@ -25,19 +26,39 @@ export default function HomePage() {
       <Header />
       <ChatHistorySidebar />
 
-      <main className="pt-16">
-        <HeroSection onSearch={handleSearch} />
+      <main>
+        {/* Hero với Smart Search Bar */}
+        <HeroSectionSearch onSearch={handleSearch} />
 
-        {/* Chatbox luôn hiển thị */}
-        <section ref={chatRef} className="py-16 px-4 bg-white" id="chat">
-          <ChatInterface />
-        </section>
+        {/* Prompt Library - Thư viện câu hỏi mẫu */}
+        <PromptLibrary onPromptSelect={handleSearch} />
 
-        <StatsSection />
         <FeaturesSection />
       </main>
 
       <Footer />
+
+      {/* Floating Chat Bubble (góc dưới phải) */}
+      <FloatingChatBubble
+        isOpen={isChatOpen}
+        onClick={toggleChat}
+        unreadCount={0}
+      />
+
+      {/* Expandable Chat Window (Sidebar/Fullscreen) */}
+      <ExpandableChatWindow
+        isOpen={isChatOpen}
+        onClose={closeChat}
+        initialMessage={initialMessage}
+      />
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <ChatUIProvider>
+      <HomePageContent />
+    </ChatUIProvider>
   );
 }

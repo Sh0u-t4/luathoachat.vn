@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Bot, User, Copy, Share, ThumbsUp, ThumbsDown, MoreHorizontal } from 'lucide-react';
+import { Bot, User, Copy, ThumbsUp, ThumbsDown, MoreHorizontal } from 'lucide-react';
 import { useMobile } from '@/lib/mobile/context';
 import { useLongPress } from '@/hooks/use-long-press';
-import { hapticFeedback, HapticPatterns, copyToClipboard, shareContent } from '@/lib/mobile/utils';
+import { hapticFeedback, HapticPatterns, copyToClipboard } from '@/lib/mobile/utils';
 import { toast } from 'sonner';
 import type { ChatMessage } from '@/types';
 
@@ -40,17 +40,6 @@ export function MobileMessageCard({
     setShowActions(false);
   };
 
-  const handleShare = async () => {
-    const success = await shareContent({
-      title: 'Tin nhắn từ LuatHoaChat.vn',
-      text: message.content,
-    });
-
-    if (success) {
-      hapticFeedback(HapticPatterns.success);
-    }
-    setShowActions(false);
-  };
 
   const handleRate = (rating: 'up' | 'down') => {
     onRate?.(rating);
@@ -133,13 +122,6 @@ export function MobileMessageCard({
                   <span className="text-[10px] text-slate-600">Sao chép</span>
                 </button>
 
-                <button
-                  onClick={handleShare}
-                  className="flex-1 flex flex-col items-center gap-1 py-2 px-3 rounded-lg hover:bg-slate-100 touch-feedback"
-                >
-                  <Share className="w-4 h-4 text-slate-600" />
-                  <span className="text-[10px] text-slate-600">Chia sẻ</span>
-                </button>
 
                 {!isUser && onRate && (
                   <>

@@ -224,8 +224,7 @@ export interface Translation {
     suggestion2: string;
     suggestion3: string;
     inputPlaceholder: string;
-    disclaimer1: string;
-    disclaimer2: string;
+    disclaimer: string;
     loginPromptTitle: string;
     loginPromptDescription: string;
     loginButton: string;
