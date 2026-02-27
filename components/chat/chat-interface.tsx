@@ -494,16 +494,6 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
               )}
             </div>
 
-            {/* AI Typing Indicator - Floating at top */}
-            {isAnyTyping && messages.length > 0 && (
-              <div className="absolute top-16 left-1/2 -translate-x-1/2 z-10 animate-fade-in">
-                <div className="bg-cyan-600/95 backdrop-blur-sm text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm font-medium">AI đang trả lời...</span>
-                </div>
-              </div>
-            )}
-
             {/* Scroll to Bottom Button - Floating at bottom-right */}
             {showScrollButton && (
               <button
@@ -516,6 +506,16 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
               </button>
             )}
           </div>
+
+          {/* AI Typing Indicator - Above input */}
+          {isAnyTyping && messages.length > 0 && (
+            <div className="px-4 py-2 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+                <span className="text-sm font-medium text-cyan-400">AI đang trả lời...</span>
+              </div>
+            </div>
+          )}
 
           {/* Mobile Chat Input with Disclaimer - Fixed at bottom */}
           <div className="flex-shrink-0">
@@ -684,16 +684,6 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
               )}
             </div>
 
-            {/* AI Typing Indicator - Floating at top */}
-            {isAnyTyping && messages.length > 0 && (
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 animate-fade-in">
-                <div className="bg-cyan-600/95 backdrop-blur-sm text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm font-medium">AI đang trả lời...</span>
-                </div>
-              </div>
-            )}
-
             {/* Scroll to Bottom Button - Floating at bottom-right */}
             {showScrollButton && (
               <button
@@ -706,6 +696,16 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
               </button>
             )}
           </div>
+
+          {/* AI Typing Indicator - Above input */}
+          {isAnyTyping && messages.length > 0 && (
+            <div className="px-6 py-2 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-t border-slate-700">
+              <div className="flex items-center justify-center gap-2 max-w-5xl mx-auto">
+                <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+                <span className="text-sm font-medium text-cyan-400">AI đang trả lời...</span>
+              </div>
+            </div>
+          )}
 
           {/* Desktop Input Form - Redesigned to match search bar style */}
           <form
