@@ -50,11 +50,17 @@ export default function MaintenancePage() {
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html, body {
+          height: 100%;
+        }
+
         body {
           font-family: 'Be Vietnam Pro', sans-serif;
           background: #050a14;
           color: #e2e8f0;
           min-height: 100vh;
+          display: flex;
+          flex-direction: column;
         }
 
         .bg-wrapper {
