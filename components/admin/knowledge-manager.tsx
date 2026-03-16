@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Upload, FileText, Trash2, CheckCircle, AlertCircle, Loader2, Brain, RefreshCw, X } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Upload, FileText, Trash2, CheckCircle, AlertCircle, Loader2, Brain, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';

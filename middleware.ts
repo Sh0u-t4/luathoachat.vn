@@ -10,7 +10,7 @@ import type { NextRequest } from 'next/server';
  *
  * Dự kiến trở lại: 01/04/2026
  */
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 const BYPASS_PATHS = [
   '/bao-tri',

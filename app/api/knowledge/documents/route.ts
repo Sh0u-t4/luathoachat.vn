@@ -24,11 +24,11 @@ export async function GET() {
 // POST: create a new document record (before upload)
 export async function POST(request: NextRequest) {
   try {
-    const { title, file_name, file_type, file_size, uploaded_by } = await request.json();
+    const { title, file_name, file_type, file_size, uploaded_by, storage_path } = await request.json();
 
     const { data, error } = await supabaseAdmin
       .from('knowledge_documents')
-      .insert({ title, file_name, file_type, file_size, uploaded_by, status: 'processing' })
+      .insert({ title, file_name, file_type, file_size, uploaded_by, storage_path, status: 'processing' })
       .select()
       .single();
 
