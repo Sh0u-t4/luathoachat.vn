@@ -202,9 +202,16 @@ async function searchRelevantContext(
 
 function buildPromptWithContext(
   userQuery: string,
-  contexts: RAGContext[]
+  contexts: RAGContext[],
+  knowledgeContext?: string
 ): string {
   let prompt = SYSTEM_PROMPT + "\n\n";
+
+  // Inject admin-uploaded knowledge base context if available
+  if (knowledgeContext && knowledgeContext.trim().length > 0) {
+    prompt += "# TÀI LIỆU BỔ SUNG (do Admin cung cấp):\n\n";
+    prompt += knowledgeContext + "\n\n---\n\n";
+  }
 
   if (contexts.length > 0) {
     prompt += "# CONTEXT - Thong tin phap ly lien quan:\n\n";
@@ -225,14 +232,15 @@ function buildPromptWithContext(
 
 async function fallbackRAG(
   supabase: ReturnType<typeof createClient>,
-  query: string
+  query: string,
+  knowledgeContext?: string
 ): Promise<{ responseText: string; contexts: RAGContext[] }> {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
 
   const queryEmbedding = await createEmbedding(query);
   const contexts = await searchRelevantContext(supabase, queryEmbedding);
-  const prompt = buildPromptWithContext(query, contexts);
+  const prompt = buildPromptWithContext(query, contexts, knowledgeContext);
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`,
@@ -281,13 +289,13 @@ Deno.serve(async (req: Request) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { query } = await req.json();
+    const { query, knowledge_context } = await req.json();
 
     if (!query || typeof query !== "string") {
       return jsonResponse({ error: "Query is required" }, 400);
     }
 
-    console.log(`[legal-ai-chat] Query: "${query}"`);
+    console.log(`[legal-ai-chat] Query: "${query}", has knowledge_context: ${!!knowledge_context}`);
 
     const n8nUrl = await getN8nWebhookUrl(supabase);
 
@@ -321,7 +329,7 @@ Deno.serve(async (req: Request) => {
 
     console.log("[legal-ai-chat] n8n not configured, using RAG fallback...");
 
-    const { responseText, contexts } = await fallbackRAG(supabase, query);
+    const { responseText, contexts } = await fallbackRAG(supabase, query, knowledge_context || '');
     const responseTimeMs = Date.now() - startTime;
 
     await logToAnalytics(supabase, {

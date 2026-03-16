@@ -39,7 +39,22 @@ interface EdgeFunctionResponse {
   response_time_ms: number;
 }
 
-async function callLegalAIEdgeFunction(query: string): Promise<EdgeFunctionResponse> {
+async function searchKnowledgeBase(query: string): Promise<string> {
+  try {
+    const res = await fetch('/api/knowledge/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query }),
+    });
+    if (!res.ok) return '';
+    const data = await res.json();
+    return data.context || '';
+  } catch {
+    return '';
+  }
+}
+
+async function callLegalAIEdgeFunction(query: string, knowledgeContext?: string): Promise<EdgeFunctionResponse> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -53,7 +68,7 @@ async function callLegalAIEdgeFunction(query: string): Promise<EdgeFunctionRespo
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${supabaseAnonKey}`,
     },
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({ query, knowledge_context: knowledgeContext || '' }),
   });
 
   if (!response.ok) {
@@ -62,6 +77,7 @@ async function callLegalAIEdgeFunction(query: string): Promise<EdgeFunctionRespo
 
   return await response.json();
 }
+
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -412,7 +428,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     try {
       const startTime = Date.now();
-      const aiResponse = await callLegalAIEdgeFunction(content);
+      // RAG: Search knowledge base for relevant context first
+      const knowledgeContext = await searchKnowledgeBase(content);
+      const aiResponse = await callLegalAIEdgeFunction(content, knowledgeContext);
       const responseTime = Date.now() - startTime;
 
       // Create assistant message with temporary ID first

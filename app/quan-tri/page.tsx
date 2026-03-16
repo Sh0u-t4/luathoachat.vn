@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { ShieldAlert, ArrowLeft, Loader2, FlaskConical, LayoutDashboard } from 'lucide-react';
+import { ShieldAlert, ArrowLeft, Loader2, FlaskConical, LayoutDashboard, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/lib/auth/context';
@@ -44,6 +44,15 @@ const FeedbackViewer = dynamic(() => import('@/components/admin/feedback-viewer'
   loading: () => (
     <div className="flex items-center justify-center py-24">
       <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
+    </div>
+  ),
+  ssr: false
+});
+
+const KnowledgeManager = dynamic(() => import('@/components/admin/knowledge-manager').then(mod => ({ default: mod.KnowledgeManager })), {
+  loading: () => (
+    <div className="flex items-center justify-center py-24">
+      <Loader2 className="w-8 h-8 text-violet-600 animate-spin" />
     </div>
   ),
   ssr: false
@@ -248,7 +257,7 @@ export default function AdminPage() {
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full max-w-4xl grid-cols-2 sm:grid-cols-4 h-auto sm:h-12 gap-1">
+          <TabsList className="grid w-full max-w-5xl grid-cols-2 sm:grid-cols-5 h-auto sm:h-12 gap-1">
             <TabsTrigger value="dashboard" className="gap-2">
               <LayoutDashboard className="w-4 h-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -264,6 +273,11 @@ export default function AdminPage() {
             <TabsTrigger value="chatlogs" className="gap-2">
               <span className="hidden sm:inline">Chat Logs</span>
               <span className="sm:hidden">Logs</span>
+            </TabsTrigger>
+            <TabsTrigger value="knowledge" className="gap-2">
+              <Brain className="w-4 h-4" />
+              <span className="hidden sm:inline">Knowledge Base</span>
+              <span className="sm:hidden">KB</span>
             </TabsTrigger>
           </TabsList>
 
@@ -297,6 +311,10 @@ export default function AdminPage() {
 
           <TabsContent value="chatlogs">
             <ChatLogsViewer />
+          </TabsContent>
+
+          <TabsContent value="knowledge">
+            <KnowledgeManager />
           </TabsContent>
         </Tabs>
       </main>
