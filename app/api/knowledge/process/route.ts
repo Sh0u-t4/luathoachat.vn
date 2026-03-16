@@ -8,7 +8,7 @@ const supabaseAdmin = createClient(
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// Chunk text into ~500 char segments with overlap
+// Chunk text into segments with overlap
 function chunkText(text: string, chunkSize = 800, overlap = 100): string[] {
   const chunks: string[] = [];
   const sentences = text.split(/(?<=[.!?])\s+/);
@@ -17,7 +17,6 @@ function chunkText(text: string, chunkSize = 800, overlap = 100): string[] {
   for (const sentence of sentences) {
     if ((current + ' ' + sentence).length > chunkSize && current.length > 0) {
       chunks.push(current.trim());
-      // Add overlap: take last ~overlap chars
       const words = current.split(' ');
       current = words.slice(-Math.floor(overlap / 6)).join(' ') + ' ' + sentence;
     } else {
@@ -25,8 +24,6 @@ function chunkText(text: string, chunkSize = 800, overlap = 100): string[] {
     }
   }
   if (current.trim()) chunks.push(current.trim());
-
-  // Filter out tiny chunks
   return chunks.filter(c => c.length > 50);
 }
 
@@ -55,12 +52,43 @@ async function generateEmbedding(text: string): Promise<number[]> {
   return data.embedding.values;
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const { document_id, text_content } = await request.json();
+// Extract text from PDF stored in Supabase Storage
+async function extractPdfText(storagePath: string): Promise<string> {
+  // Download file from Supabase Storage
+  const { data, error } = await supabaseAdmin.storage
+    .from('knowledge-documents')
+    .download(storagePath);
 
-    if (!document_id || !text_content) {
-      return NextResponse.json({ error: 'document_id and text_content required' }, { status: 400 });
+  if (error || !data) {
+    throw new Error(`Cannot download PDF from storage: ${error?.message}`);
+  }
+
+  // Convert blob to buffer and parse with pdf-parse
+  const arrayBuffer = await data.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  // Dynamic import for pdf-parse (types declared in types/pdf-parse.d.ts)
+  const pdfParse = (await import('pdf-parse')).default ?? (await import('pdf-parse'));
+
+  const parsed = await pdfParse(buffer);
+
+  if (!parsed.text || parsed.text.trim().length < 10) {
+    throw new Error('PDF có thể là file scan (ảnh), không thể trích xuất text. Hãy dùng PDF có lớp text.');
+  }
+
+  return parsed.text;
+}
+
+export async function POST(request: NextRequest) {
+  let document_id: string | undefined;
+
+  try {
+    const body = await request.json();
+    document_id = body.document_id;
+    const { text_content, storage_path, file_type } = body;
+
+    if (!document_id) {
+      return NextResponse.json({ error: 'document_id required' }, { status: 400 });
     }
 
     // Verify document exists
@@ -74,9 +102,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }
 
+    // Extract text: PDF from storage, or use provided text_content
+    let textToProcess: string;
+    if (file_type === 'pdf' && storage_path) {
+      console.log(`[process] Extracting text from PDF: ${storage_path}`);
+      textToProcess = await extractPdfText(storage_path);
+    } else if (text_content) {
+      textToProcess = text_content;
+    } else {
+      return NextResponse.json({ error: 'text_content or storage_path required' }, { status: 400 });
+    }
+
     // Chunk the text
-    const chunks = chunkText(text_content);
+    const chunks = chunkText(textToProcess);
     console.log(`[process] Processing ${chunks.length} chunks for doc ${document_id}`);
+
+    if (chunks.length === 0) {
+      await supabaseAdmin
+        .from('knowledge_documents')
+        .update({ status: 'error', error_message: 'Không trích xuất được nội dung văn bản' })
+        .eq('id', document_id);
+      return NextResponse.json({ error: 'No text content found' }, { status: 400 });
+    }
 
     // Generate embeddings and insert chunks
     const chunkInserts = [];
@@ -106,7 +153,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update document status
+    // Update document status to ready
     await supabaseAdmin
       .from('knowledge_documents')
       .update({ status: 'ready', chunk_count: chunkInserts.length })
@@ -121,15 +168,14 @@ export async function POST(request: NextRequest) {
     console.error('[process] Error:', errMsg);
 
     // Update document status to error
-    try {
-      const { document_id } = await request.json().catch(() => ({}));
-      if (document_id) {
+    if (document_id) {
+      try {
         await supabaseAdmin
           .from('knowledge_documents')
           .update({ status: 'error', error_message: errMsg })
           .eq('id', document_id);
-      }
-    } catch {}
+      } catch {}
+    }
 
     return NextResponse.json({ error: errMsg }, { status: 500 });
   }

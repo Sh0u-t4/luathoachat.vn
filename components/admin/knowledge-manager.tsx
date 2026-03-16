@@ -222,13 +222,18 @@ export function KnowledgeManager() {
 
   useEffect(() => { fetchDocuments(); }, [fetchDocuments]);
 
-  const processDocument = async (documentId: string, text: string) => {
+  const processDocument = async (documentId: string, textContent: string, storagePath = '', fileType = 'txt') => {
     setProcessingId(documentId);
     try {
       const res = await fetch('/api/knowledge/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ document_id: documentId, text_content: text }),
+        body: JSON.stringify({
+          document_id: documentId,
+          text_content: textContent || undefined,
+          storage_path: storagePath || undefined,
+          file_type: fileType,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -285,20 +290,26 @@ export function KnowledgeManager() {
       const docData = await res.json();
       if (!res.ok) throw new Error(docData.error);
 
-      toast.info('📤 Đang đọc nội dung và tạo embeddings...');
+      toast.info('📤 Đang xử lý và tạo embeddings...');
 
-      // 3. Extract text and process
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const text = e.target?.result as string;
-        if (!text || text.trim().length < 10) {
-          toast.error('Không đọc được nội dung file. Thử file TXT thuần túy.');
-          return;
-        }
-        await processDocument(docData.document.id, text);
-      };
-      reader.onerror = () => toast.error('Lỗi đọc file');
-      reader.readAsText(file, 'utf-8');
+      // 3. Process: TXT = read client-side, PDF = extract server-side
+      if (fileType === 'pdf') {
+        // Server downloads from storage and uses pdf-parse
+        await processDocument(docData.document.id, '', storagePath, 'pdf');
+      } else {
+        // TXT: read content client-side
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const text = e.target?.result as string;
+          if (!text || text.trim().length < 10) {
+            toast.error('Không đọc được nội dung file TXT.');
+            return;
+          }
+          await processDocument(docData.document.id, text, '', 'txt');
+        };
+        reader.onerror = () => toast.error('Lỗi đọc file');
+        reader.readAsText(file, 'utf-8');
+      }
 
     } catch (err) {
       toast.error('Lỗi upload: ' + (err as Error).message);
