@@ -210,7 +210,7 @@ export function AIConfigManager() {
         <div className="mt-6 pt-6 border-t border-slate-100">
           <label className="block text-sm font-medium text-slate-700 mb-2">Model AI</label>
           <div className="flex gap-3 flex-wrap">
-            {['gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-1.5-pro'].map(model => (
+            {['gemini-3-pro', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-1.5-pro'].map(model => (
               <button
                 key={model}
                 onClick={() => updateConfig('ai_model', model)}
@@ -224,7 +224,7 @@ export function AIConfigManager() {
               </button>
             ))}
           </div>
-          <p className="text-xs text-slate-400 mt-2">gemini-2.5-pro: chính xác nhất | gemini-2.0-flash: nhanh hơn, rẻ hơn</p>
+          <p className="text-xs text-slate-400 mt-2">gemini-3-pro: mới nhất | gemini-2.5-pro: chính xác | gemini-2.0-flash: nhanh hơn, rẻ hơn</p>
         </div>
       </div>
 
