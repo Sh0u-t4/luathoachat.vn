@@ -104,8 +104,12 @@ export function KnowledgeManager() {
 
     setUploading(true);
     try {
+      // Use UUID-based storage path to avoid any filename encoding issues
+      // The original filename is preserved in the database record
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'txt';
+      const storagePath = `${user?.id}/${crypto.randomUUID()}.${ext}`;
+
       // 1. Upload file to Supabase Storage
-      const storagePath = `${user?.id}/${Date.now()}_${file.name}`;
       const { error: storageError } = await supabase.storage
         .from('knowledge-documents')
         .upload(storagePath, file);
