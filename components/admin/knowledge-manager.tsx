@@ -162,11 +162,17 @@ export function KnowledgeManager() {
     }
   };
 
+  const handleFiles = async (files: File[]) => {
+    for (const file of files) {
+      await handleFile(file);
+    }
+  };
+
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) handleFiles(files);
   };
 
   const stats = {
@@ -224,7 +230,12 @@ export function KnowledgeManager() {
           type="file"
           className="hidden"
           accept=".txt,.pdf"
-          onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+          multiple
+          onChange={(e) => {
+            const files = Array.from(e.target.files || []);
+            if (files.length > 0) handleFiles(files);
+            e.target.value = '';
+          }}
         />
         {uploading || processingId ? (
           <div className="flex flex-col items-center gap-3">
