@@ -254,15 +254,36 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update document status to ready
+    // Update document status based on how many chunks were actually embedded
+    if (chunkInserts.length === 0) {
+      // Text was extracted but ALL embeddings failed silently
+      await supabaseAdmin
+        .from('knowledge_documents')
+        .update({
+          status: 'error',
+          error_message: `Trích xuất được ${chunks.length} đoạn văn bản nhưng không thể tạo embedding. Kiểm tra GEMINI_API_KEY hoặc thử lại.`,
+        })
+        .eq('id', document_id);
+
+      return NextResponse.json({
+        error: 'All embedding generations failed',
+        chunks_found: chunks.length,
+        chunks_embedded: 0,
+      }, { status: 500 });
+    }
+
+    // At least some chunks embedded — mark ready
     await supabaseAdmin
       .from('knowledge_documents')
       .update({ status: 'ready', chunk_count: chunkInserts.length })
       .eq('id', document_id);
 
+    console.log(`[process] Done: ${chunkInserts.length}/${chunks.length} chunks embedded for doc ${document_id}`);
+
     return NextResponse.json({
       success: true,
       chunks_created: chunkInserts.length,
+      chunks_total: chunks.length,
     });
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : 'Unknown error';
