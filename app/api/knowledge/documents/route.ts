@@ -11,7 +11,7 @@ export async function GET() {
   try {
     const { data, error } = await supabaseAdmin
       .from('knowledge_documents')
-      .select('id, title, file_name, file_type, file_size, status, chunk_count, error_message, created_at')
+      .select('id, title, file_name, file_type, file_size, status, chunk_count, error_message, storage_path, created_at')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
