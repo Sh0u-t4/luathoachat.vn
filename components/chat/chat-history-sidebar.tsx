@@ -1,19 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { History, MessageSquare, Trash2, ChevronRight, Loader2, Plus } from 'lucide-react';
+import { History, MessageSquare, Trash2, ChevronRight, Loader2, Plus, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 import { useChat } from './chat-context';
 import { useChatUI } from '@/lib/chat/chat-ui-context';
 import { useLanguage } from '@/lib/i18n/context';
 import { formatDistanceToNow } from 'date-fns';
 import { vi, enUS } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 export function ChatHistorySidebar() {
-  const { chatSessions, loadChatHistory, isAuthenticated, clearMessages } = useChat();
+  const { chatSessions, loadChatHistory, isAuthenticated, clearMessages, deleteSession } = useChat();
   const { openChat } = useChatUI();
   const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
@@ -28,32 +28,16 @@ export function ChatHistorySidebar() {
   }
 
   const handleLoadSession = async (sessionId: string) => {
-    console.log('🔵 handleLoadSession START - sessionId:', sessionId);
     setLoadingSession(sessionId);
     setSelectedSession(sessionId);
 
     try {
-      // Clear messages hiện tại trước khi load chat cũ
-      console.log('🔵 Step 1: Clearing current messages...');
       clearMessages();
-
-      // Thêm một chút delay để đảm bảo state được clear
       await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Load lại toàn bộ đoạn chat (câu hỏi + câu trả lời)
-      console.log('🔵 Step 2: Loading chat history...');
       await loadChatHistory(sessionId);
-
-      console.log('🔵 handleLoadSession SUCCESS - Chat history loaded');
-
-      // Open chat window to display the loaded conversation
-      console.log('🔵 Step 3: Opening chat window...');
       openChat();
-
-      // Đóng sidebar
       setIsOpen(false);
 
-      // Scroll đến chat box
       setTimeout(() => {
         const chatInterface = document.getElementById('chat-interface');
         if (chatInterface) {
@@ -61,7 +45,7 @@ export function ChatHistorySidebar() {
         }
       }, 200);
     } catch (error) {
-      console.error('🔵 handleLoadSession ERROR:', error);
+      console.error('handleLoadSession ERROR:', error);
     } finally {
       setLoadingSession(null);
     }
@@ -70,19 +54,35 @@ export function ChatHistorySidebar() {
   const handleNewChat = () => {
     setSelectedSession(null);
     clearMessages();
-
-    // Open chat window for new conversation
     openChat();
-
     setIsOpen(false);
 
-    // Scroll xuống phần chat
     setTimeout(() => {
       const chatInterface = document.getElementById('chat-interface');
       if (chatInterface) {
         chatInterface.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 200);
+  };
+
+  const handleDeleteSession = (e: React.MouseEvent, messageId: string, firstMessage: string) => {
+    e.stopPropagation(); // Prevent triggering loadSession
+    deleteSession(messageId);
+    toast.success(`Đã ẩn cuộc trò chuyện`, {
+      description: firstMessage.slice(0, 50) + (firstMessage.length > 50 ? '...' : ''),
+    });
+    // If deleting the currently selected session, clear chat
+    if (selectedSession) {
+      clearMessages();
+      setSelectedSession(null);
+    }
+  };
+
+  const handleRestoreAll = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('hidden_chat_message_ids');
+      window.location.reload(); // Reload to re-fetch sessions
+    }
   };
 
   return (
@@ -140,7 +140,7 @@ export function ChatHistorySidebar() {
               </div>
             </div>
 
-            <ScrollArea className="h-[calc(100vh-80px)]">
+            <ScrollArea className="h-[calc(100vh-130px)]">
               <div className="p-3 space-y-2">
                 {chatSessions.length === 0 ? (
                   <div className="text-center py-12 px-4">
@@ -155,45 +155,68 @@ export function ChatHistorySidebar() {
                     const isSelected = selectedSession === session.session_id;
 
                     return (
-                      <button
+                      <div
                         key={session.message_id}
-                        onClick={() => handleLoadSession(session.session_id)}
-                        disabled={isLoading}
-                        className={`w-full text-left p-3 rounded-lg border transition-all hover:shadow-md hover:border-cyan-300 disabled:opacity-60 disabled:cursor-not-allowed ${
-                          isSelected
-                            ? 'bg-cyan-50 border-cyan-400'
-                            : 'bg-white border-slate-200'
-                        }`}
+                        className="relative group"
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-slate-800 line-clamp-2 mb-1">
-                              {session.first_message}
-                            </p>
-                            <p className="text-xs text-slate-500">
-                              {formatDistanceToNow(new Date(session.created_at), {
-                                addSuffix: true,
-                                locale: dateLocale,
-                              })}
-                            </p>
+                        <button
+                          onClick={() => handleLoadSession(session.session_id)}
+                          disabled={isLoading}
+                          className={`w-full text-left p-3 rounded-lg border transition-all hover:shadow-md hover:border-cyan-300 disabled:opacity-60 disabled:cursor-not-allowed pr-10 ${
+                            isSelected
+                              ? 'bg-cyan-50 border-cyan-400'
+                              : 'bg-white border-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-slate-800 line-clamp-2 mb-1">
+                                {session.first_message}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {formatDistanceToNow(new Date(session.created_at), {
+                                  addSuffix: true,
+                                  locale: dateLocale,
+                                })}
+                              </p>
+                            </div>
+                            {isLoading ? (
+                              <Loader2 className="w-4 h-4 text-cyan-500 animate-spin flex-shrink-0" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                            )}
                           </div>
-                          {isLoading ? (
-                            <Loader2 className="w-4 h-4 text-cyan-500 animate-spin flex-shrink-0" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                          )}
-                        </div>
-                      </button>
+                        </button>
+
+                        {/* Delete button — pure CSS group-hover, always rendered */}
+                        {!isLoading && (
+                          <button
+                            onClick={(e) => handleDeleteSession(e, session.message_id, session.first_message)}
+                            className="absolute top-2 right-2 p-1.5 rounded-md bg-red-50 hover:bg-red-100 text-red-500 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100"
+                            title="Ẩn cuộc trò chuyện này"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
                     );
                   })
                 )}
               </div>
             </ScrollArea>
 
-            <div className="p-3 border-t bg-slate-50">
-              <p className="text-xs text-slate-500 text-center">
+            <div className="p-3 border-t bg-slate-50 flex items-center justify-between">
+              <p className="text-xs text-slate-500">
                 {t.chat.historyHint}
               </p>
+              <button
+                onClick={handleRestoreAll}
+                className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                title="Khôi phục tất cả cuộc trò chuyện đã ẩn"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Khôi phục
+              </button>
             </div>
           </Card>
         </>

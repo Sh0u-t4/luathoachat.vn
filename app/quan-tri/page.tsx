@@ -202,6 +202,15 @@ export default function AdminPage() {
 
   if (!user) return null;
 
+  // Profile may still be loading even after authLoading is done — wait for it
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
+      </div>
+    );
+  }
+
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
