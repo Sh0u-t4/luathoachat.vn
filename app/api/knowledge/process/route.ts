@@ -52,6 +52,103 @@ async function generateEmbedding(text: string): Promise<number[]> {
   return data.embedding.values;
 }
 
+// Extract text from PDF using Gemini File API (for scanned PDFs)
+async function extractTextWithGeminiOCR(buffer: Buffer, filename: string): Promise<string> {
+  if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not configured');
+
+  console.log(`[OCR] Uploading ${filename} to Gemini File API for OCR...`);
+
+  // Step 1: Upload file to Gemini File API
+  const uploadRes = await fetch(
+    `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/pdf',
+        'X-Goog-Upload-Command': 'start, upload, finalize',
+        'X-Goog-Upload-Header-Content-Length': buffer.length.toString(),
+        'X-Goog-Upload-Header-Content-Type': 'application/pdf',
+      },
+      body: new Uint8Array(buffer).buffer as ArrayBuffer,
+    }
+  );
+
+  if (!uploadRes.ok) {
+    const err = await uploadRes.text();
+    throw new Error(`Gemini File upload failed: ${err.slice(0, 300)}`);
+  }
+
+  const uploadData = await uploadRes.json();
+  const fileUri = uploadData?.file?.uri;
+  const fileName = uploadData?.file?.name;
+
+  if (!fileUri) {
+    throw new Error('Gemini File API did not return a file URI');
+  }
+
+  console.log(`[OCR] File uploaded: ${fileUri}. Running OCR...`);
+
+  try {
+    // Step 2: Send to Gemini Vision to extract text
+    const ocrRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            role: 'user',
+            parts: [
+              {
+                fileData: {
+                  mimeType: 'application/pdf',
+                  fileUri: fileUri,
+                },
+              },
+              {
+                text: 'Hãy trích xuất TOÀN BỘ văn bản từ tài liệu PDF này. Giữ nguyên cấu trúc, tiêu đề, số điều khoản, và nội dung. Không tóm tắt, không bỏ bất kỳ thông tin nào. Chỉ trả về văn bản thuần túy.',
+              },
+            ],
+          }],
+          generationConfig: {
+            temperature: 0,
+            maxOutputTokens: 65536,
+          },
+        }),
+      }
+    );
+
+    if (!ocrRes.ok) {
+      const err = await ocrRes.text();
+      throw new Error(`Gemini OCR failed: ${err.slice(0, 300)}`);
+    }
+
+    const ocrData = await ocrRes.json();
+    const extractedText = ocrData?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!extractedText || extractedText.trim().length < 10) {
+      throw new Error('Gemini OCR không trích xuất được text từ tài liệu này');
+    }
+
+    console.log(`[OCR] Extracted ${extractedText.length} chars via Gemini Vision`);
+    return extractedText;
+
+  } finally {
+    // Step 3: Cleanup - delete uploaded file from Gemini
+    if (fileName) {
+      try {
+        await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/${fileName}?key=${GEMINI_API_KEY}`,
+          { method: 'DELETE' }
+        );
+        console.log(`[OCR] Cleaned up Gemini file: ${fileName}`);
+      } catch {
+        // Non-critical — file will auto-expire after 48h
+      }
+    }
+  }
+}
+
 // Extract text from PDF stored in Supabase Storage
 async function extractPdfText(storagePath: string): Promise<string> {
   // Download file from Supabase Storage
@@ -72,12 +169,16 @@ async function extractPdfText(storagePath: string): Promise<string> {
 
   const parsed = await pdfParse(buffer);
 
-  if (!parsed.text || parsed.text.trim().length < 10) {
-    throw new Error('PDF có thể là file scan (ảnh), không thể trích xuất text. Hãy dùng PDF có lớp text.');
+  // If text is scarce → scanned PDF → use Gemini Vision OCR
+  if (!parsed.text || parsed.text.trim().length < 50) {
+    console.log(`[process] Detected scanned PDF (${parsed.text?.trim().length || 0} chars). Switching to Gemini OCR...`);
+    const filename = storagePath.split('/').pop() || 'document.pdf';
+    return await extractTextWithGeminiOCR(buffer, filename);
   }
 
   return parsed.text;
 }
+
 
 export async function POST(request: NextRequest) {
   let document_id: string | undefined;
