@@ -76,15 +76,16 @@ function renderMarkdown(text: string): React.ReactNode {
     } else if (line.startsWith('# ')) {
       elements.push(<h1 key={elements.length} className="font-bold text-slate-900 text-xl mt-4 mb-1">{renderInline(line.slice(2))}</h1>);
 
-    // Markdown table: lines starting with |
-    } else if (/^\|.+\|/.test(line)) {
+    // Table: trim line to handle \r from Windows line endings
+    } else if (/^\|.+\|/.test(line.trim())) {
       const tableLines: string[] = [];
-      while (i < lines.length && /^\|.+\|/.test(lines[i])) {
-        tableLines.push(lines[i]);
+      while (i < lines.length && /^\|.+\|/.test(lines[i].trim())) {
+        tableLines.push(lines[i].trim());
         i++;
       }
-      // Filter out separator rows (|---|---|)
-      const rows = tableLines.filter(r => !/^\|[-:| ]+\|$/.test(r));
+      // Filter separator rows: |---|---| or |:---|:---|
+      const isSeparator = (r: string) => /^\|[-|: ]+\|$/.test(r);
+      const rows = tableLines.filter(r => !isSeparator(r));
       const headerCells = rows[0]?.split('|').filter(Boolean).map(c => c.trim()) ?? [];
       const bodyRows = rows.slice(1);
       elements.push(
@@ -174,66 +175,15 @@ export function AssistantMessage({
   // 1. User is authenticated, OR
   // 2. This is one of the first 5 free messages (messageIndex < 5)
   const shouldShowUnblurred = isAuthenticated || messageIndex < 5;
-  // Tách nội dung thành 2 phần: public (câu đầu đủ ý) và locked (phần còn lại)
-  // Luôn hoàn thành câu đầu tiên trước khi cắt — không cắt giữa chừng
-  const splitContent = (content: string) => {
-    // Tìm dấu kết thúc câu (. ! ?) theo sau bởi khoảng trắng hoặc xuống dòng
-    // Regex: dấu câu + (space | newline | end of string)
-    const sentenceEndRegex = /[.!?]+(?:\s|\n|$)/g;
-    let lastValidCut = -1;
-    let match;
-
-    // Duyệt qua tất cả dấu câu, lấy điểm cắt đủ để hiển thị ít nhất 1 câu
-    // nhưng không quá 55% nội dung
-    const maxPublic = Math.floor(content.length * 0.55);
-
-    while ((match = sentenceEndRegex.exec(content)) !== null) {
-      const cutAt = match.index + match[0].trimEnd().length; // bao gồm dấu câu
-      if (cutAt <= maxPublic) {
-        lastValidCut = cutAt;
-      } else {
-        // Vượt quá giới hạn — nếu chưa có điểm cắt nào thì lấy điểm này
-        if (lastValidCut === -1) lastValidCut = cutAt;
-        break;
-      }
-    }
-
-    // Nếu không tìm được dấu câu → fallback cắt 30% thô
-    if (lastValidCut === -1) {
-      const rawSplit = Math.floor(content.length * 0.3);
-      return {
-        publicPart: content.substring(0, rawSplit),
-        lockedPart: content.substring(rawSplit),
-      };
-    }
-
-    return {
-      publicPart: content.substring(0, lastValidCut).trim(),
-      lockedPart: content.substring(lastValidCut).trim(),
-    };
-  };
-
-
 
   const fullContent =
     message.detailedContent && message.detailedContent !== message.content
       ? `${message.content}\n\n${message.detailedContent}`
       : message.content;
 
-  const { publicPart, lockedPart } = splitContent(fullContent);
-
-  // Typing effect - chỉ apply cho message mới nhất
-  const { displayedText: displayedPublic } = useTypingEffect(publicPart, isLatest, {
-    speed: 15,
-  });
-
-  const { displayedText: displayedLocked } = useTypingEffect(lockedPart, isLatest, {
-    speed: 15,
-  });
-
-  // Nếu không phải latest message, hiển thị toàn bộ ngay
-  const finalPublic = isLatest ? displayedPublic : publicPart;
-  const finalLocked = isLatest ? displayedLocked : lockedPart;
+  // Single typing effect on full content — no need to split text
+  const { displayedText } = useTypingEffect(fullContent, isLatest, { speed: 15 });
+  const finalContent = isLatest ? displayedText : fullContent;
 
   // Generate quick reply suggestions based on content
   const quickReplySuggestions = shouldShowUnblurred && !isLatest
@@ -382,19 +332,10 @@ export function AssistantMessage({
   // Handle copy to clipboard
   const handleCopy = async () => {
     try {
-      // Lấy toàn bộ nội dung (public + locked nếu đã unlock)
-      const fullContent = shouldShowUnblurred
-        ? message.content
-        : publicPart;
-
       await navigator.clipboard.writeText(fullContent);
       setIsCopied(true);
       toast.success('Đã sao chép câu trả lời!');
-
-      // Reset icon sau 2 giây
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
+      setTimeout(() => { setIsCopied(false); }, 2000);
     } catch (error) {
       console.error('Copy error:', error);
       toast.error('Không thể sao chép');
@@ -417,54 +358,27 @@ export function AssistantMessage({
         </div>
       )}
 
-      <div className="text-slate-800 leading-relaxed space-y-3">
-        {/* Phần public - luôn hiển thị với typing effect */}
-        <div className="space-y-1">
-          {renderMarkdown(finalPublic)}
-          {isLatest && finalPublic.length < publicPart.length && (
+      {/* Content block: full content, CSS blur for locked users */}
+      <div className="text-slate-800 leading-relaxed">
+        <div className={`space-y-1.5 ${!shouldShowUnblurred ? 'max-h-52 overflow-hidden' : ''}`}>
+          {renderMarkdown(finalContent)}
+          {isLatest && finalContent.length < fullContent.length && (
             <span className="inline-block w-1 h-4 bg-cyan-600 ml-0.5 animate-pulse" />
           )}
         </div>
 
-        {/* Phần locked - chỉ hiển thị nếu đã đăng nhập */}
-        {lockedPart && (
-          <div className="relative mt-4 pt-4 border-t border-slate-200">
-            <div className="flex items-center gap-2 mb-3">
-              <Lock
-                className={`w-4 h-4 ${
-                  shouldShowUnblurred ? 'text-cyan-600' : 'text-slate-400'
-                }`}
-              />
-              <span className="text-sm font-medium text-slate-700">
-                Chi tiết trích dẫn luật & Mức phạt
-              </span>
-            </div>
-
-            <div className="relative">
-              <div
-                className={`text-slate-700 space-y-1 ${
-                  !shouldShowUnblurred ? 'blur-content' : ''
-                }`}
+        {/* Gradient fade + login button for locked users — appears AFTER content, never inside */}
+        {!shouldShowUnblurred && (
+          <div className="relative">
+            <div className="absolute -top-20 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+            <div className="pt-2 pb-1 flex items-center justify-center border-t border-slate-100 mt-1">
+              <Button
+                onClick={onUnlockClick}
+                className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg"
               >
-                {renderMarkdown(finalLocked)}
-                {shouldShowUnblurred &&
-                  isLatest &&
-                  finalLocked.length < lockedPart.length && (
-                    <span className="inline-block w-1 h-4 bg-cyan-600 ml-0.5 animate-pulse" />
-                  )}
-              </div>
-
-              {!shouldShowUnblurred && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-white/60 to-white/90">
-                  <Button
-                    onClick={onUnlockClick}
-                    className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-xl"
-                  >
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Đăng nhập để xem chi tiết
-                  </Button>
-                </div>
-              )}
+                <LogIn className="w-4 h-4 mr-2" />
+                Đăng nhập để đọc toàn bộ câu trả lời
+              </Button>
             </div>
           </div>
         )}

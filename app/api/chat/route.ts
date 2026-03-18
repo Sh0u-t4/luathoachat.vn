@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
           ],
           generationConfig: {
             temperature: 0.15,       // Thấp hơn = chính xác hơn, ít sáng tạo hơn
-            maxOutputTokens: 2048,
+            maxOutputTokens: 4096,
             topP: 0.9,
             topK: 40,
           },
