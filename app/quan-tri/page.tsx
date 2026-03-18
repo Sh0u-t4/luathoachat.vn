@@ -76,6 +76,15 @@ const AIAnalyticsDashboard = dynamic(() => import('@/components/admin/ai-analyti
   ssr: false
 });
 
+const KnowledgeAuditPanel = dynamic(() => import('@/components/admin/knowledge-audit-panel').then(mod => ({ default: mod.KnowledgeAuditPanel })), {
+  loading: () => (
+    <div className="flex items-center justify-center py-8">
+      <Loader2 className="w-6 h-6 text-violet-500 animate-spin" />
+    </div>
+  ),
+  ssr: false
+});
+
 interface UserProfile {
   id: string;
   email: string;
@@ -354,7 +363,12 @@ export default function AdminPage() {
           </TabsContent>
 
           <TabsContent value="knowledge">
-            <KnowledgeManager />
+            <div className="space-y-8">
+              <KnowledgeManager />
+              <div className="border-t border-slate-200 pt-8">
+                <KnowledgeAuditPanel />
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="ai-config">
