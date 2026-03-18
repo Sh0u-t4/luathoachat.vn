@@ -27,30 +27,55 @@ function chunkText(text: string, chunkSize = 800, overlap = 100): string[] {
   return chunks.filter(c => c.length > 50);
 }
 
-// Generate embedding using Gemini text-embedding-004 (768-dim)
-async function generateEmbedding(text: string): Promise<number[]> {
+// Helpers
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+// Generate embedding with retry + exponential backoff
+async function generateEmbedding(text: string, retries = 3): Promise<number[]> {
   if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not configured');
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GEMINI_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'models/text-embedding-004',
-        content: { parts: [{ text }] },
-      }),
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'models/gemini-embedding-001',
+            content: { parts: [{ text }] },
+            outputDimensionality: 768,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.text();
+        // On rate limit (429) or server error (5xx) — retry after delay
+        if ((res.status === 429 || res.status >= 500) && attempt < retries) {
+          const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+          console.warn(`[embedding] Attempt ${attempt + 1} failed (${res.status}), retrying in ${delay}ms...`);
+          await sleep(delay);
+          continue;
+        }
+        throw new Error(`Gemini embedding error (${res.status}): ${err.slice(0, 200)}`);
+      }
+
+      const data = await res.json();
+      return data.embedding.values;
+    } catch (err) {
+      if (attempt < retries) {
+        const delay = Math.pow(2, attempt) * 1000;
+        console.warn(`[embedding] Attempt ${attempt + 1} exception, retrying in ${delay}ms...`);
+        await sleep(delay);
+      } else {
+        throw err;
+      }
     }
-  );
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Gemini embedding error: ${err}`);
   }
-
-  const data = await res.json();
-  return data.embedding.values;
+  throw new Error('All embedding retries exhausted');
 }
+
 
 // Extract text from PDF using Gemini File API (for scanned PDFs)
 async function extractTextWithGeminiOCR(buffer: Buffer, filename: string): Promise<string> {
@@ -226,36 +251,56 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No text content found' }, { status: 400 });
     }
 
-    // Generate embeddings and insert chunks
-    const chunkInserts = [];
+    // Generate embeddings — with delay between calls to avoid rate limiting
+    // Insert in batches of 20 to save progress incrementally
+    let totalInserted = 0;
+    const BATCH_SIZE = 20;
+    let pendingBatch: object[] = [];
+    let globalChunkIndex = 0;
+
     for (let i = 0; i < chunks.length; i++) {
       try {
-        const embedding = await generateEmbedding(chunks[i]);
-        chunkInserts.push({
+        const embedding = await generateEmbedding(chunks[i]); // has retry built-in
+        pendingBatch.push({
           document_id,
-          chunk_index: i,
+          chunk_index: globalChunkIndex++,
           content: chunks[i],
           embedding: `[${embedding.join(',')}]`,
           metadata: { chunk_index: i, total_chunks: chunks.length },
         });
+
+        // Insert batch when full
+        if (pendingBatch.length >= BATCH_SIZE) {
+          const { error: batchErr } = await supabaseAdmin
+            .from('knowledge_chunks')
+            .insert(pendingBatch);
+          if (!batchErr) {
+            totalInserted += pendingBatch.length;
+            console.log(`[process] Batch inserted: ${totalInserted}/${chunks.length} chunks`);
+          } else {
+            console.error(`[process] Batch insert error:`, batchErr);
+          }
+          pendingBatch = [];
+        }
+
+        // Throttle: 200ms delay every chunk to avoid Gemini rate limit
+        await sleep(200);
+
       } catch (embErr) {
         console.error(`[process] Embedding error for chunk ${i}:`, embErr);
       }
     }
 
-    // Batch insert chunks
-    if (chunkInserts.length > 0) {
-      const { error: insertError } = await supabaseAdmin
+    // Insert remaining chunks
+    if (pendingBatch.length > 0) {
+      const { error: finalErr } = await supabaseAdmin
         .from('knowledge_chunks')
-        .insert(chunkInserts);
-
-      if (insertError) {
-        throw new Error(`Insert chunks failed: ${insertError.message}`);
-      }
+        .insert(pendingBatch);
+      if (!finalErr) totalInserted += pendingBatch.length;
     }
 
     // Update document status based on how many chunks were actually embedded
-    if (chunkInserts.length === 0) {
+    if (totalInserted === 0) {
       // Text was extracted but ALL embeddings failed silently
       await supabaseAdmin
         .from('knowledge_documents')
@@ -275,14 +320,14 @@ export async function POST(request: NextRequest) {
     // At least some chunks embedded — mark ready
     await supabaseAdmin
       .from('knowledge_documents')
-      .update({ status: 'ready', chunk_count: chunkInserts.length })
+      .update({ status: 'ready', chunk_count: totalInserted })
       .eq('id', document_id);
 
-    console.log(`[process] Done: ${chunkInserts.length}/${chunks.length} chunks embedded for doc ${document_id}`);
+    console.log(`[process] Done: ${totalInserted}/${chunks.length} chunks embedded for doc ${document_id}`);
 
     return NextResponse.json({
       success: true,
-      chunks_created: chunkInserts.length,
+      chunks_created: totalInserted,
       chunks_total: chunks.length,
     });
   } catch (error) {

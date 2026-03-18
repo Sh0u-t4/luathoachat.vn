@@ -205,7 +205,24 @@ export function KnowledgeManager() {
   const [dragging, setDragging] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedDoc, setSelectedDoc] = useState<KnowledgeDocument | null>(null);
+  const [reprocessingAll, setReprocessingAll] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleReprocessAll = async () => {
+    if (!confirm('Xử lý lại tất cả tài liệu bị lỗi hoặc 0 chunks? Quá trình này có thể mất vài phút.')) return;
+    setReprocessingAll(true);
+    try {
+      const res = await fetch('/api/knowledge/reprocess-all', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast.success(`✅ Đã xử lý lại ${data.succeeded}/${data.processed} tài liệu, tổng ${data.total_chunks_created} chunks`);
+      await fetchDocuments();
+    } catch (err) {
+      toast.error('Lỗi: ' + (err as Error).message);
+    } finally {
+      setReprocessingAll(false);
+    }
+  };
 
   const fetchDocuments = useCallback(async () => {
     setLoading(true);
@@ -368,9 +385,21 @@ export function KnowledgeManager() {
             <p className="text-sm text-slate-500">Quản lý tài liệu cho AI chatbot</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchDocuments} className="gap-2">
-          <RefreshCw className="w-4 h-4" /> Làm mới
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={fetchDocuments} className="gap-2">
+            <RefreshCw className="w-4 h-4" /> Làm mới
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleReprocessAll}
+            disabled={reprocessingAll}
+            className="gap-2 bg-violet-600 hover:bg-violet-700 text-white"
+          >
+            {reprocessingAll
+              ? <><Loader2 className="w-4 h-4 animate-spin" /> Đang xử lý...</>
+              : <><Brain className="w-4 h-4" /> Xử lý lại tất cả</>}
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
