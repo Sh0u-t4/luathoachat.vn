@@ -12,6 +12,82 @@ import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import type { ChatMessage } from '@/types';
 
+// ── Markdown helpers ──────────────────────────────────────────────────────────
+
+/** Renders inline formatting: **bold**, *italic*, [Nguồn: ...] citations */
+function renderInline(text: string): React.ReactNode[] {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|\[Nguồn:[^\]]+\])/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4)
+      return <strong key={i} className="font-semibold text-slate-900">{part.slice(2, -2)}</strong>;
+    if (part.startsWith('*') && part.endsWith('*') && part.length > 2)
+      return <em key={i}>{part.slice(1, -1)}</em>;
+    if (part.startsWith('[Nguồn:'))
+      return <span key={i} className="inline-flex items-center text-xs text-cyan-700 font-medium bg-cyan-50 border border-cyan-200 rounded px-1.5 py-0.5 mx-0.5">{part}</span>;
+    return part;
+  });
+}
+
+/** Full block-level markdown renderer (lists, headings, paragraphs) */
+function renderMarkdown(text: string): React.ReactNode {
+  if (!text) return null;
+  const lines = text.split('\n');
+  const elements: React.ReactNode[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Numbered list items: "1. ", "2. ", ...
+    if (/^\d+\.\s+/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\d+\.\s+/, ''));
+        i++;
+      }
+      elements.push(
+        <ol key={elements.length} className="list-decimal list-outside ml-5 space-y-1 my-2">
+          {items.map((item, j) => <li key={j} className="pl-1">{renderInline(item)}</li>)}
+        </ol>
+      );
+      continue;
+    }
+
+    // Bullet list: "- " or "• "
+    if (/^[-•]\s+/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^[-•]\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^[-•]\s+/, ''));
+        i++;
+      }
+      elements.push(
+        <ul key={elements.length} className="list-disc list-outside ml-5 space-y-1 my-2">
+          {items.map((item, j) => <li key={j} className="pl-1">{renderInline(item)}</li>)}
+        </ul>
+      );
+      continue;
+    }
+
+    // Headings
+    if (line.startsWith('### ')) {
+      elements.push(<h3 key={elements.length} className="font-bold text-slate-900 text-base mt-3 mb-1">{renderInline(line.slice(4))}</h3>);
+    } else if (line.startsWith('## ')) {
+      elements.push(<h2 key={elements.length} className="font-bold text-slate-900 text-lg mt-4 mb-1">{renderInline(line.slice(3))}</h2>);
+    } else if (line.startsWith('# ')) {
+      elements.push(<h1 key={elements.length} className="font-bold text-slate-900 text-xl mt-4 mb-1">{renderInline(line.slice(2))}</h1>);
+    } else if (line.trim() === '') {
+      // Blank line → small paragraph gap
+      elements.push(<div key={elements.length} className="h-1" />);
+    } else {
+      elements.push(<p key={elements.length} className="leading-relaxed">{renderInline(line)}</p>);
+    }
+
+    i++;
+  }
+
+  return <>{elements}</>;
+}
+
 interface AssistantMessageProps {
   message: ChatMessage;
   isLatest: boolean;
@@ -301,8 +377,8 @@ export function AssistantMessage({
 
       <div className="text-slate-800 leading-relaxed space-y-3">
         {/* Phần public - luôn hiển thị với typing effect */}
-        <div className="whitespace-pre-wrap">
-          {finalPublic}
+        <div className="space-y-1">
+          {renderMarkdown(finalPublic)}
           {isLatest && finalPublic.length < publicPart.length && (
             <span className="inline-block w-1 h-4 bg-cyan-600 ml-0.5 animate-pulse" />
           )}
@@ -324,11 +400,11 @@ export function AssistantMessage({
 
             <div className="relative">
               <div
-                className={`text-slate-700 whitespace-pre-wrap ${
+                className={`text-slate-700 space-y-1 ${
                   !shouldShowUnblurred ? 'blur-content' : ''
                 }`}
               >
-                {finalLocked}
+                {renderMarkdown(finalLocked)}
                 {shouldShowUnblurred &&
                   isLatest &&
                   finalLocked.length < lockedPart.length && (
