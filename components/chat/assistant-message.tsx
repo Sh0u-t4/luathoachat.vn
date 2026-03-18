@@ -14,40 +14,82 @@ import type { ChatMessage } from '@/types';
 
 // ── Markdown helpers ──────────────────────────────────────────────────────────
 
-/** Renders inline formatting: **bold**, *italic*, [Nguồn: ...] citations */
-function renderInline(text: string): React.ReactNode[] {
-  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|\[Nguồn:[^\]]+\])/g);
-  return parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**') && part.length > 4)
-      return <strong key={i} className="font-semibold text-slate-900">{part.slice(2, -2)}</strong>;
-    if (part.startsWith('*') && part.endsWith('*') && part.length > 2)
-      return <em key={i}>{part.slice(1, -1)}</em>;
-    if (part.startsWith('[Nguồn:'))
-      return <span key={i} className="inline-flex items-center text-xs text-cyan-700 font-medium bg-cyan-50 border border-cyan-200 rounded px-1.5 py-0.5 mx-0.5">{part}</span>;
-    return part;
+/** Pre-clean raw markdown text before rendering */
+function cleanMarkdown(text: string): string {
+  return text
+    .replace(/\*{3,}/g, '**')       // *** → **
+    .replace(/\*\*([^*]*)$/, '$1')  // unclosed ** at end (typing animation) → strip
+    .replace(/\r/g, '');            // strip carriage returns
+}
+
+/** Renders inline formatting using sequential passes (bold → italic → citation) */
+function renderInline(raw: string): React.ReactNode[] {
+  const text = cleanMarkdown(raw);
+  if (!text) return [];
+
+  // Build segments via sequential regex replacement
+  // Each segment is either { t: 'text', v: string } | { t: 'bold'|'em'|'cite', v: string }
+  type Seg = { t: 'text' | 'bold' | 'em' | 'cite'; v: string };
+
+  // Start with full text as one segment
+  let segments: Seg[] = [{ t: 'text', v: text }];
+
+  function splitSegments(segs: Seg[], pattern: RegExp, type: Seg['t'], strip: number): Seg[] {
+    const out: Seg[] = [];
+    for (const seg of segs) {
+      if (seg.t !== 'text') { out.push(seg); continue; }
+      const parts = seg.v.split(pattern);
+      for (let i = 0; i < parts.length; i++) {
+        if (!parts[i]) continue;
+        if (i % 2 === 1) out.push({ t: type, v: parts[i].slice(strip, parts[i].length - strip) });
+        else out.push({ t: 'text', v: parts[i] });
+      }
+    }
+    return out;
+  }
+
+  // Pass 1: Bold  **text**
+  segments = splitSegments(segments, /(\*\*[^*]+\*\*)/g, 'bold', 2);
+  // Pass 2: Italic *text*
+  segments = splitSegments(segments, /(\*[^*]+\*)/g, 'em', 1);
+  // Pass 3: Citation [Nguồn: ...]
+  segments = splitSegments(segments, /(\[Nguồn:[^\]]+\])/g, 'cite', 0);
+
+  return segments.map((seg, i) => {
+    if (seg.t === 'bold') return <strong key={i} className="font-semibold text-slate-900">{seg.v}</strong>;
+    if (seg.t === 'em') return <em key={i}>{seg.v}</em>;
+    if (seg.t === 'cite') return (
+      <span key={i} className="inline-flex items-center text-xs text-cyan-700 font-medium bg-cyan-50 border border-cyan-200 rounded px-1.5 py-0.5 mx-0.5">
+        {seg.v}
+      </span>
+    );
+    return <span key={i}>{seg.v}</span>;
   });
 }
 
-/** Full block-level markdown renderer (lists, headings, paragraphs) */
+/** Full block-level markdown renderer (lists, headings, tables, paragraphs) */
 function renderMarkdown(text: string): React.ReactNode {
   if (!text) return null;
-  const lines = text.split('\n');
+  // Normalize line endings and strip carriage returns
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   const elements: React.ReactNode[] = [];
   let i = 0;
 
   while (i < lines.length) {
     const line = lines[i];
 
-    // Numbered list items: "1. ", "2. ", ...
+    // Numbered list items — collect ALL numbered items, skip blank lines between them
     if (/^\d+\.\s+/.test(line)) {
       const items: string[] = [];
-      while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^\d+\.\s+/, ''));
-        i++;
+      while (i < lines.length) {
+        const l = lines[i];
+        if (/^\d+\.\s+/.test(l)) { items.push(l.replace(/^\d+\.\s+/, '')); i++; }
+        else if (l.trim() === '' && i + 1 < lines.length && /^\d+\.\s+/.test(lines[i + 1])) { i++; } // skip lone blank between items
+        else break;
       }
       elements.push(
-        <ol key={elements.length} className="list-decimal list-outside ml-5 space-y-1 my-2">
-          {items.map((item, j) => <li key={j} className="pl-1">{renderInline(item)}</li>)}
+        <ol key={elements.length} className="list-decimal list-outside ml-5 space-y-1.5 my-2">
+          {items.map((item, j) => <li key={j} className="pl-1 leading-relaxed">{renderInline(item)}</li>)}
         </ol>
       );
       continue;
@@ -56,34 +98,35 @@ function renderMarkdown(text: string): React.ReactNode {
     // Bullet list: "- " or "• "
     if (/^[-•]\s+/.test(line)) {
       const items: string[] = [];
-      while (i < lines.length && /^[-•]\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^[-•]\s+/, ''));
-        i++;
+      while (i < lines.length) {
+        const l = lines[i];
+        if (/^[-•]\s+/.test(l)) { items.push(l.replace(/^[-•]\s+/, '')); i++; }
+        else if (l.trim() === '' && i + 1 < lines.length && /^[-•]\s+/.test(lines[i + 1])) { i++; }
+        else break;
       }
       elements.push(
-        <ul key={elements.length} className="list-disc list-outside ml-5 space-y-1 my-2">
-          {items.map((item, j) => <li key={j} className="pl-1">{renderInline(item)}</li>)}
+        <ul key={elements.length} className="list-disc list-outside ml-5 space-y-1.5 my-2">
+          {items.map((item, j) => <li key={j} className="pl-1 leading-relaxed">{renderInline(item)}</li>)}
         </ul>
       );
       continue;
     }
 
     // Headings
-    if (line.startsWith('### ')) {
+    if (line.startsWith('###')) {
       elements.push(<h3 key={elements.length} className="font-bold text-slate-900 text-base mt-3 mb-1">{renderInline(line.slice(4))}</h3>);
     } else if (line.startsWith('## ')) {
       elements.push(<h2 key={elements.length} className="font-bold text-slate-900 text-lg mt-4 mb-1">{renderInline(line.slice(3))}</h2>);
     } else if (line.startsWith('# ')) {
       elements.push(<h1 key={elements.length} className="font-bold text-slate-900 text-xl mt-4 mb-1">{renderInline(line.slice(2))}</h1>);
 
-    // Table: trim line to handle \r from Windows line endings
+    // Table
     } else if (/^\|.+\|/.test(line.trim())) {
       const tableLines: string[] = [];
       while (i < lines.length && /^\|.+\|/.test(lines[i].trim())) {
         tableLines.push(lines[i].trim());
         i++;
       }
-      // Filter separator rows: |---|---| or |:---|:---|
       const isSeparator = (r: string) => /^\|[-|: ]+\|$/.test(r);
       const rows = tableLines.filter(r => !isSeparator(r));
       const headerCells = rows[0]?.split('|').filter(Boolean).map(c => c.trim()) ?? [];

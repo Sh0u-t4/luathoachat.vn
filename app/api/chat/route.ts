@@ -75,34 +75,36 @@ Nếu KHÔNG đạt → bổ sung trước khi kết thúc.
 
 QUAN TRỌNG: Hoàn thành toàn bộ, ưu tiên kết thúc câu hoàn chỉnh. KHÔNG dùng lời chào mở đầu.`;
 
-// ── Multi-query generator ───────────────────────────────────────────────────
-/** For complex/comparison questions, generate 2-3 focused sub-queries */
-async function generateSubQueries(query: string, type: string): Promise<string[]> {
-  if (!GEMINI_API_KEY) return [query];
+// ── Language detector ──────────────────────────────────────────────────────
+/** Returns 'en' if input is clearly English (no Vietnamese diacritics) */
+function detectLanguage(query: string): 'vi' | 'en' {
+  const viDiacritics = (query.match(/[\u00C0-\u024F\u1EA0-\u1EFF]/g) || []).length;
+  const asciiLetters  = (query.match(/[a-zA-Z]/g) || []).length;
+  const total = query.replace(/\s/g, '').length;
+  if (total === 0) return 'vi';
+  if (viDiacritics === 0 && asciiLetters / total > 0.5) return 'en';
+  return 'vi';
+}
+
+// ── Fast rule-based sub-query splitter ─────────────────────────────────────
+/** Replaces slow Gemini sub-query call — NO extra API round-trip, saves 3-5s */
+function splitIntoSubQueries(query: string, type: string): string[] {
   if (type !== 'complex' && type !== 'compare') return [query];
+  const q = query.trim();
 
-  try {
-    const prompt = type === 'compare'
-      ? `Câu hỏi so sánh: "${query}"\nTách thành 2-3 sub-query đơn để tìm kiếm từng đối tượng riêng. Chỉ liệt kê sub-queries, mỗi dòng 1 câu, không giải thích thêm:`
-      : `Câu hỏi phức hợp: "${query}"\nTách thành 2-3 sub-query đơn để tìm kiếm từng điều kiện riêng. Chỉ liệt kê sub-queries, mỗi dòng 1 câu, không giải thích thêm:`;
-
-    const res = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 200 },
-      }),
-    });
-
-    if (!res.ok) return [query];
-    const data = await res.json();
-    const text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-    const lines = text.split('\n').map((l: string) => l.replace(/^[-•\d.]\s*/, '').trim()).filter((l: string) => l.length > 10);
-    return lines.length >= 2 ? [query, ...lines.slice(0, 2)] : [query];
-  } catch {
-    return [query];
+  // Pattern 1: "so sánh A và B"
+  const cm = q.match(/so\s+s.nh\s+(.+?)\s+(?:v.\s+|vs\.?\s*)(.+)/i);
+  if (cm) {
+    return [q, `điều kiện ${cm[1].trim()} theo quy định`, `điều kiện ${cm[2].trim()} theo quy định`];
   }
+  // Pattern 2: "vừa X vừa Y"
+  const both = q.match(/vừa\s+(.+?)\s+vừa\s+(.+)/i);
+  if (both) return [q, both[1].trim(), both[2].trim()];
+  // Pattern 3: "A hoặc B cần"
+  const orr = q.match(/(.+?)\s+hoặc\s+(.+?)(?:\s+cần|\s+phải|$)/i);
+  if (orr) return [q, orr[1].trim() + ' điều kiện', orr[2].trim() + ' điều kiện'];
+
+  return [q];
 }
 
 // ── Question classifier ─────────────────────────────────────────────────────
@@ -120,7 +122,7 @@ function classifyQuestion(query: string): QuestionProfile {
   const q = query.toLowerCase();
 
   if (/so (sánh|sanh)|khác (nhau|biệt)|phân biệt|vs\b|versus|giữa.*và.*khác|so với/i.test(q)) {
-    return { type: 'compare', maxTokens: 6000, contextLimit: 12000, topK: 10, useMultiQuery: true };
+    return { type: 'compare', maxTokens: 4096, contextLimit: 10000, topK: 10, useMultiQuery: true };
   }
 
   if (/(đồng thời|kết hợp|cùng lúc|cả.*lẫn|nhiều loại|bao gồm cả|mà còn|vừa.*vừa)/i.test(q) ||
@@ -257,7 +259,7 @@ export async function POST(request: NextRequest) {
 
     if (profile.useMultiQuery && request.url) {
       const baseUrl = new URL(request.url).origin;
-      const subQueries = await generateSubQueries(query, profile.type);
+      const subQueries = splitIntoSubQueries(query, profile.type);
       console.log(`[api/chat] Multi-query: ${subQueries.length} queries:`, subQueries.map((q: string) => q.slice(0, 60)));
 
       const subResults = await Promise.all(
@@ -282,9 +284,15 @@ export async function POST(request: NextRequest) {
 
     const hasContext = context.length > 0;
 
+    // Detect input language for bilingual support
+    const lang = detectLanguage(query);
+    const langPrefix = lang === 'en'
+      ? '[INSTRUCTION: The user is writing in English. You MUST respond entirely in English, maintaining your role as a Vietnamese chemical law expert.] '
+      : '';
+
     const userMessage = hasContext
-      ? `# TÀI LIỆU PHÁP LÝ LIÊN QUAN:\n\n${context}\n\n---\n\n# CÂU HỎI (Loại: ${profile.type}):\n${query}`
-      : `# TÀI LIỆU PHÁP LÝ: Không tìm thấy thông tin liên quan.\n\n# CÂU HỎI (Loại: ${profile.type}):\n${query}`;
+      ? `${langPrefix}# TÀI LIỆU PHÁP LÝ LIÊN QUAN:\n\n${context}\n\n---\n\n# CÂU HỎI (Loại: ${profile.type}):\n${query}`
+      : `${langPrefix}# TÀI LIỆU PHÁP LÝ: Không tìm thấy thông tin liên quan.\n\n# CÂU HỎI (Loại: ${profile.type}):\n${query}`;
 
     // 4. Primary Gemini call
     let text = await callGemini(SYSTEM_INSTRUCTION, userMessage, profile.maxTokens);
