@@ -38,28 +38,46 @@ interface EdgeFunctionResponse {
   citations: Citation[];
   detected_chemicals: string[];
   response_time_ms: number;
+  // Analytics fields (Phase 4.1)
+  question_type?: string;
+  chunks_used?: number;
+  max_tokens_used?: number;
+  has_context?: boolean;
+  model_used?: string;
 }
 
-async function searchKnowledgeBase(query: string): Promise<string> {
+interface SearchResult {
+  context: string;
+  chunks: Array<{ content: string; document_title: string; chunk_index: number }>;
+}
+
+async function searchKnowledgeBase(query: string, topK = 6): Promise<SearchResult> {
   try {
     const res = await fetch('/api/knowledge/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({ query, top_k: topK }),
     });
-    if (!res.ok) return '';
+    if (!res.ok) return { context: '', chunks: [] };
     const data = await res.json();
-    return data.context || '';
+    return { context: data.context || '', chunks: data.chunks || [] };
   } catch {
-    return '';
+    return { context: '', chunks: [] };
   }
 }
 
-async function callLegalAIChatAPI(query: string, knowledgeContext?: string): Promise<EdgeFunctionResponse> {
+async function callLegalAIChatAPI(
+  query: string,
+  searchResult?: SearchResult
+): Promise<EdgeFunctionResponse> {
   const response = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, knowledge_context: knowledgeContext || '' }),
+    body: JSON.stringify({
+      query,
+      knowledge_context: searchResult?.context || '',
+      chunks: searchResult?.chunks || [],
+    }),
   });
 
   if (!response.ok) {
@@ -424,9 +442,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     try {
       const startTime = Date.now();
-      // RAG: Search knowledge base for relevant context first
-      const knowledgeContext = await searchKnowledgeBase(content);
-      const aiResponse = await callLegalAIChatAPI(content, knowledgeContext);
+      // RAG: Classify question to pick optimal top-K, then search
+      const q = content.toLowerCase();
+      const initialTopK =
+        /so (sánh|sanh)|khác (nhau|biệt)|phân biệt|vs\b/i.test(q) ? 10 :
+        /(đồng thời|kết hợp|vừa.*vừa|nhiều loại)/i.test(q) ? 12 :
+        /(liệt kê|điều kiện để|danh sách|thủ tục|hồ sơ)/i.test(q) ? 8 :
+        /(là gì|có phải|có không)/i.test(q) && q.length < 80 ? 3 : 6;
+
+      const searchResult = await searchKnowledgeBase(content, initialTopK);
+      const aiResponse = await callLegalAIChatAPI(content, searchResult);
       const responseTime = Date.now() - startTime;
 
       // Create assistant message with temporary ID first
@@ -449,27 +474,54 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setQuestionCount((prev) => prev + 1);
       }
 
-      // Lưu assistant message vào database và lấy UUID thực
-      try {
-        const { data: savedMessage, error: saveError } = await supabase
-          .from('chat_messages')
-          .insert({
-            user_id: user?.id || null,
-            session_id: sessionToken,
-            role: 'assistant',
-            content: aiResponse.summary,
-            detailed_content: aiResponse.detailed,
-            detected_chemicals: aiResponse.detected_chemicals,
-            citations: aiResponse.citations,
-            response_time_ms: responseTime,
-            is_error: false,
-            metadata: {
-              response_source: 'legal-ai-chat',
-              question_number: !user ? questionCount + 1 : null,
-            },
-          })
-          .select()
-          .single();
+      // Lưu assistant message với rich analytics metadata
+        try {
+          // Detect response format from content
+          const responseText = aiResponse.summary || '';
+          const formatType = responseText.includes('|---|') ? 'table'
+            : /^\d+\.\s/m.test(responseText) ? 'list'
+            : /^[-•]\s/m.test(responseText) ? 'list'
+            : /\*\*Trường hợp|Bước \d+ →/m.test(responseText) ? 'structured'
+            : 'text';
+
+          // Detect if response is complete (ends with sentence-ending punct)
+          const trimmed = responseText.trimEnd();
+          const responseComplete = /[.!?。）\]）。]$/.test(trimmed) || trimmed.length < 100;
+
+          // Count citations in response
+          const citationsCount = (responseText.match(/\[Nguồn:/g) || []).length;
+
+          const { data: savedMessage, error: saveError } = await supabase
+            .from('chat_messages')
+            .insert({
+              user_id: user?.id || null,
+              session_id: sessionToken,
+              role: 'assistant',
+              content: aiResponse.summary,
+              detailed_content: aiResponse.detailed,
+              detected_chemicals: aiResponse.detected_chemicals,
+              citations: aiResponse.citations,
+              response_time_ms: responseTime,
+              is_error: false,
+              metadata: {
+                // 4.1 Enhanced logging fields
+                question_type: aiResponse.question_type || 'unknown',
+                response_complete: responseComplete,
+                response_format: formatType,
+                chunks_used: aiResponse.chunks_used || 0,
+                citations_count: citationsCount,
+                max_tokens_used: aiResponse.max_tokens_used || 4096,
+                latency_search_ms: 0, // Could be tracked separately
+                latency_total_ms: responseTime,
+                has_context: aiResponse.has_context || false,
+                model_used: aiResponse.model_used || 'gemini-2.5-flash',
+                // Legacy fields
+                response_source: 'legal-ai-chat',
+                question_number: !user ? questionCount + 1 : null,
+              },
+            })
+            .select()
+            .single();
 
         if (saveError) {
           console.error('Failed to save assistant message:', saveError);

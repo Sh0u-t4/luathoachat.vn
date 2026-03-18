@@ -80,24 +80,32 @@ function scoreChunk(content: string, keywords: string[]): number {
 
 export async function POST(request: NextRequest) {
   try {
-    const { query } = await request.json();
+    const body = await request.json();
+    const { query, top_k } = body;
+    const matchCount = Math.min(Math.max(top_k ?? 6, 3), 15); // clamp 3-15
     if (!query) return NextResponse.json({ error: 'query required' }, { status: 400 });
 
-    // Try vector search first (only when embedding model is available)
+    // Try vector search first
     const embedding = await generateEmbedding(query);
 
     if (embedding) {
       const { data, error } = await supabaseAdmin.rpc('search_knowledge_base', {
         query_embedding: `[${embedding.join(',')}]`,
-        match_threshold: 0.5,
-        match_count: 8,
+        match_threshold: 0.45,
+        match_count: matchCount,
       });
 
       if (!error && data && data.length > 0) {
-        const context = (data as { document_title: string; content: string; similarity: number }[])
+        const chunks = data as { document_title: string; content: string; similarity: number; chunk_index: number }[];
+        const context = chunks
           .map((c) => `[Nguồn: ${c.document_title}]\n${c.content}`)
           .join('\n\n---\n\n');
-        return NextResponse.json({ context, chunks: data, search_mode: 'vector', chunks_found: data.length });
+        return NextResponse.json({
+          context,
+          chunks, // structured chunks with document_title for chat route
+          search_mode: 'vector',
+          chunks_found: chunks.length,
+        });
       }
     }
 
@@ -140,24 +148,27 @@ export async function POST(request: NextRequest) {
     }));
     scored.sort((a, b) => b.score - a.score);
 
-    // Take top 6 most relevant chunks
-    const topChunks = scored.slice(0, 6).map(s => s.chunk);
+    // Take top chunks ranked by relevance score
+    const topChunks = scored.slice(0, matchCount).map(s => s.chunk);
 
-    const context = topChunks
-      .map((c: KnowledgeChunkRow) => {
-        const docs = c.knowledge_documents;
-        const title = Array.isArray(docs) ? docs[0]?.title : docs?.title;
-        return `[Nguồn: ${title}]\n${c.content}`;
-      })
+    // Normalize to include document_title field
+    const structuredChunks = topChunks.map((c: KnowledgeChunkRow) => {
+      const docs = c.knowledge_documents;
+      const title = Array.isArray(docs) ? docs[0]?.title : docs?.title;
+      return { content: c.content, document_title: title || 'Văn bản pháp luật', chunk_index: c.chunk_index };
+    });
+
+    const context = structuredChunks
+      .map((c) => `[Nguồn: ${c.document_title}]\n${c.content}`)
       .join('\n\n---\n\n');
 
-    console.log(`[knowledge-search] Found ${likeData.length} chunks, returning top ${topChunks.length} ranked by score`);
+    console.log(`[knowledge-search] Found ${likeData.length} chunks, returning top ${structuredChunks.length} ranked by score`);
 
     return NextResponse.json({
       context,
-      chunks: topChunks,
+      chunks: structuredChunks,
       search_mode: 'keyword',
-      chunks_found: topChunks.length,
+      chunks_found: structuredChunks.length,
       keywords_used: keywords,
     });
   } catch (error) {

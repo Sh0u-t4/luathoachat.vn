@@ -25,77 +25,82 @@ interface FeedbackDialogProps {
   rating?: 'positive' | 'negative';
 }
 
+const NEGATIVE_REASONS = [
+  { id: 'wrong_info', label: 'Thông tin sai / không chính xác' },
+  { id: 'missing_info', label: 'Thiếu thông tin quan trọng' },
+  { id: 'bad_citation', label: 'Trích dẫn nguồn không rõ ràng' },
+  { id: 'misunderstood', label: 'AI không hiểu đúng câu hỏi' },
+  { id: 'other', label: 'Khác' },
+];
+
 export function FeedbackDialog({
-  open,
-  onOpenChange,
-  messageId,
-  sessionId,
-  rating: initialRating,
+  open, onOpenChange, messageId, sessionId, rating: initialRating,
 }: FeedbackDialogProps) {
   const { t } = useLanguage();
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedRating, setSelectedRating] = useState<'positive' | 'negative'>(
-    initialRating || 'positive'
-  );
+  const [selectedRating, setSelectedRating] = useState<'positive' | 'negative'>(initialRating || 'positive');
+  const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
 
-  // Update rating when initialRating changes
   useEffect(() => {
-    if (initialRating) {
-      setSelectedRating(initialRating);
-    }
+    if (initialRating) setSelectedRating(initialRating);
   }, [initialRating]);
 
+  // Reset reasons when rating changes
+  useEffect(() => {
+    if (selectedRating === 'positive') setSelectedReasons([]);
+  }, [selectedRating]);
+
+  const toggleReason = (id: string) => {
+    setSelectedReasons(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]);
+  };
+
   const handleSubmit = async () => {
-    if (!comment.trim()) {
+    const isNegative = selectedRating === 'negative';
+    // For negative feedback, at least one reason or comment required
+    if (isNegative && selectedReasons.length === 0 && !comment.trim()) {
+      toast.error('Vui lòng chọn lý do hoặc nhập nhận xét');
+      return;
+    }
+    if (!isNegative && !comment.trim()) {
       toast.error(t.chat.feedbackErrorEmpty);
       return;
     }
 
     setIsSubmitting(true);
-
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      // Allow both authenticated and anonymous users to submit feedback
-      const feedbackData = {
+      const { data: { user } } = await supabase.auth.getUser();
+      const feedbackData: Record<string, unknown> = {
         message_id: messageId,
         user_id: user?.id || null,
         session_id: sessionId,
         rating: selectedRating,
-        comment: comment.trim(),
+        comment: comment.trim() || null,
       };
 
-      const { error } = await supabase.from('message_feedback').upsert(
-        feedbackData,
-        {
-          onConflict: 'message_id,session_id',
-        }
-      );
+      // Save structured reasons for negative feedback
+      if (isNegative && selectedReasons.length > 0) {
+        feedbackData['feedback_reason'] = selectedReasons.join(',');
+      }
 
+      const { error } = await supabase.from('message_feedback').upsert(
+        feedbackData, { onConflict: 'message_id,session_id' }
+      );
       if (error) throw error;
 
-      toast.success(t.chat.feedbackSuccessTitle, {
-        description: t.chat.feedbackSuccessDescription,
-      });
-
+      toast.success(t.chat.feedbackSuccessTitle, { description: t.chat.feedbackSuccessDescription });
       setComment('');
+      setSelectedReasons([]);
       onOpenChange(false);
     } catch (error) {
       console.error('Error submitting feedback:', error);
-      toast.error(t.chat.feedbackErrorTitle, {
-        description: t.chat.feedbackErrorDescription,
-      });
+      toast.error(t.chat.feedbackErrorTitle, { description: t.chat.feedbackErrorDescription });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const ratingText = selectedRating === 'positive'
-    ? t.chat.feedbackRatingTextHelpful
-    : t.chat.feedbackRatingTextNotHelpful;
+  const ratingText = selectedRating === 'positive' ? t.chat.feedbackRatingTextHelpful : t.chat.feedbackRatingTextNotHelpful;
   const ratingColor = selectedRating === 'positive' ? 'text-green-600' : 'text-red-600';
 
   return (
@@ -150,6 +155,34 @@ export function FeedbackDialog({
                   <ThumbsDown className="w-4 h-4 mr-2" />
                   {t.chat.feedbackNotHelpful}
                 </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Reason checkboxes — only for negative feedback */}
+          {selectedRating === 'negative' && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Lý do chưa hữu ích:</Label>
+              <div className="space-y-1.5">
+                {NEGATIVE_REASONS.map(reason => (
+                  <label
+                    key={reason.id}
+                    className={`flex items-center gap-2.5 p-2 rounded-lg border cursor-pointer transition-colors ${
+                      selectedReasons.includes(reason.id)
+                        ? 'border-red-300 bg-red-50 text-red-800'
+                        : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="rounded border-slate-300 text-red-600"
+                      checked={selectedReasons.includes(reason.id)}
+                      onChange={() => toggleReason(reason.id)}
+                      disabled={isSubmitting}
+                    />
+                    <span className="text-sm">{reason.label}</span>
+                  </label>
+                ))}
               </div>
             </div>
           )}

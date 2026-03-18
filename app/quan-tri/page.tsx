@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { ShieldAlert, ArrowLeft, Loader2, FlaskConical, LayoutDashboard, Brain, Bot } from 'lucide-react';
+import { ShieldAlert, ArrowLeft, Loader2, FlaskConical, LayoutDashboard, Brain, Bot, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/lib/auth/context';
@@ -67,6 +67,14 @@ const AIConfigManager = dynamic(() => import('@/components/admin/ai-config-manag
   ssr: false
 });
 
+const AIAnalyticsDashboard = dynamic(() => import('@/components/admin/ai-analytics-dashboard').then(mod => ({ default: mod.AIAnalyticsDashboard })), {
+  loading: () => (
+    <div className="flex items-center justify-center py-24">
+      <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
+    </div>
+  ),
+  ssr: false
+});
 
 interface UserProfile {
   id: string;
@@ -276,10 +284,14 @@ export default function AdminPage() {
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full max-w-6xl grid-cols-3 sm:grid-cols-6 h-auto sm:h-12 gap-1">
+          <TabsList className="grid w-full max-w-6xl grid-cols-4 sm:grid-cols-7 h-auto sm:h-12 gap-1">
             <TabsTrigger value="dashboard" className="gap-2">
               <LayoutDashboard className="w-4 h-4" />
               <span className="hidden sm:inline">Dashboard</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-2">
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
             <TabsTrigger value="users" className="gap-2">
               <span className="hidden sm:inline">Quản lý Users</span>
@@ -307,6 +319,10 @@ export default function AdminPage() {
 
           <TabsContent value="dashboard">
             <DashboardOverview />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <AIAnalyticsDashboard />
           </TabsContent>
 
           <TabsContent value="users">
