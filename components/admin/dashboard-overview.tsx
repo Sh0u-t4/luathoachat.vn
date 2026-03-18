@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Users,
   MessageSquare,
@@ -13,8 +14,14 @@ import {
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { supabase } from '@/lib/supabase';
-import { AnalyticsCharts } from './analytics-charts';
 import { RecentActivity } from './recent-activity';
+
+// recharts must be loaded client-side only (causes 'call' error when SSR'd)
+const AnalyticsCharts = dynamic(
+  () => import('./analytics-charts').then(mod => ({ default: mod.AnalyticsCharts })),
+  { ssr: false }
+);
+
 
 interface DashboardStats {
   totalUsers: number;

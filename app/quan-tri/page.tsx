@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { ShieldAlert, ArrowLeft, Loader2, FlaskConical, LayoutDashboard, Brain } from 'lucide-react';
+import { ShieldAlert, ArrowLeft, Loader2, FlaskConical, LayoutDashboard, Brain, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/lib/auth/context';
@@ -57,6 +57,16 @@ const KnowledgeManager = dynamic(() => import('@/components/admin/knowledge-mana
   ),
   ssr: false
 });
+
+const AIConfigManager = dynamic(() => import('@/components/admin/ai-config-manager').then(mod => ({ default: mod.AIConfigManager })), {
+  loading: () => (
+    <div className="flex items-center justify-center py-24">
+      <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+    </div>
+  ),
+  ssr: false
+});
+
 
 interface UserProfile {
   id: string;
@@ -192,6 +202,15 @@ export default function AdminPage() {
 
   if (!user) return null;
 
+  // Profile may still be loading even after authLoading is done — wait for it
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
+      </div>
+    );
+  }
+
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
@@ -257,7 +276,7 @@ export default function AdminPage() {
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full max-w-5xl grid-cols-2 sm:grid-cols-5 h-auto sm:h-12 gap-1">
+          <TabsList className="grid w-full max-w-6xl grid-cols-3 sm:grid-cols-6 h-auto sm:h-12 gap-1">
             <TabsTrigger value="dashboard" className="gap-2">
               <LayoutDashboard className="w-4 h-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -278,6 +297,11 @@ export default function AdminPage() {
               <Brain className="w-4 h-4" />
               <span className="hidden sm:inline">Knowledge Base</span>
               <span className="sm:hidden">KB</span>
+            </TabsTrigger>
+            <TabsTrigger value="ai-config" className="gap-2">
+              <Bot className="w-4 h-4" />
+              <span className="hidden sm:inline">Cấu hình AI</span>
+              <span className="sm:hidden">AI</span>
             </TabsTrigger>
           </TabsList>
 
@@ -315,6 +339,10 @@ export default function AdminPage() {
 
           <TabsContent value="knowledge">
             <KnowledgeManager />
+          </TabsContent>
+
+          <TabsContent value="ai-config">
+            <AIConfigManager />
           </TabsContent>
         </Tabs>
       </main>

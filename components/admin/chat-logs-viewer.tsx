@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageSquare, User, Bot, Calendar, Filter, Download, ThumbsUp, ThumbsDown, FileSpreadsheet } from 'lucide-react';
+import { MessageSquare, User, Bot, Calendar, Filter, Download, ThumbsUp, ThumbsDown, FileSpreadsheet, Trash2, AlertTriangle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import { exportToExcel } from '@/lib/excel-export';
 import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 interface ChatLog {
   id: string;
@@ -48,6 +49,8 @@ export function ChatLogsViewer() {
   const [selectedUser, setSelectedUser] = useState<string>('all');
   const [users, setUsers] = useState<Array<{ id: string; email: string; full_name?: string }>>([]);
   const [ratings, setRatings] = useState<Map<string, MessageRating>>(new Map());
+  const [deletingSession, setDeletingSession] = useState<string | null>(null);
+  const [deletingMessage, setDeletingMessage] = useState<string | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -248,6 +251,43 @@ export function ChatLogsViewer() {
     });
   };
 
+  // Admin hard-delete: xóa toàn bộ session_id khỏi database
+  const handleDeleteSession = async (sessionId: string) => {
+    if (!confirm(`Xóa vĩnh viễn toàn bộ tin nhắn trong session ${sessionId.slice(0, 8)}...?`)) return;
+    setDeletingSession(sessionId);
+    try {
+      const { error } = await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('session_id', sessionId);
+      if (error) throw error;
+      setLogs(prev => prev.filter(l => l.session_id !== sessionId));
+      toast.success('Đã xóa session khỏi database', { description: `Session: ${sessionId.slice(0, 8)}...` });
+    } catch (err: any) {
+      toast.error('Xóa thất bại', { description: err.message });
+    } finally {
+      setDeletingSession(null);
+    }
+  };
+
+  // Admin hard-delete: xóa 1 message
+  const handleDeleteMessage = async (messageId: string) => {
+    setDeletingMessage(messageId);
+    try {
+      const { error } = await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('id', messageId);
+      if (error) throw error;
+      setLogs(prev => prev.filter(l => l.id !== messageId));
+      toast.success('Đã xóa tin nhắn');
+    } catch (err: any) {
+      toast.error('Xóa thất bại', { description: err.message });
+    } finally {
+      setDeletingMessage(null);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Header & Filters */}
@@ -313,33 +353,57 @@ export function ChatLogsViewer() {
           ) : (
             <div className="space-y-3">
               {logs.map((log) => (
-                <div
-                  key={log.id}
-                  className={`p-4 rounded-lg border ${
+                  <div key={log.id} className={`p-4 rounded-lg border relative group ${
                     log.is_error
                       ? 'bg-red-50 border-red-200'
                       : log.role === 'user'
                       ? 'bg-blue-50 border-blue-200'
                       : 'bg-green-50 border-green-200'
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      {log.role === 'user' ? (
-                        <User className="w-4 h-4 text-blue-600" />
-                      ) : (
-                        <Bot className="w-4 h-4 text-green-600" />
-                      )}
-                      <Badge variant={log.role === 'user' ? 'default' : 'secondary'}>
-                        {log.role === 'user' ? 'User' : 'AI'}
-                      </Badge>
-                      {log.is_error && <Badge variant="destructive">Error</Badge>}
+                  }`}>
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        {log.role === 'user' ? (
+                          <User className="w-4 h-4 text-blue-600" />
+                        ) : (
+                          <Bot className="w-4 h-4 text-green-600" />
+                        )}
+                        <Badge variant={log.role === 'user' ? 'default' : 'secondary'}>
+                          {log.role === 'user' ? 'User' : 'AI'}
+                        </Badge>
+                        {log.is_error && <Badge variant="destructive">Error</Badge>}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-500 flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {format(new Date(log.created_at), 'dd/MM/yyyy HH:mm:ss', { locale: vi })}
+                        </span>
+                        {/* Xóa session button (hiện khi là user message = đại diện session) */}
+                        {log.role === 'user' && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteSession(log.session_id)}
+                            disabled={deletingSession === log.session_id}
+                            className="h-7 px-2 text-orange-500 hover:text-orange-700 hover:bg-orange-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Xóa toàn bộ session này khỏi DB"
+                          >
+                            <AlertTriangle className="w-3.5 h-3.5 mr-1" />
+                            Xóa session
+                          </Button>
+                        )}
+                        {/* Xóa 1 message */}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteMessage(log.id)}
+                          disabled={deletingMessage === log.id}
+                          className="h-7 w-7 p-0 text-red-400 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Xóa tin nhắn này"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                      <Calendar className="w-3 h-3" />
-                      {format(new Date(log.created_at), 'dd/MM/yyyy HH:mm:ss', { locale: vi })}
-                    </div>
-                  </div>
 
                   <p className="text-sm text-slate-800 mb-2">{log.content}</p>
 

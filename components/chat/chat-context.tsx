@@ -24,6 +24,7 @@ interface ChatContextType {
   clearCurrentQuery: () => void;
   loadChatHistory: (sessionId?: string) => Promise<void>;
   chatSessions: Array<{ session_id: string; message_id: string; first_message: string; created_at: string }>;
+  deleteSession: (messageId: string) => void;
   setShowEmailGate: (show: boolean) => void;
   setShowLoginGate: (show: boolean) => void;
   saveGuestEmail: (email: string, currentQuestion: string) => Promise<void>;
@@ -54,25 +55,15 @@ async function searchKnowledgeBase(query: string): Promise<string> {
   }
 }
 
-async function callLegalAIEdgeFunction(query: string, knowledgeContext?: string): Promise<EdgeFunctionResponse> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Supabase configuration missing');
-  }
-
-  const response = await fetch(`${supabaseUrl}/functions/v1/legal-ai-chat`, {
+async function callLegalAIChatAPI(query: string, knowledgeContext?: string): Promise<EdgeFunctionResponse> {
+  const response = await fetch('/api/chat', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${supabaseAnonKey}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, knowledge_context: knowledgeContext || '' }),
   });
 
   if (!response.ok) {
-    throw new Error(`Edge function error: ${response.statusText}`);
+    throw new Error(`Chat API error: ${response.statusText}`);
   }
 
   return await response.json();
@@ -180,13 +171,18 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
       console.log('[loadUserSessions] Raw data from Supabase:', data);
 
-      // Mỗi user message là một item riêng biệt trong sidebar
-      const sessions = data?.map((msg) => ({
+      // Load hidden message IDs from localStorage
+      const hiddenIds: string[] = typeof window !== 'undefined'
+        ? JSON.parse(localStorage.getItem('hidden_chat_message_ids') || '[]')
+        : [];
+
+      // Mỗi user message là một item riêng biệt trong sidebar, filter out hidden ones
+      const sessions = (data?.map((msg) => ({
         session_id: msg.session_id,
         message_id: msg.id,
         first_message: msg.content,
         created_at: msg.created_at,
-      })) || [];
+      })) || []).filter(s => !hiddenIds.includes(s.message_id));
 
       console.log('[loadUserSessions] Processed sessions:', sessions.length, sessions);
       setChatSessions(sessions);
@@ -430,7 +426,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       const startTime = Date.now();
       // RAG: Search knowledge base for relevant context first
       const knowledgeContext = await searchKnowledgeBase(content);
-      const aiResponse = await callLegalAIEdgeFunction(content, knowledgeContext);
+      const aiResponse = await callLegalAIChatAPI(content, knowledgeContext);
       const responseTime = Date.now() - startTime;
 
       // Create assistant message with temporary ID first
@@ -579,6 +575,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setCurrentQuery('');
   }, []);
 
+  // Soft-delete: ẩn session khỏi sidebar người dùng bằng localStorage
+  const deleteSession = useCallback((messageId: string) => {
+    if (typeof window === 'undefined') return;
+    const existing: string[] = JSON.parse(localStorage.getItem('hidden_chat_message_ids') || '[]');
+    if (!existing.includes(messageId)) {
+      existing.push(messageId);
+      localStorage.setItem('hidden_chat_message_ids', JSON.stringify(existing));
+    }
+    // Xóa khỏi state ngay lập tức không cần reload
+    setChatSessions(prev => prev.filter(s => s.message_id !== messageId));
+  }, []);
+
+
   return (
     <ChatContext.Provider
       value={{
@@ -599,6 +608,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         clearCurrentQuery,
         loadChatHistory,
         chatSessions,
+        deleteSession,
         setShowEmailGate,
         setShowLoginGate,
         saveGuestEmail,

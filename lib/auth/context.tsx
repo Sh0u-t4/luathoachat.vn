@@ -77,13 +77,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
+    supabase.auth.getSession().then(async ({ data: { session: s } }) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        fetchProfile(s.user.id);
+        await fetchProfile(s.user.id); // MUST await before setLoading(false)
       }
-      setLoading(false);
+      setLoading(false); // Only mark done after profile is loaded
     });
 
     const {

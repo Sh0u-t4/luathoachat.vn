@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Upload, FileText, Trash2, CheckCircle, AlertCircle, Loader2, Brain, RefreshCw } from 'lucide-react';
+import { Upload, FileText, Trash2, CheckCircle, AlertCircle, Loader2, Brain, RefreshCw, Eye, X, ChevronDown, ChevronUp, Hash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
@@ -17,6 +17,14 @@ interface KnowledgeDocument {
   status: 'processing' | 'ready' | 'error';
   chunk_count: number;
   error_message?: string;
+  created_at: string;
+}
+
+interface KnowledgeChunk {
+  id: string;
+  chunk_index: number;
+  content: string;
+  metadata?: Record<string, unknown>;
   created_at: string;
 }
 
@@ -45,6 +53,150 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+// ─── Document Detail Modal ────────────────────────────────────────────────────
+function DocumentDetailModal({
+  doc,
+  onClose,
+}: {
+  doc: KnowledgeDocument;
+  onClose: () => void;
+}) {
+  const [chunks, setChunks] = useState<KnowledgeChunk[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/knowledge/documents/${doc.id}/chunks`);
+        const data = await res.json();
+        setChunks(data.chunks || []);
+      } catch {
+        toast.error('Không thể tải nội dung chunks');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [doc.id]);
+
+  const filtered = chunks.filter(c =>
+    !search || c.content.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-end">
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Drawer panel */}
+      <div className="relative z-10 h-full w-full max-w-2xl bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+        {/* Header */}
+        <div className="flex items-start gap-3 px-6 py-5 border-b border-slate-100 bg-gradient-to-r from-violet-50 to-purple-50">
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+            doc.file_type === 'pdf' ? 'bg-red-100' : 'bg-blue-100'
+          }`}>
+            <FileText className={`w-5 h-5 ${doc.file_type === 'pdf' ? 'text-red-500' : 'text-blue-500'}`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="font-bold text-slate-900 text-lg leading-tight truncate">{doc.title}</h2>
+            <p className="text-sm text-slate-500 mt-0.5 truncate">{doc.file_name}</p>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Meta info */}
+        <div className="grid grid-cols-2 gap-3 px-6 py-4 bg-slate-50 border-b border-slate-100">
+          {[
+            { label: 'Loại file', value: doc.file_type.toUpperCase() },
+            { label: 'Kích thước', value: formatBytes(doc.file_size) },
+            { label: 'Số Chunks', value: doc.chunk_count?.toString() ?? '—' },
+            { label: 'Upload lúc', value: new Date(doc.created_at).toLocaleString('vi-VN') },
+          ].map(item => (
+            <div key={item.label} className="bg-white rounded-lg px-3 py-2 border border-slate-100">
+              <p className="text-xs text-slate-400">{item.label}</p>
+              <p className="text-sm font-semibold text-slate-700 mt-0.5">{item.value}</p>
+            </div>
+          ))}
+          <div className="col-span-2 bg-white rounded-lg px-3 py-2 border border-slate-100 flex items-center gap-3">
+            <p className="text-xs text-slate-400 flex-shrink-0">Trạng thái</p>
+            <StatusBadge status={doc.status} />
+            {doc.error_message && (
+              <p className="text-xs text-red-400 truncate">{doc.error_message}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Chunks section */}
+        <div className="flex-1 flex flex-col overflow-hidden px-6 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Hash className="w-4 h-4 text-violet-500" />
+              <h3 className="font-semibold text-slate-800 text-sm">Nội dung chunks ({filtered.length})</h3>
+            </div>
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Tìm trong chunks..."
+              className="text-xs border border-slate-200 rounded-lg px-3 py-1.5 w-40 focus:outline-none focus:ring-2 focus:ring-violet-200"
+            />
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-6 h-6 text-violet-500 animate-spin" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-12 text-slate-400 text-sm">
+              {search ? 'Không tìm thấy kết quả' : 'Chưa có chunk nào'}
+            </div>
+          ) : (
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+              {filtered.map((chunk) => {
+                const isExpanded = expandedIdx === chunk.chunk_index;
+                const preview = chunk.content.slice(0, 180);
+                const hasMore = chunk.content.length > 180;
+                return (
+                  <div
+                    key={chunk.id}
+                    className="border border-slate-200 rounded-xl overflow-hidden hover:border-violet-200 transition-colors"
+                  >
+                    <div
+                      className="flex items-center gap-3 px-4 py-2.5 bg-slate-50 cursor-pointer select-none"
+                      onClick={() => setExpandedIdx(isExpanded ? null : chunk.chunk_index)}
+                    >
+                      <span className="text-xs font-mono bg-violet-100 text-violet-600 px-2 py-0.5 rounded-md flex-shrink-0">
+                        #{chunk.chunk_index + 1}
+                      </span>
+                      <p className="text-xs text-slate-500 flex-1 truncate">{preview}…</p>
+                      {hasMore && (
+                        isExpanded
+                          ? <ChevronUp className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                          : <ChevronDown className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                      )}
+                    </div>
+                    {isExpanded && (
+                      <div className="px-4 py-3 bg-white border-t border-slate-100">
+                        <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">{chunk.content}</p>
+                        <p className="text-[10px] text-slate-300 mt-2">{chunk.content.length} ký tự</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ────────────────────────────────────────────────────────────
 export function KnowledgeManager() {
   const { user } = useAuth();
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
@@ -52,7 +204,25 @@ export function KnowledgeManager() {
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [selectedDoc, setSelectedDoc] = useState<KnowledgeDocument | null>(null);
+  const [reprocessingAll, setReprocessingAll] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleReprocessAll = async () => {
+    if (!confirm('Xử lý lại tất cả tài liệu bị lỗi hoặc 0 chunks? Quá trình này có thể mất vài phút.')) return;
+    setReprocessingAll(true);
+    try {
+      const res = await fetch('/api/knowledge/reprocess-all', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast.success(`✅ Đã xử lý lại ${data.succeeded}/${data.processed} tài liệu, tổng ${data.total_chunks_created} chunks`);
+      await fetchDocuments();
+    } catch (err) {
+      toast.error('Lỗi: ' + (err as Error).message);
+    } finally {
+      setReprocessingAll(false);
+    }
+  };
 
   const fetchDocuments = useCallback(async () => {
     setLoading(true);
@@ -69,13 +239,18 @@ export function KnowledgeManager() {
 
   useEffect(() => { fetchDocuments(); }, [fetchDocuments]);
 
-  const processDocument = async (documentId: string, text: string) => {
+  const processDocument = async (documentId: string, textContent: string, storagePath = '', fileType = 'txt') => {
     setProcessingId(documentId);
     try {
       const res = await fetch('/api/knowledge/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ document_id: documentId, text_content: text }),
+        body: JSON.stringify({
+          document_id: documentId,
+          text_content: textContent || undefined,
+          storage_path: storagePath || undefined,
+          file_type: fileType,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -104,8 +279,12 @@ export function KnowledgeManager() {
 
     setUploading(true);
     try {
+      // Use UUID-based storage path to avoid any filename encoding issues
+      // The original filename is preserved in the database record
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'txt';
+      const storagePath = `${user?.id}/${crypto.randomUUID()}.${fileExt}`;
+
       // 1. Upload file to Supabase Storage
-      const storagePath = `${user?.id}/${Date.now()}_${file.name}`;
       const { error: storageError } = await supabase.storage
         .from('knowledge-documents')
         .upload(storagePath, file);
@@ -128,25 +307,37 @@ export function KnowledgeManager() {
       const docData = await res.json();
       if (!res.ok) throw new Error(docData.error);
 
-      toast.info('📤 Đang đọc nội dung và tạo embeddings...');
+      toast.info('📤 Đang xử lý và tạo embeddings...');
 
-      // 3. Extract text and process
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const text = e.target?.result as string;
-        if (!text || text.trim().length < 10) {
-          toast.error('Không đọc được nội dung file. Thử file TXT thuần túy.');
-          return;
-        }
-        await processDocument(docData.document.id, text);
-      };
-      reader.onerror = () => toast.error('Lỗi đọc file');
-      reader.readAsText(file, 'utf-8');
+      // 3. Process: TXT = read client-side, PDF = extract server-side
+      if (fileType === 'pdf') {
+        // Server downloads from storage and uses pdf-parse
+        await processDocument(docData.document.id, '', storagePath, 'pdf');
+      } else {
+        // TXT: read content client-side
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const text = e.target?.result as string;
+          if (!text || text.trim().length < 10) {
+            toast.error('Không đọc được nội dung file TXT.');
+            return;
+          }
+          await processDocument(docData.document.id, text, '', 'txt');
+        };
+        reader.onerror = () => toast.error('Lỗi đọc file');
+        reader.readAsText(file, 'utf-8');
+      }
 
     } catch (err) {
       toast.error('Lỗi upload: ' + (err as Error).message);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleFiles = async (files: File[]) => {
+    for (const file of files) {
+      await handleFile(file);
     }
   };
 
@@ -157,6 +348,7 @@ export function KnowledgeManager() {
       if (!res.ok) throw new Error('Delete failed');
       toast.success('Đã xóa tài liệu');
       setDocuments(prev => prev.filter(d => d.id !== id));
+      if (selectedDoc?.id === id) setSelectedDoc(null);
     } catch {
       toast.error('Không thể xóa tài liệu');
     }
@@ -165,8 +357,8 @@ export function KnowledgeManager() {
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) handleFiles(files);
   };
 
   const stats = {
@@ -177,6 +369,11 @@ export function KnowledgeManager() {
 
   return (
     <div className="space-y-6">
+      {/* Detail modal */}
+      {selectedDoc && (
+        <DocumentDetailModal doc={selectedDoc} onClose={() => setSelectedDoc(null)} />
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -188,9 +385,21 @@ export function KnowledgeManager() {
             <p className="text-sm text-slate-500">Quản lý tài liệu cho AI chatbot</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchDocuments} className="gap-2">
-          <RefreshCw className="w-4 h-4" /> Làm mới
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={fetchDocuments} className="gap-2">
+            <RefreshCw className="w-4 h-4" /> Làm mới
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleReprocessAll}
+            disabled={reprocessingAll}
+            className="gap-2 bg-violet-600 hover:bg-violet-700 text-white"
+          >
+            {reprocessingAll
+              ? <><Loader2 className="w-4 h-4 animate-spin" /> Đang xử lý...</>
+              : <><Brain className="w-4 h-4" /> Xử lý lại tất cả</>}
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -224,7 +433,12 @@ export function KnowledgeManager() {
           type="file"
           className="hidden"
           accept=".txt,.pdf"
-          onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+          multiple
+          onChange={(e) => {
+            const files = Array.from(e.target.files || []);
+            if (files.length > 0) handleFiles(files);
+            e.target.value = '';
+          }}
         />
         {uploading || processingId ? (
           <div className="flex flex-col items-center gap-3">
@@ -241,7 +455,7 @@ export function KnowledgeManager() {
             </div>
             <div>
               <p className="font-semibold text-slate-700">Kéo thả file vào đây</p>
-              <p className="text-sm text-slate-400 mt-1">hoặc click để chọn file</p>
+              <p className="text-sm text-slate-400 mt-1">hoặc click để chọn file (có thể chọn nhiều)</p>
             </div>
             <div className="flex gap-2 mt-1">
               {['TXT', 'PDF'].map(t => (
@@ -272,7 +486,11 @@ export function KnowledgeManager() {
         ) : (
           <div className="divide-y divide-slate-50">
             {documents.map((doc) => (
-              <div key={doc.id} className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 transition-colors group">
+              <div
+                key={doc.id}
+                className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 transition-colors group cursor-pointer"
+                onClick={() => setSelectedDoc(doc)}
+              >
                 {/* File icon */}
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                   doc.file_type === 'pdf' ? 'bg-red-50' : 'bg-blue-50'
@@ -309,15 +527,25 @@ export function KnowledgeManager() {
                   {new Date(doc.created_at).toLocaleDateString('vi-VN')}
                 </span>
 
-                {/* Delete */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(doc.id, doc.title)}
-                  className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 hover:bg-red-50 transition-all p-2 h-8 w-8"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                {/* Actions */}
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); setSelectedDoc(doc); }}
+                    className="text-violet-400 hover:text-violet-600 hover:bg-violet-50 p-2 h-8 w-8"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); handleDelete(doc.id, doc.title); }}
+                    className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 h-8 w-8"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
@@ -332,6 +560,7 @@ export function KnowledgeManager() {
           <ul className="space-y-1 text-violet-600 text-xs">
             <li>• Tài liệu được chia thành các đoạn nhỏ (chunks) và chuyển thành vector embedding</li>
             <li>• Khi user chat, AI tự động tìm các đoạn liên quan nhất để trả lời</li>
+            <li>• Click vào tài liệu để xem chi tiết nội dung đã được trích xuất</li>
             <li>• Chỉ Admin mới có thể upload/xóa tài liệu</li>
           </ul>
         </div>

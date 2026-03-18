@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.58.0";
 
+// ─── CORS ─────────────────────────────────────────────────────────────────────
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
@@ -26,67 +27,93 @@ function extractRequestMeta(req: Request) {
   };
 }
 
-async function getN8nWebhookUrl(
-  supabase: ReturnType<typeof createClient>
+// ─── SYSTEM PROMPT ────────────────────────────────────────────────────────────
+const SYSTEM_PROMPT = `# VAI TRO
+Ban la Tro ly Phap ly AI chuyen sau ve Luat Hoa chat Viet Nam 2026 cua LuatHoaChat.vn.
+Nhiem vu: Tu van phap ly dua tren Luat 69/2025/QH15 va cac Nghi dinh 24, 25, 26/2026/ND-CP.
+
+# GIOI HAN DU LIEU
+CHI su dung thong tin trong Context bên duoi. Tuyet doi khong su dung kien thuc ngoai ve luat cu.
+Neu khong co thong tin lien quan trong Context, tra loi: "Xin loi, noi dung nay chua co trong co so du lieu hoa chat 2026."
+
+# QUY TAC BAT BUOC
+1. CHI SU DUNG thong tin trong Context bên duoi. KHONG bịa dat lieu phap.
+2. TRICH DAN NGUON sau moi y: [Nguon: Ten van ban, Dieu X, Khoan Y]
+3. Van phong: Chuyen nghiep, chinh xac, ro rang, dung tieng Viet
+4. Neu hoa chat bi cam: Nhan manh "CAM TUYET DOI" va trich dan dieu luat cu the
+
+# CAU TRUC TRA LOI (neu co du thong tin)
+1. **Phan loai hoa chat** (thuoc Phu luc nao, bi cam/han che khong)
+2. **Yeu cau phap ly** (giay phep, khai bao, dieu kien, ho so)
+3. **Yeu cau an toan** (luu tru, van chuyen, ung pho su co)
+4. **Muc phat vi pham** (neu co thong tin)
+5. **Luu y dac biet**
+
+Moi phan PHAI co trich dan nguon [Nguon: ...].`;
+
+// ─── GEMINI: GENERATE ANSWER ──────────────────────────────────────────────────
+async function generateAnswer(
+  query: string,
+  knowledgeContext: string
 ): Promise<string> {
-  const { data } = await supabase
-    .from("system_config")
-    .select("value")
-    .eq("key", "n8n_webhook_url")
-    .maybeSingle();
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
 
-  return data?.value || "";
-}
+  // Build prompt with context
+  let prompt = SYSTEM_PROMPT + "\n\n";
 
-function extractN8nResponseText(data: unknown): string {
-  if (typeof data === "string") return data;
-  if (Array.isArray(data) && data.length > 0) {
-    return extractN8nResponseText(data[0]);
+  if (knowledgeContext && knowledgeContext.trim().length > 0) {
+    prompt += "# TAI LIEU PHAP LY LIEN QUAN:\n\n";
+    prompt += knowledgeContext + "\n\n---\n\n";
+  } else {
+    prompt +=
+      "# TAI LIEU: Khong tim thay thong tin lien quan trong co so du lieu.\n\n";
   }
-  if (data && typeof data === "object") {
-    const obj = data as Record<string, unknown>;
-    if (typeof obj.output === "string") return obj.output;
-    if (typeof obj.response === "string") return obj.response;
-    if (typeof obj.text === "string") return obj.text;
-    if (typeof obj.message === "string") return obj.message;
-    if (obj.data && typeof obj.data === "object") {
-      return extractN8nResponseText(obj.data);
+
+  prompt += `# CAU HOI:\n${query}\n\nHay tra loi bang tieng Viet, chi tiet, dua tren tai lieu neu tren.`;
+
+  // Try gemini-2.0-flash first (faster, cheaper)
+  const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"];
+
+  for (const model of models) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.2,
+              maxOutputTokens: 2048,
+              topP: 0.8,
+            },
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const err = await response.text();
+        console.warn(`[legal-ai-chat] ${model} failed: ${err.slice(0, 200)}`);
+        continue;
+      }
+
+      const data = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) {
+        console.log(`[legal-ai-chat] Generated answer with ${model}`);
+        return text;
+      }
+    } catch (e) {
+      console.warn(`[legal-ai-chat] ${model} exception:`, e);
     }
   }
-  return JSON.stringify(data);
+
+  throw new Error("All Gemini models failed to generate a response");
 }
 
-async function callN8nAgent(
-  webhookUrl: string,
-  query: string,
-  sessionId: string
-): Promise<string> {
-  const response = await fetch(webhookUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "sendMessage",
-      chatInput: query,
-      sessionId,
-    }),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text().catch(() => response.statusText);
-    throw new Error(`n8n error (${response.status}): ${errText}`);
-  }
-
-  const contentType = response.headers.get("content-type") || "";
-  let raw: unknown;
-  if (contentType.includes("application/json")) {
-    raw = await response.json();
-  } else {
-    raw = await response.text();
-  }
-
-  return extractN8nResponseText(raw);
-}
-
+// ─── ANALYTICS ───────────────────────────────────────────────────────────────
 async function logToAnalytics(
   supabase: ReturnType<typeof createClient>,
   entry: {
@@ -120,162 +147,7 @@ async function logToAnalytics(
   }
 }
 
-const SYSTEM_PROMPT = `# VAI TRO
-Ban la Tro ly Phap ly AI chuyen sau ve Luat Hoa chat Viet Nam 2026 cua LuatHoaChat.vn.
-Nhiem vu: Tu van phap ly dua tren Luat 69/2025/QH15 va cac Nghi dinh 24, 25, 26/2026/ND-CP.
-
-# QUY TAC
-1. CHI SU DUNG thong tin trong Context ben duoi
-2. TRICH DAN NGUON sau moi y: [Nguon: Nghi dinh X/2026/ND-CP, Dieu Y, Khoan Z]
-3. Neu khong co thong tin, tra loi: "Xin loi, noi dung nay chua co trong co so du lieu."
-4. Van phong: Chuyen nghiep, chinh xac, ro rang
-
-# CAU TRUC TRA LOI
-1. Phan loai hoa chat (neu co)
-2. Yeu cau phap ly (giay phep, khai bao)
-3. Yeu cau an toan (luu tru, ung pho su co)
-4. Muc phat vi pham (neu co)
-5. Luu y dac biet
-
-Moi phan PHAI co trich dan [Nguon: ...].`;
-
-interface RAGContext {
-  content: string;
-  document_code: string;
-  article_number: number | null;
-  clause_number: number | null;
-  point_letter: string | null;
-  similarity: number;
-}
-
-async function createEmbedding(text: string): Promise<number[]> {
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
-  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
-
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "models/text-embedding-004",
-        content: {
-          parts: [{ text }]
-        }
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Gemini embedding error: ${error}`);
-  }
-
-  const data = await response.json();
-  return data.embedding.values;
-}
-
-async function searchRelevantContext(
-  supabase: ReturnType<typeof createClient>,
-  queryEmbedding: number[]
-): Promise<RAGContext[]> {
-  const { data, error } = await supabase.rpc("search_legal_knowledge", {
-    query_embedding: queryEmbedding,
-    match_threshold: 0.7,
-    match_count: 5,
-  });
-
-  if (error) {
-    console.error("Vector search error:", error);
-    return [];
-  }
-
-  return (data || []).map((item: Record<string, unknown>) => ({
-    content: item.content as string,
-    document_code: item.document_code as string,
-    article_number: item.article_number as number | null,
-    clause_number: item.clause_number as number | null,
-    point_letter: (item.point_letter as string) || null,
-    similarity: item.similarity as number,
-  }));
-}
-
-function buildPromptWithContext(
-  userQuery: string,
-  contexts: RAGContext[],
-  knowledgeContext?: string
-): string {
-  let prompt = SYSTEM_PROMPT + "\n\n";
-
-  // Inject admin-uploaded knowledge base context if available
-  if (knowledgeContext && knowledgeContext.trim().length > 0) {
-    prompt += "# TÀI LIỆU BỔ SUNG (do Admin cung cấp):\n\n";
-    prompt += knowledgeContext + "\n\n---\n\n";
-  }
-
-  if (contexts.length > 0) {
-    prompt += "# CONTEXT - Thong tin phap ly lien quan:\n\n";
-    contexts.forEach((ctx, index) => {
-      prompt += `## [${index + 1}] ${ctx.document_code}`;
-      if (ctx.article_number) prompt += `, Dieu ${ctx.article_number}`;
-      if (ctx.clause_number) prompt += `, Khoan ${ctx.clause_number}`;
-      prompt += ` (${(ctx.similarity * 100).toFixed(1)}%)\n\n`;
-      prompt += `${ctx.content}\n\n---\n\n`;
-    });
-  } else {
-    prompt += "# CONTEXT: Khong tim thay thong tin lien quan.\n\n";
-  }
-
-  prompt += `# CAU HOI:\n${userQuery}\n\nTra loi dua tren Context.`;
-  return prompt;
-}
-
-async function fallbackRAG(
-  supabase: ReturnType<typeof createClient>,
-  query: string,
-  knowledgeContext?: string
-): Promise<{ responseText: string; contexts: RAGContext[] }> {
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
-  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
-
-  const queryEmbedding = await createEmbedding(query);
-  const contexts = await searchRelevantContext(supabase, queryEmbedding);
-  const prompt = buildPromptWithContext(query, contexts, knowledgeContext);
-
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: prompt },
-              { text: `\n\nUser Query: ${query}` }
-            ]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 2000,
-        },
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Gemini error: ${error}`);
-  }
-
-  const data = await response.json();
-  return {
-    responseText: data.candidates[0].content.parts[0].text,
-    contexts,
-  };
-}
-
+// ─── MAIN HANDLER ─────────────────────────────────────────────────────────────
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
@@ -283,96 +155,62 @@ Deno.serve(async (req: Request) => {
 
   const startTime = Date.now();
   const meta = extractRequestMeta(req);
+  const sessionId = crypto.randomUUID();
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const body = await req.json();
+    const { query, knowledge_context } = body;
 
-    const { query, knowledge_context } = await req.json();
-
-    if (!query || typeof query !== "string") {
+    if (!query || typeof query !== "string" || query.trim().length === 0) {
       return jsonResponse({ error: "Query is required" }, 400);
     }
 
-    console.log(`[legal-ai-chat] Query: "${query}", has knowledge_context: ${!!knowledge_context}`);
+    console.log(
+      `[legal-ai-chat] Query: "${query.slice(0, 80)}", has_context: ${!!(knowledge_context && knowledge_context.trim())}`
+    );
 
-    const n8nUrl = await getN8nWebhookUrl(supabase);
+    // Use knowledge_context from frontend (already searched by /api/knowledge/search)
+    // This avoids needing embedding models in the Edge Function
+    const responseText = await generateAnswer(query, knowledge_context || "");
 
-    if (n8nUrl) {
-      console.log("[legal-ai-chat] Routing to n8n agent...");
-
-      const sessionId = crypto.randomUUID();
-      const responseText = await callN8nAgent(n8nUrl, query, sessionId);
-      const responseTimeMs = Date.now() - startTime;
-
-      console.log(`[legal-ai-chat] n8n response in ${responseTimeMs}ms`);
-
-      await logToAnalytics(supabase, {
-        sessionId,
-        query,
-        response: responseText,
-        source: "n8n",
-        timeMs: responseTimeMs,
-        success: true,
-        meta,
-      });
-
-      return jsonResponse({
-        summary: responseText,
-        detailed: "",
-        citations: [],
-        detected_chemicals: [],
-        response_time_ms: responseTimeMs,
-      });
-    }
-
-    console.log("[legal-ai-chat] n8n not configured, using RAG fallback...");
-
-    const { responseText, contexts } = await fallbackRAG(supabase, query, knowledge_context || '');
     const responseTimeMs = Date.now() - startTime;
+    console.log(`[legal-ai-chat] Done in ${responseTimeMs}ms`);
 
     await logToAnalytics(supabase, {
-      sessionId: crypto.randomUUID(),
+      sessionId,
       query,
       response: responseText,
-      source: "rag_fallback",
+      source: "gemini_rag_keyword",
       timeMs: responseTimeMs,
       success: true,
       meta,
       extraMetadata: {
-        contexts_count: contexts.length,
-        top_documents: contexts.map((c) => c.document_code),
+        has_context: !!(knowledge_context && knowledge_context.trim()),
+        context_length: knowledge_context?.length || 0,
       },
     });
 
     return jsonResponse({
       summary: responseText,
       detailed: responseText,
-      citations: contexts.map((c) => ({
-        document: c.document_code,
-        article: c.article_number,
-        clause: c.clause_number,
-        point: c.point_letter,
-        content: c.content,
-      })),
+      citations: [],
       detected_chemicals: [],
       response_time_ms: responseTimeMs,
     });
   } catch (error) {
-    console.error("[legal-ai-chat] Error:", error);
-
     const responseTimeMs = Date.now() - startTime;
     const errorMsg =
       error instanceof Error ? error.message : "Internal server error";
 
-    try {
-      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-      const supabase = createClient(supabaseUrl, supabaseKey);
+    console.error("[legal-ai-chat] Error:", errorMsg);
 
+    try {
       await logToAnalytics(supabase, {
-        sessionId: crypto.randomUUID(),
+        sessionId,
         query: "unknown",
         response: "",
         source: "error",
@@ -382,13 +220,13 @@ Deno.serve(async (req: Request) => {
         meta,
       });
     } catch {
-      console.error("[legal-ai-chat] Failed to log error to analytics");
+      // ignore analytics error
     }
 
     return jsonResponse(
       {
         summary:
-          "Xin loi, da co loi xay ra khi xu ly cau hoi. Vui long thu lai sau.",
+          "Xin lỗi, đã có lỗi xảy ra khi xử lý câu hỏi. Vui lòng thử lại sau.",
         detailed: "",
         citations: [],
         detected_chemicals: [],

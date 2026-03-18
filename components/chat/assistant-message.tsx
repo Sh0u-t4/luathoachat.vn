@@ -56,24 +56,46 @@ export function AssistantMessage({
   // 1. User is authenticated, OR
   // 2. This is one of the first 5 free messages (messageIndex < 5)
   const shouldShowUnblurred = isAuthenticated || messageIndex < 5;
-  // Tách nội dung thành 2 phần: public (25%) và locked (75%)
+  // Tách nội dung thành 2 phần: public (câu đầu đủ ý) và locked (phần còn lại)
+  // Luôn hoàn thành câu đầu tiên trước khi cắt — không cắt giữa chừng
   const splitContent = (content: string) => {
-    const lines = content.split('\n');
+    // Tìm dấu kết thúc câu (. ! ?) theo sau bởi khoảng trắng hoặc xuống dòng
+    // Regex: dấu câu + (space | newline | end of string)
+    const sentenceEndRegex = /[.!?]+(?:\s|\n|$)/g;
+    let lastValidCut = -1;
+    let match;
 
-    if (lines.length <= 2) {
-      const splitPoint = Math.floor(content.length * 0.25);
+    // Duyệt qua tất cả dấu câu, lấy điểm cắt đủ để hiển thị ít nhất 1 câu
+    // nhưng không quá 55% nội dung
+    const maxPublic = Math.floor(content.length * 0.55);
+
+    while ((match = sentenceEndRegex.exec(content)) !== null) {
+      const cutAt = match.index + match[0].trimEnd().length; // bao gồm dấu câu
+      if (cutAt <= maxPublic) {
+        lastValidCut = cutAt;
+      } else {
+        // Vượt quá giới hạn — nếu chưa có điểm cắt nào thì lấy điểm này
+        if (lastValidCut === -1) lastValidCut = cutAt;
+        break;
+      }
+    }
+
+    // Nếu không tìm được dấu câu → fallback cắt 30% thô
+    if (lastValidCut === -1) {
+      const rawSplit = Math.floor(content.length * 0.3);
       return {
-        publicPart: content.substring(0, splitPoint),
-        lockedPart: content.substring(splitPoint),
+        publicPart: content.substring(0, rawSplit),
+        lockedPart: content.substring(rawSplit),
       };
     }
 
-    const splitPoint = Math.floor(lines.length * 0.25);
     return {
-      publicPart: lines.slice(0, Math.max(1, splitPoint)).join('\n'),
-      lockedPart: lines.slice(Math.max(1, splitPoint)).join('\n'),
+      publicPart: content.substring(0, lastValidCut).trim(),
+      lockedPart: content.substring(lastValidCut).trim(),
     };
   };
+
+
 
   const fullContent =
     message.detailedContent && message.detailedContent !== message.content
