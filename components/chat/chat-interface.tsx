@@ -47,6 +47,7 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
   const [isMounted, setIsMounted] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevMessagesLengthRef = useRef(0);
   const wasCleared = useRef(false);
   const router = useRouter();
@@ -124,18 +125,15 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
     }
   }, [messages]);
 
-  // Cycle through loading stages while typing
+  // Cycle through loading stages while typing — 3s per stage for responsive feedback
   useEffect(() => {
     if (!isTyping) {
       setLoadingStage(0);
       return;
     }
-
-    // Start cycling through stages
     const interval = setInterval(() => {
       setLoadingStage(prev => (prev + 1) % 3);
-    }, 10000); // Change stage every 10 seconds
-
+    }, 3000);
     return () => clearInterval(interval);
   }, [isTyping]);
 
@@ -239,14 +237,10 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
     const hasNewMessage = messages.length > prevMessagesLengthRef.current;
     const isLoadingHistory = wasCleared.current && messages.length > 0;
 
-    // If loading history, scroll to top to read from beginning
     if (isLoadingHistory) {
       setTimeout(() => {
         if (chatContainerRef.current) {
-          chatContainerRef.current.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-          });
+          chatContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
           wasCleared.current = false;
         }
       }, 100);
@@ -254,12 +248,15 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
       return;
     }
 
-    // Smart scroll: Only scroll if user is near bottom OR if typing
     if ((hasNewMessage || isTyping) && autoScrollEnabledRef.current) {
       const timer = setTimeout(() => {
-        scrollToBottom('smooth');
-      }, 100);
-
+        // Prefer scrolling the anchor into view for accuracy
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        } else {
+          scrollToBottom('smooth');
+        }
+      }, 80);
       prevMessagesLengthRef.current = messages.length;
       return () => clearTimeout(timer);
     } else if (hasNewMessage) {

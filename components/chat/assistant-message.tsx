@@ -75,8 +75,50 @@ function renderMarkdown(text: string): React.ReactNode {
       elements.push(<h2 key={elements.length} className="font-bold text-slate-900 text-lg mt-4 mb-1">{renderInline(line.slice(3))}</h2>);
     } else if (line.startsWith('# ')) {
       elements.push(<h1 key={elements.length} className="font-bold text-slate-900 text-xl mt-4 mb-1">{renderInline(line.slice(2))}</h1>);
+
+    // Markdown table: lines starting with |
+    } else if (/^\|.+\|/.test(line)) {
+      const tableLines: string[] = [];
+      while (i < lines.length && /^\|.+\|/.test(lines[i])) {
+        tableLines.push(lines[i]);
+        i++;
+      }
+      // Filter out separator rows (|---|---|)
+      const rows = tableLines.filter(r => !/^\|[-:| ]+\|$/.test(r));
+      const headerCells = rows[0]?.split('|').filter(Boolean).map(c => c.trim()) ?? [];
+      const bodyRows = rows.slice(1);
+      elements.push(
+        <div key={elements.length} className="overflow-x-auto my-3 rounded-lg border border-slate-200 shadow-sm">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-slate-800 text-white">
+                {headerCells.map((cell, j) => (
+                  <th key={j} className="px-3 py-2 text-left font-semibold border-r border-slate-600 last:border-r-0">
+                    {renderInline(cell)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {bodyRows.map((row, ri) => {
+                const cells = row.split('|').filter(Boolean).map(c => c.trim());
+                return (
+                  <tr key={ri} className={ri % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                    {cells.map((cell, ci) => (
+                      <td key={ci} className="px-3 py-2 border-t border-r border-slate-200 last:border-r-0 align-top">
+                        {renderInline(cell)}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      );
+      continue;
+
     } else if (line.trim() === '') {
-      // Blank line → small paragraph gap
       elements.push(<div key={elements.length} className="h-1" />);
     } else {
       elements.push(<p key={elements.length} className="leading-relaxed">{renderInline(line)}</p>);
