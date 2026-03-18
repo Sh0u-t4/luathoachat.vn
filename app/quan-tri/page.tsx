@@ -85,6 +85,15 @@ const KnowledgeAuditPanel = dynamic(() => import('@/components/admin/knowledge-a
   ssr: false
 });
 
+const ContentVerifyPanel = dynamic(() => import('@/components/admin/content-verify-panel').then(mod => ({ default: mod.ContentVerifyPanel })), {
+  loading: () => (
+    <div className="flex items-center justify-center py-8">
+      <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+    </div>
+  ),
+  ssr: false
+});
+
 interface UserProfile {
   id: string;
   email: string;
@@ -367,6 +376,9 @@ export default function AdminPage() {
               <KnowledgeManager />
               <div className="border-t border-slate-200 pt-8">
                 <KnowledgeAuditPanel />
+              </div>
+              <div className="border-t border-slate-200 pt-8">
+                <ContentVerifyPanel />
               </div>
             </div>
           </TabsContent>
