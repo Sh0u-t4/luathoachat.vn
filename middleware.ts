@@ -8,7 +8,7 @@ import type { NextRequest } from 'next/server';
  * true  = bật bảo trì — chỉ admin được vào, còn lại thấy trang bảo trì
  * false = tắt bảo trì — mọi người đều vào được bình thường
  */
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 // Supabase project ref từ URL
 const SUPABASE_URL = 'https://yybzsgbqbksctdblynlm.supabase.co';
