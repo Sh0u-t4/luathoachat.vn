@@ -9,6 +9,7 @@ import { AuthProvider } from '@/lib/auth/context';
 import { MobileProvider } from '@/lib/mobile/context';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { ServiceWorkerRegistration } from '@/components/service-worker-registration';
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],
@@ -298,6 +299,7 @@ export default function RootLayout({
           </MobileProvider>
         </ErrorBoundary>
         <Toaster position="top-center" richColors />
+        <Analytics />
       </body>
     </html>
   );
