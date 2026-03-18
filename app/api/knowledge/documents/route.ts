@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+export const dynamic = 'force-dynamic';
+
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 // GET: list all documents
 export async function GET() {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabase()
       .from('knowledge_documents')
       .select('id, title, file_name, file_type, file_size, status, chunk_count, error_message, storage_path, created_at')
       .order('created_at', { ascending: false });
@@ -26,7 +30,7 @@ export async function POST(request: NextRequest) {
   try {
     const { title, file_name, file_type, file_size, uploaded_by, storage_path } = await request.json();
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabase()
       .from('knowledge_documents')
       .insert({ title, file_name, file_type, file_size, uploaded_by, storage_path, status: 'processing' })
       .select()

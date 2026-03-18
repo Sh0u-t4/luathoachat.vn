@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Force dynamic rendering — prevents static data collection at build time
+export const dynamic = 'force-dynamic';
+
+// Lazy-init so env vars are available at runtime, not build time
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 const DEFAULT_CONFIGS = [
   { key: 'ai_system_prompt', value: 'Ban la Tro ly Phap ly AI chuyen sau ve Luat Hoa chat Viet Nam 2026 cua LuatHoaChat.vn.', description: 'System prompt cho AI' },
@@ -17,7 +23,7 @@ const DEFAULT_CONFIGS = [
 
 export async function GET() {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabase()
       .from('system_config')
       .select('key, value, description')
       .in('key', DEFAULT_CONFIGS.map(c => c.key));
@@ -26,7 +32,7 @@ export async function GET() {
 
     // Merge with defaults for any missing keys
     const result = DEFAULT_CONFIGS.map(def => {
-      const found = (data || []).find(d => d.key === def.key);
+      const found = (data || []).find((d: {key: string; value: string; description: string}) => d.key === def.key);
       return found || def;
     });
 
@@ -41,7 +47,7 @@ export async function POST(request: NextRequest) {
     const { configs } = await request.json();
 
     for (const config of configs) {
-      await supabaseAdmin
+      await getSupabase()
         .from('system_config')
         .upsert({ key: config.key, value: config.value, description: config.description }, { onConflict: 'key' });
     }
