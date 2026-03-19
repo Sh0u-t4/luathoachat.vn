@@ -24,7 +24,7 @@ interface ChatContextType {
   clearCurrentQuery: () => void;
   loadChatHistory: (sessionId?: string) => Promise<void>;
   chatSessions: Array<{ session_id: string; message_id: string; first_message: string; created_at: string }>;
-  deleteSession: (messageId: string) => Promise<void>;
+  deleteSession: (messageId: string) => void;
   setShowEmailGate: (show: boolean) => void;
   setShowLoginGate: (show: boolean) => void;
   saveGuestEmail: (email: string, currentQuestion: string) => Promise<void>;
@@ -38,53 +38,86 @@ interface EdgeFunctionResponse {
   citations: Citation[];
   detected_chemicals: string[];
   response_time_ms: number;
-  // Analytics fields (Phase 4.1)
-  question_type?: string;
-  chunks_used?: number;
-  max_tokens_used?: number;
-  has_context?: boolean;
-  model_used?: string;
 }
 
-interface SearchResult {
-  context: string;
-  chunks: Array<{ content: string; document_title: string; chunk_index: number }>;
-}
-
-async function searchKnowledgeBase(query: string, topK = 6): Promise<SearchResult> {
+async function searchKnowledgeBase(query: string): Promise<string> {
   try {
     const res = await fetch('/api/knowledge/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, top_k: topK }),
+      body: JSON.stringify({ query }),
     });
-    if (!res.ok) return { context: '', chunks: [] };
+    if (!res.ok) return '';
     const data = await res.json();
-    return { context: data.context || '', chunks: data.chunks || [] };
+    return data.context || '';
   } catch {
-    return { context: '', chunks: [] };
+    return '';
   }
 }
 
-async function callLegalAIChatAPI(
+interface StreamMeta {
+  full_text: string;
+  response_time_ms: number;
+  language: string;
+  question_type: string;
+  has_context: boolean;
+  detected_chemicals: string[];
+  model_used: string;
+}
+
+/**
+ * Streams from /api/chat using SSE.
+ * Calls onToken for each text chunk, resolves with final metadata.
+ */
+async function streamChatAPI(
   query: string,
-  searchResult?: SearchResult
-): Promise<EdgeFunctionResponse> {
+  knowledgeContext: string,
+  onToken: (token: string) => void
+): Promise<StreamMeta> {
   const response = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      query,
-      knowledge_context: searchResult?.context || '',
-      chunks: searchResult?.chunks || [],
-    }),
+    body: JSON.stringify({ query, knowledge_context: knowledgeContext }),
   });
 
-  if (!response.ok) {
-    throw new Error(`Chat API error: ${response.statusText}`);
+  if (!response.ok) throw new Error(`Chat API error: ${response.statusText}`);
+
+  // Non-streaming fallback (error JSON)
+  const contentType = response.headers.get('Content-Type') || '';
+  if (!contentType.includes('text/event-stream')) {
+    const data = await response.json();
+    onToken(data.summary || '');
+    return { full_text: data.summary || '', response_time_ms: data.response_time_ms || 0, language: data.language || 'vi', question_type: 'general', has_context: false, detected_chemicals: data.detected_chemicals || [], model_used: data.model_used || 'gemini-2.5-flash' };
   }
 
-  return await response.json();
+  // SSE streaming
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let meta: StreamMeta = { full_text: '', response_time_ms: 0, language: 'vi', question_type: 'general', has_context: false, detected_chemicals: [], model_used: 'gemini-2.5-flash' };
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const json = line.slice(6).trim();
+      if (!json || json === '[DONE]') continue;
+      try {
+        const chunk = JSON.parse(json);
+        if (chunk.done) {
+          meta = chunk as StreamMeta;
+        } else if (chunk.token) {
+          onToken(chunk.token);
+        }
+      } catch { /* skip malformed */ }
+    }
+  }
+  reader.releaseLock();
+  return meta;
 }
 
 
@@ -176,11 +209,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('chat_messages')
-        .select('id, session_id, content, created_at, metadata')
+        .select('id, session_id, content, created_at')
         .eq('user_id', user.id)
         .eq('role', 'user')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(50); // Giới hạn 50 câu hỏi gần nhất
 
       if (error) {
         console.error('[loadUserSessions] Supabase error:', error);
@@ -189,21 +222,18 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
       console.log('[loadUserSessions] Raw data from Supabase:', data);
 
-      // Filter out messages marked as hidden in their metadata (server-side persistence)
-      // Also support legacy localStorage hidden IDs for backward compatibility
-      const legacyHiddenIds: string[] = typeof window !== 'undefined'
-        ? JSON.parse(localStorage.getItem(`hidden_chats_${user.id}`) || '[]')
+      // Load hidden message IDs from localStorage
+      const hiddenIds: string[] = typeof window !== 'undefined'
+        ? JSON.parse(localStorage.getItem('hidden_chat_message_ids') || '[]')
         : [];
 
+      // Mỗi user message là một item riêng biệt trong sidebar, filter out hidden ones
       const sessions = (data?.map((msg) => ({
         session_id: msg.session_id,
         message_id: msg.id,
         first_message: msg.content,
         created_at: msg.created_at,
-        is_hidden: msg.metadata?.hidden === true,
-      })) || [])
-        .filter(s => !s.is_hidden && !legacyHiddenIds.includes(s.message_id))
-        .map(({ is_hidden: _h, ...s }) => s);
+      })) || []).filter(s => !hiddenIds.includes(s.message_id));
 
       console.log('[loadUserSessions] Processed sessions:', sessions.length, sessions);
       setChatSessions(sessions);
@@ -445,95 +475,97 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     try {
       const startTime = Date.now();
-      // RAG: Classify question to pick optimal top-K, then search
-      const q = content.toLowerCase();
-      const initialTopK =
-        /so (sánh|sanh)|khác (nhau|biệt)|phân biệt|vs\b/i.test(q) ? 10 :
-        /(đồng thời|kết hợp|vừa.*vừa|nhiều loại)/i.test(q) ? 12 :
-        /(liệt kê|điều kiện để|danh sách|thủ tục|hồ sơ)/i.test(q) ? 8 :
-        /(là gì|có phải|có không)/i.test(q) && q.length < 80 ? 3 : 6;
+      // RAG: Search knowledge base for relevant context
+      const knowledgeContext = await searchKnowledgeBase(content);
 
-      const searchResult = await searchKnowledgeBase(content, initialTopK);
-      const aiResponse = await callLegalAIChatAPI(content, searchResult);
-      const responseTime = Date.now() - startTime;
-
-      // Create assistant message with temporary ID first
+      // Create assistant message with empty content — will be filled by streaming
+      const tempId = `assistant_${Date.now()}`;
       const tempAssistantMessage: ChatMessage = {
-        id: `assistant_${Date.now()}`,
+        id: tempId,
         role: 'assistant',
-        content: aiResponse.summary,
+        content: '',
         timestamp: new Date(),
         isBlurred: !hasUnlockedContent,
-        detailedContent: aiResponse.detailed,
-        citations: aiResponse.citations,
-        detectedChemicals: aiResponse.detected_chemicals,
+        detailedContent: '',
+        citations: [],
+        detectedChemicals: [],
+        metadata: { language: 'vi' },
       };
-
       setMessages((prev) => [...prev, tempAssistantMessage]);
-      setIsTyping(false);
 
-      // Increment question count for freemium gate tracking (only for non-authenticated users)
-      if (!user) {
-        setQuestionCount((prev) => prev + 1);
-      }
+      let firstToken = true;
+      let accumulatedText = '';
 
-      // Lưu assistant message với rich analytics metadata
-        try {
-          // Detect response format from content
-          const responseText = aiResponse.summary || '';
-          const formatType = responseText.includes('|---|') ? 'table'
-            : /^\d+\.\s/m.test(responseText) ? 'list'
-            : /^[-•]\s/m.test(responseText) ? 'list'
-            : /\*\*Trường hợp|Bước \d+ →/m.test(responseText) ? 'structured'
-            : 'text';
+      // Stream tokens — update message content as they arrive
+      const meta = await streamChatAPI(content, knowledgeContext, (token: string) => {
+        accumulatedText += token;
+        if (firstToken) {
+          setIsTyping(false); // Turn off typing indicator on first token
+          firstToken = false;
+        }
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === tempId
+              ? { ...msg, content: accumulatedText, detailedContent: accumulatedText }
+              : msg
+          )
+        );
+      });
 
-          // Detect if response is complete (ends with sentence-ending punct)
-          const trimmed = responseText.trimEnd();
-          const responseComplete = /[.!?。）\]）。]$/.test(trimmed) || trimmed.length < 100;
+      const responseTime = Date.now() - startTime;
+      const finalText = meta.full_text || accumulatedText;
 
-          // Count citations in response
-          const citationsCount = (responseText.match(/\[Nguồn:/g) || []).length;
+      // Update message with final metadata (language, detectedChemicals)
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === tempId
+            ? {
+                ...msg,
+                content: finalText,
+                detailedContent: finalText,
+                detectedChemicals: meta.detected_chemicals || [],
+                metadata: { language: meta.language || 'vi' },
+              }
+            : msg
+        )
+      );
+      setIsTyping(false); // Ensure off if no tokens arrived
 
-          const { data: savedMessage, error: saveError } = await supabase
-            .from('chat_messages')
-            .insert({
-              user_id: user?.id || null,
-              session_id: sessionToken,
-              role: 'assistant',
-              content: aiResponse.summary,
-              detailed_content: aiResponse.detailed,
-              detected_chemicals: aiResponse.detected_chemicals,
-              citations: aiResponse.citations,
-              response_time_ms: responseTime,
-              is_error: false,
-              metadata: {
-                // 4.1 Enhanced logging fields
-                question_type: aiResponse.question_type || 'unknown',
-                response_complete: responseComplete,
-                response_format: formatType,
-                chunks_used: aiResponse.chunks_used || 0,
-                citations_count: citationsCount,
-                max_tokens_used: aiResponse.max_tokens_used || 4096,
-                latency_search_ms: 0, // Could be tracked separately
-                latency_total_ms: responseTime,
-                has_context: aiResponse.has_context || false,
-                model_used: aiResponse.model_used || 'gemini-2.5-flash',
-                // Legacy fields
-                response_source: 'legal-ai-chat',
-                question_number: !user ? questionCount + 1 : null,
-              },
-            })
-            .select()
-            .single();
+      // Increment question count
+      if (!user) setQuestionCount((prev) => prev + 1);
+
+      // Save to database
+      try {
+        const { data: savedMessage, error: saveError } = await supabase
+          .from('chat_messages')
+          .insert({
+            user_id: user?.id || null,
+            session_id: sessionToken,
+            role: 'assistant',
+            content: finalText,
+            detailed_content: finalText,
+            detected_chemicals: meta.detected_chemicals || [],
+            citations: [],
+            response_time_ms: responseTime,
+            is_error: false,
+            metadata: {
+              response_source: 'legal-ai-chat',
+              question_type: meta.question_type || 'general',
+              has_context: meta.has_context || false,
+              model_used: meta.model_used || 'gemini-2.5-flash',
+              language: meta.language || 'vi',
+              question_number: !user ? questionCount + 1 : null,
+            },
+          })
+          .select()
+          .single();
 
         if (saveError) {
           console.error('Failed to save assistant message:', saveError);
         } else if (savedMessage) {
-          // Update message in state with real UUID from database
-          console.log('[ChatContext] Message saved with UUID:', savedMessage.id);
           setMessages((prev) =>
             prev.map((msg) =>
-              msg.id === tempAssistantMessage.id
+              msg.id === tempId
                 ? { ...msg, id: savedMessage.id }
                 : msg
             )
@@ -553,7 +585,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         await supabase.from('chat_sessions').insert({
           session_token: sessionToken,
           query_summary: content,
-          response_summary: aiResponse.summary,
+          response_summary: finalText,
           is_converted: hasUnlockedContent,
         });
       } catch {
@@ -630,48 +662,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setCurrentQuery('');
   }, []);
 
-  // Soft-delete: ẩn session khỏi sidebar người dùng — lưu vào Supabase metadata để persist qua login
-  const deleteSession = useCallback(async (messageId: string) => {
-    if (!user) return;
-
-    // Update state immediately for instant UX
-    setChatSessions(prev => prev.filter(s => s.message_id !== messageId));
-
-    try {
-      // Fetch current metadata to merge
-      const { data: existing } = await supabase
-        .from('chat_messages')
-        .select('metadata')
-        .eq('id', messageId)
-        .eq('user_id', user.id)
-        .single();
-
-      const updatedMetadata = {
-        ...(existing?.metadata || {}),
-        hidden: true,
-        hidden_at: new Date().toISOString(),
-      };
-
-      const { error } = await supabase
-        .from('chat_messages')
-        .update({ metadata: updatedMetadata })
-        .eq('id', messageId)
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('[deleteSession] Failed to hide in Supabase:', error);
-        // Fallback: persist in user-scoped localStorage
-        const key = `hidden_chats_${user.id}`;
-        const existing: string[] = JSON.parse(localStorage.getItem(key) || '[]');
-        if (!existing.includes(messageId)) {
-          existing.push(messageId);
-          localStorage.setItem(key, JSON.stringify(existing));
-        }
-      }
-    } catch (err) {
-      console.error('[deleteSession] Exception:', err);
+  // Soft-delete: ẩn session khỏi sidebar người dùng bằng localStorage
+  const deleteSession = useCallback((messageId: string) => {
+    if (typeof window === 'undefined') return;
+    const existing: string[] = JSON.parse(localStorage.getItem('hidden_chat_message_ids') || '[]');
+    if (!existing.includes(messageId)) {
+      existing.push(messageId);
+      localStorage.setItem('hidden_chat_message_ids', JSON.stringify(existing));
     }
-  }, [user]);
+    // Xóa khỏi state ngay lập tức không cần reload
+    setChatSessions(prev => prev.filter(s => s.message_id !== messageId));
+  }, []);
 
 
   return (

@@ -17,6 +17,14 @@ export interface ChatMessage {
   detailedContent?: string;
   citations?: Citation[];
   detectedChemicals?: string[];
+  metadata?: {
+    language?: string;
+    question_type?: string;
+    detected_chemicals?: string[];
+    response_time_ms?: number;
+    model_used?: string;
+    has_context?: boolean;
+  };
 }
 
 export interface LeadFormData {

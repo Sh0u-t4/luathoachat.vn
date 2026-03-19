@@ -38,9 +38,10 @@ interface ChatInterfaceProps {
   initialMessage?: string;
   hideDisclaimer?: boolean;
   hideHeader?: boolean;
+  isFullscreen?: boolean;  // Controls table rendering mode
 }
 
-export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHeader = false }: ChatInterfaceProps = {}) {
+export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHeader = false, isFullscreen = false }: ChatInterfaceProps = {}) {
   const [inputValue, setInputValue] = useState('');
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showMobileHistory, setShowMobileHistory] = useState(false);
@@ -441,6 +442,7 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
                           onUnlockClick={handleUnlockClick}
                           messageIndex={assistantMessageIndex}
                           sessionId={sessionId || 'no-session'}
+                          isFullscreen={isFullscreen}
                           onQuickReply={(reply) => {
                             setInputValue(reply);
                             inputRef.current?.focus();
@@ -631,6 +633,7 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
                           onUnlockClick={handleUnlockClick}
                           messageIndex={assistantMessageIndex}
                           sessionId={sessionId || 'no-session'}
+                          isFullscreen={isFullscreen}
                           onQuickReply={(reply) => {
                             setInputValue(reply);
                             inputRef.current?.focus();

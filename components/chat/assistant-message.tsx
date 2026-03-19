@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Lock, LogIn, ThumbsUp, ThumbsDown, MessageSquare, Copy, Check } from 'lucide-react';
@@ -10,178 +10,18 @@ import { FeedbackDialog } from './feedback-dialog';
 import { QuickReplyButtons, generateQuickReplies } from './quick-reply-buttons';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { useLanguage } from '@/lib/i18n/context';
 import type { ChatMessage } from '@/types';
-
-// ── Markdown helpers ──────────────────────────────────────────────────────────
-
-/** Pre-clean raw markdown text before rendering */
-function cleanMarkdown(text: string): string {
-  return text
-    .replace(/\*{3,}/g, '**')       // *** → **
-    .replace(/\*\*([^*]*)$/, '$1')  // unclosed ** at end (typing animation) → strip
-    .replace(/\r/g, '');            // strip carriage returns
-}
-
-/** Renders inline formatting using sequential passes (bold → italic → citation) */
-function renderInline(raw: string): React.ReactNode[] {
-  const text = cleanMarkdown(raw);
-  if (!text) return [];
-
-  // Build segments via sequential regex replacement
-  // Each segment is either { t: 'text', v: string } | { t: 'bold'|'em'|'cite', v: string }
-  type Seg = { t: 'text' | 'bold' | 'em' | 'cite'; v: string };
-
-  // Start with full text as one segment
-  let segments: Seg[] = [{ t: 'text', v: text }];
-
-  function splitSegments(segs: Seg[], pattern: RegExp, type: Seg['t'], strip: number): Seg[] {
-    const out: Seg[] = [];
-    for (const seg of segs) {
-      if (seg.t !== 'text') { out.push(seg); continue; }
-      const parts = seg.v.split(pattern);
-      for (let i = 0; i < parts.length; i++) {
-        if (!parts[i]) continue;
-        if (i % 2 === 1) out.push({ t: type, v: parts[i].slice(strip, parts[i].length - strip) });
-        else out.push({ t: 'text', v: parts[i] });
-      }
-    }
-    return out;
-  }
-
-  // Pass 1: Bold  **text**
-  segments = splitSegments(segments, /(\*\*[^*]+\*\*)/g, 'bold', 2);
-  // Pass 2: Italic *text*
-  segments = splitSegments(segments, /(\*[^*]+\*)/g, 'em', 1);
-  // Pass 3: Citation [Nguồn: ...]
-  segments = splitSegments(segments, /(\[Nguồn:[^\]]+\])/g, 'cite', 0);
-
-  return segments.map((seg, i) => {
-    if (seg.t === 'bold') return <strong key={i} className="font-semibold text-slate-900">{seg.v}</strong>;
-    if (seg.t === 'em') return <em key={i}>{seg.v}</em>;
-    if (seg.t === 'cite') return (
-      <span key={i} className="inline-flex items-center text-xs text-cyan-700 font-medium bg-cyan-50 border border-cyan-200 rounded px-1.5 py-0.5 mx-0.5">
-        {seg.v}
-      </span>
-    );
-    return <span key={i}>{seg.v}</span>;
-  });
-}
-
-/** Full block-level markdown renderer (lists, headings, tables, paragraphs) */
-function renderMarkdown(text: string): React.ReactNode {
-  if (!text) return null;
-  // Normalize line endings and strip carriage returns
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-  const elements: React.ReactNode[] = [];
-  let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
-
-    // Numbered list items — collect ALL numbered items, skip blank lines between them
-    if (/^\d+\.\s+/.test(line)) {
-      const items: string[] = [];
-      while (i < lines.length) {
-        const l = lines[i];
-        if (/^\d+\.\s+/.test(l)) { items.push(l.replace(/^\d+\.\s+/, '')); i++; }
-        else if (l.trim() === '' && i + 1 < lines.length && /^\d+\.\s+/.test(lines[i + 1])) { i++; } // skip lone blank between items
-        else break;
-      }
-      elements.push(
-        <ol key={elements.length} className="list-decimal list-outside ml-5 space-y-1.5 my-2">
-          {items.map((item, j) => <li key={j} className="pl-1 leading-relaxed">{renderInline(item)}</li>)}
-        </ol>
-      );
-      continue;
-    }
-
-    // Bullet list: "- " or "• "
-    if (/^[-•]\s+/.test(line)) {
-      const items: string[] = [];
-      while (i < lines.length) {
-        const l = lines[i];
-        if (/^[-•]\s+/.test(l)) { items.push(l.replace(/^[-•]\s+/, '')); i++; }
-        else if (l.trim() === '' && i + 1 < lines.length && /^[-•]\s+/.test(lines[i + 1])) { i++; }
-        else break;
-      }
-      elements.push(
-        <ul key={elements.length} className="list-disc list-outside ml-5 space-y-1.5 my-2">
-          {items.map((item, j) => <li key={j} className="pl-1 leading-relaxed">{renderInline(item)}</li>)}
-        </ul>
-      );
-      continue;
-    }
-
-    // Headings
-    if (line.startsWith('###')) {
-      elements.push(<h3 key={elements.length} className="font-bold text-slate-900 text-base mt-3 mb-1">{renderInline(line.slice(4))}</h3>);
-    } else if (line.startsWith('## ')) {
-      elements.push(<h2 key={elements.length} className="font-bold text-slate-900 text-lg mt-4 mb-1">{renderInline(line.slice(3))}</h2>);
-    } else if (line.startsWith('# ')) {
-      elements.push(<h1 key={elements.length} className="font-bold text-slate-900 text-xl mt-4 mb-1">{renderInline(line.slice(2))}</h1>);
-
-    // Table
-    } else if (/^\|.+\|/.test(line.trim())) {
-      const tableLines: string[] = [];
-      while (i < lines.length && /^\|.+\|/.test(lines[i].trim())) {
-        tableLines.push(lines[i].trim());
-        i++;
-      }
-      const isSeparator = (r: string) => /^\|[-|: ]+\|$/.test(r);
-      const rows = tableLines.filter(r => !isSeparator(r));
-      const headerCells = rows[0]?.split('|').filter(Boolean).map(c => c.trim()) ?? [];
-      const bodyRows = rows.slice(1);
-      elements.push(
-        <div key={elements.length} className="overflow-x-auto my-3 rounded-lg border border-slate-200 shadow-sm">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="bg-slate-800 text-white">
-                {headerCells.map((cell, j) => (
-                  <th key={j} className="px-3 py-2 text-left font-semibold border-r border-slate-600 last:border-r-0">
-                    {renderInline(cell)}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {bodyRows.map((row, ri) => {
-                const cells = row.split('|').filter(Boolean).map(c => c.trim());
-                return (
-                  <tr key={ri} className={ri % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                    {cells.map((cell, ci) => (
-                      <td key={ci} className="px-3 py-2 border-t border-r border-slate-200 last:border-r-0 align-top">
-                        {renderInline(cell)}
-                      </td>
-                    ))}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      );
-      continue;
-
-    } else if (line.trim() === '') {
-      elements.push(<div key={elements.length} className="h-1" />);
-    } else {
-      elements.push(<p key={elements.length} className="leading-relaxed">{renderInline(line)}</p>);
-    }
-
-    i++;
-  }
-
-  return <>{elements}</>;
-}
 
 interface AssistantMessageProps {
   message: ChatMessage;
   isLatest: boolean;
   isAuthenticated: boolean;
   onUnlockClick: () => void;
-  messageIndex: number; // Index của assistant message này (0-based)
+  messageIndex: number;
   sessionId: string;
-  onQuickReply?: (reply: string) => void; // Callback for quick reply selection
+  isFullscreen?: boolean;  // When true, tables render at full width without column limit
+  onQuickReply?: (reply: string) => void;
 }
 
 // Helper function to validate if a string is a valid UUID
@@ -198,8 +38,10 @@ export function AssistantMessage({
   onUnlockClick,
   messageIndex,
   sessionId,
+  isFullscreen = false,
   onQuickReply,
 }: AssistantMessageProps) {
+  const { t } = useLanguage();
   // Rating state - quick like/dislike
   const [userRating, setUserRating] = useState<'like' | 'dislike' | null>(null);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
@@ -218,15 +60,58 @@ export function AssistantMessage({
   // 1. User is authenticated, OR
   // 2. This is one of the first 5 free messages (messageIndex < 5)
   const shouldShowUnblurred = isAuthenticated || messageIndex < 5;
+  // Tách nội dung thành 2 phần: public (câu đầu đủ ý) và locked (phần còn lại)
+  // Luôn hoàn thành câu đầu tiên trước khi cắt — không cắt giữa chừng
+  const splitContent = (content: string) => {
+    // Tìm dấu kết thúc câu (. ! ?) theo sau bởi khoảng trắng hoặc xuống dòng
+    // Regex: dấu câu + (space | newline | end of string)
+    const sentenceEndRegex = /[.!?]+(?:\s|\n|$)/g;
+    let lastValidCut = -1;
+    let match;
+
+    // Duyệt qua tất cả dấu câu, lấy điểm cắt đủ để hiển thị ít nhất 1 câu
+    // nhưng không quá 55% nội dung
+    const maxPublic = Math.floor(content.length * 0.55);
+
+    while ((match = sentenceEndRegex.exec(content)) !== null) {
+      const cutAt = match.index + match[0].trimEnd().length; // bao gồm dấu câu
+      if (cutAt <= maxPublic) {
+        lastValidCut = cutAt;
+      } else {
+        // Vượt quá giới hạn — nếu chưa có điểm cắt nào thì lấy điểm này
+        if (lastValidCut === -1) lastValidCut = cutAt;
+        break;
+      }
+    }
+
+    // Nếu không tìm được dấu câu → fallback cắt 30% thô
+    if (lastValidCut === -1) {
+      const rawSplit = Math.floor(content.length * 0.3);
+      return {
+        publicPart: content.substring(0, rawSplit),
+        lockedPart: content.substring(rawSplit),
+      };
+    }
+
+    return {
+      publicPart: content.substring(0, lastValidCut).trim(),
+      lockedPart: content.substring(lastValidCut).trim(),
+    };
+  };
+
+
 
   const fullContent =
     message.detailedContent && message.detailedContent !== message.content
       ? `${message.content}\n\n${message.detailedContent}`
       : message.content;
 
-  // Single typing effect on full content — no need to split text
-  const { displayedText } = useTypingEffect(fullContent, isLatest, { speed: 15 });
-  const finalContent = isLatest ? displayedText : fullContent;
+  const { publicPart, lockedPart } = splitContent(fullContent);
+
+  // Typing effect disabled for streaming — chat-context updates content incrementally as tokens arrive
+  // useTypingEffect would add a second animation layer on top of streaming (double-slow)
+  const finalPublic = publicPart;
+  const finalLocked = lockedPart;
 
   // Generate quick reply suggestions based on content
   const quickReplySuggestions = shouldShowUnblurred && !isLatest
@@ -272,13 +157,13 @@ export function AssistantMessage({
     // Check if message has valid UUID from database
     if (!hasValidMessageId) {
       console.error('[Rating] Message not yet saved to database. ID:', message.id);
-      toast.error('Vui lòng đợi tin nhắn được lưu trước khi đánh giá');
+      toast.error(t.chat.ratingError);
       return;
     }
 
     if (!sessionId || sessionId === 'no-session') {
       console.error('[Rating] Invalid session ID:', sessionId);
-      toast.error('Lỗi: Session chưa được khởi tạo. Vui lòng tải lại trang.');
+      toast.error(t.chat.ratingError);
       return;
     }
 
@@ -375,14 +260,194 @@ export function AssistantMessage({
   // Handle copy to clipboard
   const handleCopy = async () => {
     try {
+      // Lấy toàn bộ nội dung (public + locked nếu đã unlock)
+      const fullContent = shouldShowUnblurred
+        ? message.content
+        : publicPart;
+
       await navigator.clipboard.writeText(fullContent);
       setIsCopied(true);
-      toast.success('Đã sao chép câu trả lời!');
-      setTimeout(() => { setIsCopied(false); }, 2000);
+      toast.success(t.chat.copiedToast);
+
+      // Reset icon sau 2 giây
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
     } catch (error) {
       console.error('Copy error:', error);
-      toast.error('Không thể sao chép');
+      toast.error(t.common.error);
     }
+  };
+
+  /** 
+   * Renders markdown content with smart table handling.
+   * Narrow widget (isFullscreen=false): wide tables (>2 data cols) → compact bullet list.
+   * Fullscreen: all tables render normally.
+   */
+  const renderMarkdownContent = (text: string) => {
+    if (!text) return null;
+
+    // Parse content into blocks: table blocks and text blocks
+    const blocks: Array<{ type: 'table' | 'text'; content: string }> = [];
+    const lines = text.split('\n');
+    let currentText: string[] = [];
+    let inTable = false;
+    let tableLines: string[] = [];
+
+    const flushText = () => {
+      if (currentText.length > 0) {
+        blocks.push({ type: 'text', content: currentText.join('\n') });
+        currentText = [];
+      }
+    };
+    const flushTable = () => {
+      if (tableLines.length > 0) {
+        blocks.push({ type: 'table', content: tableLines.join('\n') });
+        tableLines = [];
+      }
+    };
+
+    for (const line of lines) {
+      const isTableRow = /^\s*\|/.test(line);
+      if (isTableRow) {
+        if (!inTable) { flushText(); inTable = true; }
+        tableLines.push(line);
+      } else {
+        if (inTable) { flushTable(); inTable = false; }
+        currentText.push(line);
+      }
+    }
+    if (inTable) flushTable(); else flushText();
+
+    // Render inline: bold, source citations
+    const renderInline = (s: string, key: number) => {
+      const parts: React.ReactNode[] = [];
+      let last = 0;
+      const re = /(\*\*([^*]+)\*\*|\[(?:Nguồn|Source):[^\]]+\])/g;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(s)) !== null) {
+        if (m.index > last) parts.push(s.slice(last, m.index));
+        if (m[0].startsWith('**')) {
+          parts.push(<strong key={`b${m.index}`}>{m[2]}</strong>);
+        } else {
+          parts.push(<span key={`src${m.index}`} className="text-xs text-cyan-700 font-medium italic">{m[0]}</span>);
+        }
+        last = m.index + m[0].length;
+      }
+      if (last < s.length) parts.push(s.slice(last));
+      return <span key={key}>{parts}</span>;
+    };
+
+    // Render a table block — either as HTML table or bullet list
+    const renderTable = (raw: string, blockIdx: number) => {
+      const tableRowLines = raw.split('\n').filter(l => /^\s*\|/.test(l));
+      if (tableRowLines.length < 2) return <pre key={blockIdx} className="text-sm">{raw}</pre>;
+
+      // Parse rows (skip separator row |---|...)
+      const dataRows = tableRowLines.filter(l => !/^\s*\|[-:|\s]+\|/.test(l));
+      if (dataRows.length === 0) return null;
+
+      const parseCells = (row: string) =>
+        row.split('|').map(c => c.trim()).filter((c, i, a) => i > 0 && i < a.length - 1);
+
+      const headers = parseCells(dataRows[0]);
+      const bodyRows = dataRows.slice(1);
+      const dataCols = headers.length; // number of data columns
+
+      // Narrow mode + wide table: convert to bullet list
+      if (!isFullscreen && dataCols > 2) {
+        return (
+          <div key={blockIdx} className="space-y-2 my-2">
+            {bodyRows.map((row, ri) => {
+              const cells = parseCells(row);
+              return (
+                <div key={ri} className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 text-sm">
+                  {cells.map((cell, ci) => (
+                    <div key={ci} className="flex gap-1.5 min-w-0">
+                      {headers[ci] && (
+                        <span className="font-semibold text-slate-600 shrink-0">{headers[ci]}:</span>
+                      )}
+                      <span className="text-slate-800 break-words">{cell}</span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+
+      // Normal table render (≤2 cols or fullscreen)
+      return (
+        <div key={blockIdx} className="overflow-x-auto my-3 rounded-lg border border-slate-200">
+          <table className="min-w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-slate-100">
+                {headers.map((h, i) => (
+                  <th key={i} className="px-3 py-2 text-left font-semibold text-slate-700 border-b border-slate-200 whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {bodyRows.map((row, ri) => {
+                const cells = parseCells(row);
+                return (
+                  <tr key={ri} className={ri % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                    {cells.map((cell, ci) => (
+                      <td key={ci} className="px-3 py-2 text-slate-800 border-b border-slate-100 break-words max-w-[180px]">{cell}</td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      );
+    };
+
+    // Render a text block
+    const renderTextBlock = (raw: string, blockIdx: number) => {
+      const textLines = raw.split('\n');
+      return (
+        <div key={blockIdx} className="space-y-1">
+          {textLines.map((line, li) => {
+            if (line.trim() === '') return <br key={li} />;
+            // Numbered list
+            const numMatch = line.match(/^(\d+)\.\s+(.+)/);
+            if (numMatch) return (
+              <div key={li} className="flex gap-2">
+                <span className="font-semibold text-slate-500 shrink-0 min-w-[1.2rem]">{numMatch[1]}.</span>
+                <span>{renderInline(numMatch[2], li)}</span>
+              </div>
+            );
+            // Bullet
+            const bulletMatch = line.match(/^[-•*]\s+(.+)/);
+            if (bulletMatch) return (
+              <div key={li} className="flex gap-2">
+                <span className="text-cyan-600 mt-0.5 shrink-0">•</span>
+                <span>{renderInline(bulletMatch[1], li)}</span>
+              </div>
+            );
+            // Heading (## or **text**)
+            if (/^#{1,3}\s/.test(line)) {
+              const heading = line.replace(/^#{1,3}\s/, '');
+              return <p key={li} className="font-bold text-slate-800 mt-2">{renderInline(heading, li)}</p>;
+            }
+            return <p key={li}>{renderInline(line, li)}</p>;
+          })}
+        </div>
+      );
+    };
+
+    return (
+      <div className="space-y-2">
+        {blocks.map((block, i) =>
+          block.type === 'table'
+            ? renderTable(block.content, i)
+            : renderTextBlock(block.content, i)
+        )}
+      </div>
+    );
   };
 
   return (
@@ -401,27 +466,54 @@ export function AssistantMessage({
         </div>
       )}
 
-      {/* Content block: full content, CSS blur for locked users */}
-      <div className="text-slate-800 leading-relaxed">
-        <div className={`space-y-1.5 ${!shouldShowUnblurred ? 'max-h-52 overflow-hidden' : ''}`}>
-          {renderMarkdown(finalContent)}
-          {isLatest && finalContent.length < fullContent.length && (
+      <div className="text-slate-800 leading-relaxed space-y-3">
+        {/* Content: rendered markdown with smart table handling */}
+        <div>
+          {renderMarkdownContent(finalPublic)}
+          {isLatest && finalPublic.length < publicPart.length && (
             <span className="inline-block w-1 h-4 bg-cyan-600 ml-0.5 animate-pulse" />
           )}
         </div>
 
-        {/* Gradient fade + login button for locked users — appears AFTER content, never inside */}
-        {!shouldShowUnblurred && (
-          <div className="relative">
-            <div className="absolute -top-20 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none" />
-            <div className="pt-2 pb-1 flex items-center justify-center border-t border-slate-100 mt-1">
-              <Button
-                onClick={onUnlockClick}
-                className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg"
+        {/* Phần locked - chỉ hiển thị nếu đã đăng nhập */}
+        {lockedPart && (
+          <div className="relative mt-4 pt-4 border-t border-slate-200">
+            <div className="flex items-center gap-2 mb-3">
+              <Lock
+                className={`w-4 h-4 ${
+                  shouldShowUnblurred ? 'text-cyan-600' : 'text-slate-400'
+                }`}
+              />
+              <span className="text-sm font-medium text-slate-700">
+                Chi tiết trích dẫn luật & Mức phạt
+              </span>
+            </div>
+
+            <div className="relative">
+              <div
+                className={`text-slate-700 ${
+                  !shouldShowUnblurred ? 'blur-content' : ''
+                }`}
               >
-                <LogIn className="w-4 h-4 mr-2" />
-                Đăng nhập để đọc toàn bộ câu trả lời
-              </Button>
+                {renderMarkdownContent(finalLocked)}
+                {shouldShowUnblurred &&
+                  isLatest &&
+                  finalLocked.length < lockedPart.length && (
+                    <span className="inline-block w-1 h-4 bg-cyan-600 ml-0.5 animate-pulse" />
+                  )}
+              </div>
+
+              {!shouldShowUnblurred && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-white/60 to-white/90">
+                  <Button
+                    onClick={onUnlockClick}
+                    className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-xl"
+                  >
+                    <LogIn className="w-4 h-4 mr-2" />
+                    {t.auth.loginButton}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -439,7 +531,7 @@ export function AssistantMessage({
         <div className="mt-6 pt-4 border-t border-slate-200">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm text-slate-600">Câu trả lời này có hữu ích không?</span>
+            <span className="text-sm text-slate-600">{t.chat.feedbackQuestion}</span>
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant={userRating === 'like' ? 'default' : 'outline'}
@@ -454,7 +546,7 @@ export function AssistantMessage({
                   title={!hasValidMessageId ? 'Đang lưu tin nhắn...' : ''}
                 >
                   <ThumbsUp className="w-4 h-4 mr-1.5" />
-                  Hữu ích
+                  {t.chat.helpful}
                 </Button>
                 <Button
                   variant={userRating === 'dislike' ? 'default' : 'outline'}
@@ -469,7 +561,7 @@ export function AssistantMessage({
                   title={!hasValidMessageId ? 'Đang lưu tin nhắn...' : ''}
                 >
                   <ThumbsDown className="w-4 h-4 mr-1.5" />
-                  Chưa hữu ích
+                  {t.chat.notHelpful}
                 </Button>
                 <Button
                   variant="outline"
@@ -484,12 +576,12 @@ export function AssistantMessage({
                   {isCopied ? (
                     <>
                       <Check className="w-4 h-4 mr-1.5" />
-                      Đã sao chép
+                      {t.chat.copied}
                     </>
                   ) : (
                     <>
                       <Copy className="w-4 h-4 mr-1.5" />
-                      Sao chép
+                      {t.chat.copy}
                     </>
                   )}
                 </Button>
@@ -502,7 +594,7 @@ export function AssistantMessage({
                   title={!hasValidMessageId ? 'Đang lưu tin nhắn...' : ''}
                 >
                   <MessageSquare className="w-4 h-4 mr-1.5" />
-                  Phản hồi chi tiết
+                  {t.chat.detailedFeedback}
                 </Button>
               </div>
             </div>

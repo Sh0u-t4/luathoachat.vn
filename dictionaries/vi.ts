@@ -234,6 +234,18 @@ export const vi: Translation = {
     feedbackDescWithRatingPrefix: 'Bạn đã đánh giá câu trả lời này là',
     feedbackDescWithRatingSuffix: '. Hãy cho chúng tôi biết thêm để cải thiện dịch vụ.',
     feedbackDescNoRating: 'Hãy cho chúng tôi biết ý kiến của bạn về câu trả lời này để giúp chúng tôi cải thiện dịch vụ.',
+    // Chat widget UI controls
+    helpful: 'Hữu ích',
+    notHelpful: 'Chưa hữu ích',
+    copy: 'Sao chép',
+    copied: 'Đã sao chép',
+    detailedFeedback: 'Phản hồi chi tiết',
+    feedbackQuestion: 'Câu trả lời này có hữu ích không?',
+    relatedQuestions: 'Câu hỏi liên quan:',
+    copiedToast: 'Đã sao chép vào clipboard',
+    ratingSuccess: 'Cảm ơn phản hồi của bạn!',
+    ratingError: 'Không thể lưu đánh giá. Vui lòng thử lại.',
+    headerOnline: 'Online • Sẵn sàng hỗ trợ',
   },
   admin: {
     title: 'Quản trị người dùng',

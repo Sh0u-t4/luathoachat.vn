@@ -263,6 +263,18 @@ export interface Translation {
     feedbackDescWithRatingPrefix: string;
     feedbackDescWithRatingSuffix: string;
     feedbackDescNoRating: string;
+    // Chat widget UI controls
+    helpful: string;
+    notHelpful: string;
+    copy: string;
+    copied: string;
+    detailedFeedback: string;
+    feedbackQuestion: string;
+    relatedQuestions: string;
+    copiedToast: string;
+    ratingSuccess: string;
+    ratingError: string;
+    headerOnline: string;
   };
   seo: {
     home: {

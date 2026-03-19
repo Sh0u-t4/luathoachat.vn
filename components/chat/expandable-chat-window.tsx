@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, Maximize2, Minimize2, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ChatInterface } from './chat-interface';
+import { useLanguage } from '@/lib/i18n/context';
 import { hapticFeedback, HapticPatterns } from '@/lib/mobile/utils';
 
 interface ExpandableChatWindowProps {
@@ -16,12 +17,15 @@ type ChatMode = 'sidebar' | 'fullscreen';
 
 /**
  * Expandable Chat Window
- * Mode 1: Sidebar (400px width) - Default
+ * Mode 1: Sidebar (480px) - Default
  * Mode 2: Fullscreen - Khi user click nút expand
+ *
+ * Language: controlled by the global useLanguage() hook shared with the navbar toggle.
  */
 export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: ExpandableChatWindowProps) {
   const [mode, setMode] = useState<ChatMode>('sidebar');
   const [isAnimating, setIsAnimating] = useState(false);
+  const { t } = useLanguage();
 
   // Reset to sidebar khi đóng
   useEffect(() => {
@@ -30,13 +34,6 @@ export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: Expand
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
-
-  // Gửi initial message nếu có
-  useEffect(() => {
-    if (isOpen && initialMessage) {
-      // ChatInterface sẽ xử lý initialMessage qua props
-    }
-  }, [isOpen, initialMessage]);
 
   const toggleMode = () => {
     hapticFeedback(HapticPatterns.medium);
@@ -51,6 +48,8 @@ export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: Expand
   };
 
   if (!isOpen) return null;
+
+  const isFullscreen = mode === 'fullscreen';
 
   return (
     <>
@@ -68,9 +67,9 @@ export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: Expand
           fixed z-50 bg-white shadow-2xl
           transition-all duration-300 ease-in-out
           ${isAnimating ? 'transition-all duration-300' : ''}
-          ${mode === 'sidebar'
-            ? 'top-0 right-0 bottom-0 w-full md:w-[480px] lg:w-[520px]'
-            : 'inset-4 rounded-2xl'
+          ${isFullscreen
+            ? 'inset-4 rounded-2xl'
+            : 'top-0 right-0 bottom-0 w-full md:w-[480px] lg:w-[520px]'
           }
         `}
         style={{
@@ -78,49 +77,54 @@ export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: Expand
         }}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center justify-between border-b border-slate-700">
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-4 py-3 flex items-center justify-between border-b border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shrink-0">
+              <MessageCircle className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h2 className="text-white font-semibold text-lg">Trợ lý AI Luật Hóa chất</h2>
-              <p className="text-slate-400 text-xs">Online • Sẵn sàng hỗ trợ</p>
+              <h2 className="text-white font-semibold text-base leading-tight">
+                {t.chat.title}
+              </h2>
+              <p className="text-slate-400 text-xs">
+                {t.chat.headerOnline}
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Toggle Fullscreen Button */}
+          <div className="flex items-center gap-1">
+            {/* Toggle Fullscreen */}
             <Button
               onClick={toggleMode}
               variant="ghost"
               size="icon"
-              className="text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
-              aria-label={mode === 'sidebar' ? 'Mở rộng toàn màn hình' : 'Thu nhỏ'}
+              className="w-8 h-8 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+              aria-label={isFullscreen ? t.common.backToHome : 'Fullscreen'}
             >
-              {mode === 'sidebar' ? (
-                <Maximize2 className="w-5 h-5" />
-              ) : (
-                <Minimize2 className="w-5 h-5" />
-              )}
+              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </Button>
 
-            {/* Close Button */}
+            {/* Close */}
             <Button
               onClick={handleClose}
               variant="ghost"
               size="icon"
-              className="text-slate-400 hover:text-white hover:bg-red-600 transition-colors"
-              aria-label="Đóng chat"
+              className="w-8 h-8 text-slate-400 hover:text-white hover:bg-red-600 transition-colors"
+              aria-label="Close"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </Button>
           </div>
         </div>
 
         {/* Chat Content */}
-        <div className="h-[calc(100vh-80px)] overflow-hidden">
-          <ChatInterface initialMessage={initialMessage} hideDisclaimer={false} hideHeader={true} />
+        <div className="h-[calc(100%-60px)] overflow-hidden">
+          <ChatInterface
+            initialMessage={initialMessage}
+            hideDisclaimer={false}
+            hideHeader={true}
+            isFullscreen={isFullscreen}
+          />
         </div>
       </div>
     </>

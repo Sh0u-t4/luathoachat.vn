@@ -234,6 +234,18 @@ export const en: Translation = {
     feedbackDescWithRatingPrefix: 'You rated this answer as',
     feedbackDescWithRatingSuffix: '. Let us know more to help us improve.',
     feedbackDescNoRating: 'Let us know your thoughts about this answer to help us improve our service.',
+    // Chat widget UI controls
+    helpful: 'Helpful',
+    notHelpful: 'Not Helpful',
+    copy: 'Copy',
+    copied: 'Copied',
+    detailedFeedback: 'Detailed Feedback',
+    feedbackQuestion: 'Was this answer helpful?',
+    relatedQuestions: 'Related Questions:',
+    copiedToast: 'Copied to clipboard',
+    ratingSuccess: 'Thanks for your feedback!',
+    ratingError: 'Could not save rating. Please try again.',
+    headerOnline: 'Online • Ready to help',
   },
   admin: {
     title: 'User Management',
