@@ -83,20 +83,31 @@ const nextConfig = {
     ];
   },
 
-  webpack: (config, { isServer, dev }) => {
-    if (isBoltDev && dev) {
-      config.parallelism = 1;
-      config.cache = false;
-    }
+  // Transpile ESM-only packages that crash webpack's module factory in dev mode
+  transpilePackages: ['recharts', 'lucide-react'],
 
-    config.optimization = {
-      ...config.optimization,
-      moduleIds: 'deterministic',
-      minimize: isProduction,
-    };
+  webpack: (config, { isServer, dev }) => {
+    // Disable filesystem cache in dev mode to prevent stale chunks
+    // causing "Cannot read properties of undefined (reading 'call')" errors
+    if (dev) {
+      config.cache = false;
+      // Use named module IDs in dev for stable HMR — deterministic IDs are for production only
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: 'named',
+        minimize: false,
+      };
+    } else {
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: 'deterministic',
+        minimize: true,
+      };
+    }
 
     return config;
   },
 };
+
 
 module.exports = nextConfig;

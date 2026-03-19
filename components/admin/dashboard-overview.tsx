@@ -10,16 +10,35 @@ import {
   TrendingUp,
   UserCheck,
   AlertCircle,
-  BarChart3
+  BarChart3,
+  Loader2,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { supabase } from '@/lib/supabase';
-import { RecentActivity } from './recent-activity';
 
-// recharts must be loaded client-side only (causes 'call' error when SSR'd)
+// Both sub-components loaded client-side only to prevent webpack SSR chunk errors
 const AnalyticsCharts = dynamic(
   () => import('./analytics-charts').then(mod => ({ default: mod.AnalyticsCharts })),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-6 h-6 text-cyan-600 animate-spin" />
+      </div>
+    ),
+  }
+);
+
+const RecentActivity = dynamic(
+  () => import('./recent-activity').then(mod => ({ default: mod.RecentActivity })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-6 h-6 text-cyan-600 animate-spin" />
+      </div>
+    ),
+  }
 );
 
 
