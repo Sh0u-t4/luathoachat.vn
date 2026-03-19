@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Maximize2, Minimize2, MessageCircle, Languages } from 'lucide-react';
+import { X, Maximize2, Minimize2, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ChatInterface } from './chat-interface';
-import { useChat } from './chat-context';
+import { useLanguage } from '@/lib/i18n/context';
 import { hapticFeedback, HapticPatterns } from '@/lib/mobile/utils';
 
 interface ExpandableChatWindowProps {
@@ -19,11 +19,13 @@ type ChatMode = 'sidebar' | 'fullscreen';
  * Expandable Chat Window
  * Mode 1: Sidebar (480px) - Default
  * Mode 2: Fullscreen - Khi user click nút expand
+ *
+ * Language: controlled by the global useLanguage() hook shared with the navbar toggle.
  */
 export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: ExpandableChatWindowProps) {
   const [mode, setMode] = useState<ChatMode>('sidebar');
   const [isAnimating, setIsAnimating] = useState(false);
-  const { chatLang, setChatLang } = useChat();
+  const { t } = useLanguage();
 
   // Reset to sidebar khi đóng
   useEffect(() => {
@@ -38,11 +40,6 @@ export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: Expand
     setIsAnimating(true);
     setMode(prev => prev === 'sidebar' ? 'fullscreen' : 'sidebar');
     setTimeout(() => setIsAnimating(false), 300);
-  };
-
-  const toggleLang = () => {
-    hapticFeedback(HapticPatterns.light);
-    setChatLang(chatLang === 'vi' ? 'en' : 'vi');
   };
 
   const handleClose = () => {
@@ -87,46 +84,33 @@ export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: Expand
             </div>
             <div>
               <h2 className="text-white font-semibold text-base leading-tight">
-                {chatLang === 'vi' ? 'Trợ lý AI Luật Hóa chất' : 'Chemical Law AI Assistant'}
+                {t.chat.title}
               </h2>
               <p className="text-slate-400 text-xs">
-                {chatLang === 'vi' ? 'Online • Sẵn sàng hỗ trợ' : 'Online • Ready to help'}
+                {t.chat.headerOnline}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-1">
-            {/* Language Toggle EN/VI */}
-            <Button
-              onClick={toggleLang}
-              variant="ghost"
-              size="sm"
-              className="text-slate-300 hover:text-white hover:bg-slate-700 transition-colors px-2 py-1 h-8 font-mono text-xs font-bold tracking-wider rounded gap-1"
-              aria-label="Toggle language"
-              title={chatLang === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
-            >
-              <Languages className="w-3.5 h-3.5" />
-              {chatLang === 'vi' ? 'EN' : 'VI'}
-            </Button>
-
-            {/* Toggle Fullscreen Button */}
+            {/* Toggle Fullscreen */}
             <Button
               onClick={toggleMode}
               variant="ghost"
               size="icon"
               className="w-8 h-8 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
-              aria-label={isFullscreen ? (chatLang === 'vi' ? 'Thu nhỏ' : 'Minimize') : (chatLang === 'vi' ? 'Mở rộng toàn màn hình' : 'Fullscreen')}
+              aria-label={isFullscreen ? t.common.backToHome : 'Fullscreen'}
             >
               {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </Button>
 
-            {/* Close Button */}
+            {/* Close */}
             <Button
               onClick={handleClose}
               variant="ghost"
               size="icon"
               className="w-8 h-8 text-slate-400 hover:text-white hover:bg-red-600 transition-colors"
-              aria-label={chatLang === 'vi' ? 'Đóng chat' : 'Close chat'}
+              aria-label="Close"
             >
               <X className="w-4 h-4" />
             </Button>

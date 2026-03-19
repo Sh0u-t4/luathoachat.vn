@@ -6,8 +6,6 @@ import { supabase, getSessionToken } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth/context';
 import { toast } from 'sonner';
 
-import { detectChatLanguage, type ChatLang } from '@/lib/chat-language';
-
 interface ChatContextType {
   messages: ChatMessage[];
   isTyping: boolean;
@@ -20,8 +18,6 @@ interface ChatContextType {
   showEmailGate: boolean;
   showLoginGate: boolean;
   sessionId: string | null;
-  chatLang: ChatLang;           // User-selected chat language preference
-  setChatLang: (lang: ChatLang) => void;
   sendMessage: (content: string) => Promise<void>;
   unlockContent: () => void;
   clearMessages: () => void;
@@ -140,13 +136,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [guestEmail, setGuestEmail] = useState<string | null>(null);
   const [showEmailGate, setShowEmailGate] = useState(false);
   const [showLoginGate, setShowLoginGate] = useState(false);
-  const [chatLang, setChatLangState] = useState<ChatLang>('vi');
-
-  // setChatLang — persists to localStorage
-  const setChatLang = useCallback((lang: ChatLang) => {
-    setChatLangState(lang);
-    if (typeof window !== 'undefined') localStorage.setItem('chat_lang', lang);
-  }, []);
 
   // Initialize sessionId on mount
   useEffect(() => {
@@ -167,9 +156,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       if (savedCount) setQuestionCount(parseInt(savedCount, 10));
       if (savedEmail) setGuestEmail(savedEmail);
       if (savedCollected === 'true') setEmailCollected(true);
-      // Load chat language preference
-      const savedLang = localStorage.getItem('chat_lang');
-      if (savedLang === 'en' || savedLang === 'vi') setChatLangState(savedLang);
     }
   }, []);
 
@@ -710,8 +696,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         loadChatHistory,
         chatSessions,
         deleteSession,
-        chatLang,
-        setChatLang,
         setShowEmailGate,
         setShowLoginGate,
         saveGuestEmail,

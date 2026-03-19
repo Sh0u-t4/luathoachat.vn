@@ -10,6 +10,7 @@ import { FeedbackDialog } from './feedback-dialog';
 import { QuickReplyButtons, generateQuickReplies } from './quick-reply-buttons';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { useLanguage } from '@/lib/i18n/context';
 import type { ChatMessage } from '@/types';
 
 interface AssistantMessageProps {
@@ -40,6 +41,7 @@ export function AssistantMessage({
   isFullscreen = false,
   onQuickReply,
 }: AssistantMessageProps) {
+  const { t } = useLanguage();
   // Rating state - quick like/dislike
   const [userRating, setUserRating] = useState<'like' | 'dislike' | null>(null);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
@@ -155,13 +157,13 @@ export function AssistantMessage({
     // Check if message has valid UUID from database
     if (!hasValidMessageId) {
       console.error('[Rating] Message not yet saved to database. ID:', message.id);
-      toast.error('Vui lòng đợi tin nhắn được lưu trước khi đánh giá');
+      toast.error(t.chat.ratingError);
       return;
     }
 
     if (!sessionId || sessionId === 'no-session') {
       console.error('[Rating] Invalid session ID:', sessionId);
-      toast.error('Lỗi: Session chưa được khởi tạo. Vui lòng tải lại trang.');
+      toast.error(t.chat.ratingError);
       return;
     }
 
@@ -265,7 +267,7 @@ export function AssistantMessage({
 
       await navigator.clipboard.writeText(fullContent);
       setIsCopied(true);
-      toast.success('Đã sao chép câu trả lời!');
+      toast.success(t.chat.copiedToast);
 
       // Reset icon sau 2 giây
       setTimeout(() => {
@@ -273,7 +275,7 @@ export function AssistantMessage({
       }, 2000);
     } catch (error) {
       console.error('Copy error:', error);
-      toast.error('Không thể sao chép');
+      toast.error(t.common.error);
     }
   };
 
@@ -508,7 +510,7 @@ export function AssistantMessage({
                     className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-xl"
                   >
                     <LogIn className="w-4 h-4 mr-2" />
-                    Đăng nhập để xem chi tiết
+                    {t.auth.loginButton}
                   </Button>
                 </div>
               )}
@@ -529,7 +531,7 @@ export function AssistantMessage({
         <div className="mt-6 pt-4 border-t border-slate-200">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm text-slate-600">Câu trả lời này có hữu ích không?</span>
+            <span className="text-sm text-slate-600">{t.chat.feedbackQuestion}</span>
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant={userRating === 'like' ? 'default' : 'outline'}
@@ -544,7 +546,7 @@ export function AssistantMessage({
                   title={!hasValidMessageId ? 'Đang lưu tin nhắn...' : ''}
                 >
                   <ThumbsUp className="w-4 h-4 mr-1.5" />
-                  Hữu ích
+                  {t.chat.helpful}
                 </Button>
                 <Button
                   variant={userRating === 'dislike' ? 'default' : 'outline'}
@@ -559,7 +561,7 @@ export function AssistantMessage({
                   title={!hasValidMessageId ? 'Đang lưu tin nhắn...' : ''}
                 >
                   <ThumbsDown className="w-4 h-4 mr-1.5" />
-                  Chưa hữu ích
+                  {t.chat.notHelpful}
                 </Button>
                 <Button
                   variant="outline"
@@ -574,12 +576,12 @@ export function AssistantMessage({
                   {isCopied ? (
                     <>
                       <Check className="w-4 h-4 mr-1.5" />
-                      Đã sao chép
+                      {t.chat.copied}
                     </>
                   ) : (
                     <>
                       <Copy className="w-4 h-4 mr-1.5" />
-                      Sao chép
+                      {t.chat.copy}
                     </>
                   )}
                 </Button>
@@ -592,7 +594,7 @@ export function AssistantMessage({
                   title={!hasValidMessageId ? 'Đang lưu tin nhắn...' : ''}
                 >
                   <MessageSquare className="w-4 h-4 mr-1.5" />
-                  Phản hồi chi tiết
+                  {t.chat.detailedFeedback}
                 </Button>
               </div>
             </div>
