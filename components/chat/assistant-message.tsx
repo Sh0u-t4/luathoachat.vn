@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Lock, LogIn, ThumbsUp, ThumbsDown, MessageSquare, Copy, Check } from 'lucide-react';
@@ -17,9 +17,10 @@ interface AssistantMessageProps {
   isLatest: boolean;
   isAuthenticated: boolean;
   onUnlockClick: () => void;
-  messageIndex: number; // Index của assistant message này (0-based)
+  messageIndex: number;
   sessionId: string;
-  onQuickReply?: (reply: string) => void; // Callback for quick reply selection
+  isFullscreen?: boolean;  // When true, tables render at full width without column limit
+  onQuickReply?: (reply: string) => void;
 }
 
 // Helper function to validate if a string is a valid UUID
@@ -36,6 +37,7 @@ export function AssistantMessage({
   onUnlockClick,
   messageIndex,
   sessionId,
+  isFullscreen = false,
   onQuickReply,
 }: AssistantMessageProps) {
   // Rating state - quick like/dislike
@@ -104,18 +106,10 @@ export function AssistantMessage({
 
   const { publicPart, lockedPart } = splitContent(fullContent);
 
-  // Typing effect - chỉ apply cho message mới nhất
-  const { displayedText: displayedPublic } = useTypingEffect(publicPart, isLatest, {
-    speed: 15,
-  });
-
-  const { displayedText: displayedLocked } = useTypingEffect(lockedPart, isLatest, {
-    speed: 15,
-  });
-
-  // Nếu không phải latest message, hiển thị toàn bộ ngay
-  const finalPublic = isLatest ? displayedPublic : publicPart;
-  const finalLocked = isLatest ? displayedLocked : lockedPart;
+  // Typing effect disabled for streaming — chat-context updates content incrementally as tokens arrive
+  // useTypingEffect would add a second animation layer on top of streaming (double-slow)
+  const finalPublic = publicPart;
+  const finalLocked = lockedPart;
 
   // Generate quick reply suggestions based on content
   const quickReplySuggestions = shouldShowUnblurred && !isLatest
@@ -283,6 +277,177 @@ export function AssistantMessage({
     }
   };
 
+  /** 
+   * Renders markdown content with smart table handling.
+   * Narrow widget (isFullscreen=false): wide tables (>2 data cols) → compact bullet list.
+   * Fullscreen: all tables render normally.
+   */
+  const renderMarkdownContent = (text: string) => {
+    if (!text) return null;
+
+    // Parse content into blocks: table blocks and text blocks
+    const blocks: Array<{ type: 'table' | 'text'; content: string }> = [];
+    const lines = text.split('\n');
+    let currentText: string[] = [];
+    let inTable = false;
+    let tableLines: string[] = [];
+
+    const flushText = () => {
+      if (currentText.length > 0) {
+        blocks.push({ type: 'text', content: currentText.join('\n') });
+        currentText = [];
+      }
+    };
+    const flushTable = () => {
+      if (tableLines.length > 0) {
+        blocks.push({ type: 'table', content: tableLines.join('\n') });
+        tableLines = [];
+      }
+    };
+
+    for (const line of lines) {
+      const isTableRow = /^\s*\|/.test(line);
+      if (isTableRow) {
+        if (!inTable) { flushText(); inTable = true; }
+        tableLines.push(line);
+      } else {
+        if (inTable) { flushTable(); inTable = false; }
+        currentText.push(line);
+      }
+    }
+    if (inTable) flushTable(); else flushText();
+
+    // Render inline: bold, source citations
+    const renderInline = (s: string, key: number) => {
+      const parts: React.ReactNode[] = [];
+      let last = 0;
+      const re = /(\*\*([^*]+)\*\*|\[(?:Nguồn|Source):[^\]]+\])/g;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(s)) !== null) {
+        if (m.index > last) parts.push(s.slice(last, m.index));
+        if (m[0].startsWith('**')) {
+          parts.push(<strong key={`b${m.index}`}>{m[2]}</strong>);
+        } else {
+          parts.push(<span key={`src${m.index}`} className="text-xs text-cyan-700 font-medium italic">{m[0]}</span>);
+        }
+        last = m.index + m[0].length;
+      }
+      if (last < s.length) parts.push(s.slice(last));
+      return <span key={key}>{parts}</span>;
+    };
+
+    // Render a table block — either as HTML table or bullet list
+    const renderTable = (raw: string, blockIdx: number) => {
+      const tableRowLines = raw.split('\n').filter(l => /^\s*\|/.test(l));
+      if (tableRowLines.length < 2) return <pre key={blockIdx} className="text-sm">{raw}</pre>;
+
+      // Parse rows (skip separator row |---|...)
+      const dataRows = tableRowLines.filter(l => !/^\s*\|[-:|\s]+\|/.test(l));
+      if (dataRows.length === 0) return null;
+
+      const parseCells = (row: string) =>
+        row.split('|').map(c => c.trim()).filter((c, i, a) => i > 0 && i < a.length - 1);
+
+      const headers = parseCells(dataRows[0]);
+      const bodyRows = dataRows.slice(1);
+      const dataCols = headers.length; // number of data columns
+
+      // Narrow mode + wide table: convert to bullet list
+      if (!isFullscreen && dataCols > 2) {
+        return (
+          <div key={blockIdx} className="space-y-2 my-2">
+            {bodyRows.map((row, ri) => {
+              const cells = parseCells(row);
+              return (
+                <div key={ri} className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 text-sm">
+                  {cells.map((cell, ci) => (
+                    <div key={ci} className="flex gap-1.5 min-w-0">
+                      {headers[ci] && (
+                        <span className="font-semibold text-slate-600 shrink-0">{headers[ci]}:</span>
+                      )}
+                      <span className="text-slate-800 break-words">{cell}</span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+
+      // Normal table render (≤2 cols or fullscreen)
+      return (
+        <div key={blockIdx} className="overflow-x-auto my-3 rounded-lg border border-slate-200">
+          <table className="min-w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-slate-100">
+                {headers.map((h, i) => (
+                  <th key={i} className="px-3 py-2 text-left font-semibold text-slate-700 border-b border-slate-200 whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {bodyRows.map((row, ri) => {
+                const cells = parseCells(row);
+                return (
+                  <tr key={ri} className={ri % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                    {cells.map((cell, ci) => (
+                      <td key={ci} className="px-3 py-2 text-slate-800 border-b border-slate-100 break-words max-w-[180px]">{cell}</td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      );
+    };
+
+    // Render a text block
+    const renderTextBlock = (raw: string, blockIdx: number) => {
+      const textLines = raw.split('\n');
+      return (
+        <div key={blockIdx} className="space-y-1">
+          {textLines.map((line, li) => {
+            if (line.trim() === '') return <br key={li} />;
+            // Numbered list
+            const numMatch = line.match(/^(\d+)\.\s+(.+)/);
+            if (numMatch) return (
+              <div key={li} className="flex gap-2">
+                <span className="font-semibold text-slate-500 shrink-0 min-w-[1.2rem]">{numMatch[1]}.</span>
+                <span>{renderInline(numMatch[2], li)}</span>
+              </div>
+            );
+            // Bullet
+            const bulletMatch = line.match(/^[-•*]\s+(.+)/);
+            if (bulletMatch) return (
+              <div key={li} className="flex gap-2">
+                <span className="text-cyan-600 mt-0.5 shrink-0">•</span>
+                <span>{renderInline(bulletMatch[1], li)}</span>
+              </div>
+            );
+            // Heading (## or **text**)
+            if (/^#{1,3}\s/.test(line)) {
+              const heading = line.replace(/^#{1,3}\s/, '');
+              return <p key={li} className="font-bold text-slate-800 mt-2">{renderInline(heading, li)}</p>;
+            }
+            return <p key={li}>{renderInline(line, li)}</p>;
+          })}
+        </div>
+      );
+    };
+
+    return (
+      <div className="space-y-2">
+        {blocks.map((block, i) =>
+          block.type === 'table'
+            ? renderTable(block.content, i)
+            : renderTextBlock(block.content, i)
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="p-4">
       {message.detectedChemicals && message.detectedChemicals.length > 0 && (
@@ -300,9 +465,9 @@ export function AssistantMessage({
       )}
 
       <div className="text-slate-800 leading-relaxed space-y-3">
-        {/* Phần public - luôn hiển thị với typing effect */}
-        <div className="whitespace-pre-wrap">
-          {finalPublic}
+        {/* Content: rendered markdown with smart table handling */}
+        <div>
+          {renderMarkdownContent(finalPublic)}
           {isLatest && finalPublic.length < publicPart.length && (
             <span className="inline-block w-1 h-4 bg-cyan-600 ml-0.5 animate-pulse" />
           )}
@@ -324,11 +489,11 @@ export function AssistantMessage({
 
             <div className="relative">
               <div
-                className={`text-slate-700 whitespace-pre-wrap ${
+                className={`text-slate-700 ${
                   !shouldShowUnblurred ? 'blur-content' : ''
                 }`}
               >
-                {finalLocked}
+                {renderMarkdownContent(finalLocked)}
                 {shouldShowUnblurred &&
                   isLatest &&
                   finalLocked.length < lockedPart.length && (

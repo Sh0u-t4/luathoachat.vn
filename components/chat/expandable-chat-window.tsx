@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Maximize2, Minimize2, MessageCircle } from 'lucide-react';
+import { X, Maximize2, Minimize2, MessageCircle, Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ChatInterface } from './chat-interface';
+import { useChat } from './chat-context';
 import { hapticFeedback, HapticPatterns } from '@/lib/mobile/utils';
 
 interface ExpandableChatWindowProps {
@@ -16,12 +17,13 @@ type ChatMode = 'sidebar' | 'fullscreen';
 
 /**
  * Expandable Chat Window
- * Mode 1: Sidebar (400px width) - Default
+ * Mode 1: Sidebar (480px) - Default
  * Mode 2: Fullscreen - Khi user click nút expand
  */
 export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: ExpandableChatWindowProps) {
   const [mode, setMode] = useState<ChatMode>('sidebar');
   const [isAnimating, setIsAnimating] = useState(false);
+  const { chatLang, setChatLang } = useChat();
 
   // Reset to sidebar khi đóng
   useEffect(() => {
@@ -31,18 +33,16 @@ export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: Expand
     }
   }, [isOpen]);
 
-  // Gửi initial message nếu có
-  useEffect(() => {
-    if (isOpen && initialMessage) {
-      // ChatInterface sẽ xử lý initialMessage qua props
-    }
-  }, [isOpen, initialMessage]);
-
   const toggleMode = () => {
     hapticFeedback(HapticPatterns.medium);
     setIsAnimating(true);
     setMode(prev => prev === 'sidebar' ? 'fullscreen' : 'sidebar');
     setTimeout(() => setIsAnimating(false), 300);
+  };
+
+  const toggleLang = () => {
+    hapticFeedback(HapticPatterns.light);
+    setChatLang(chatLang === 'vi' ? 'en' : 'vi');
   };
 
   const handleClose = () => {
@@ -51,6 +51,8 @@ export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: Expand
   };
 
   if (!isOpen) return null;
+
+  const isFullscreen = mode === 'fullscreen';
 
   return (
     <>
@@ -68,9 +70,9 @@ export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: Expand
           fixed z-50 bg-white shadow-2xl
           transition-all duration-300 ease-in-out
           ${isAnimating ? 'transition-all duration-300' : ''}
-          ${mode === 'sidebar'
-            ? 'top-0 right-0 bottom-0 w-full md:w-[480px] lg:w-[520px]'
-            : 'inset-4 rounded-2xl'
+          ${isFullscreen
+            ? 'inset-4 rounded-2xl'
+            : 'top-0 right-0 bottom-0 w-full md:w-[480px] lg:w-[520px]'
           }
         `}
         style={{
@@ -78,31 +80,44 @@ export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: Expand
         }}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center justify-between border-b border-slate-700">
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-4 py-3 flex items-center justify-between border-b border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shrink-0">
+              <MessageCircle className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h2 className="text-white font-semibold text-lg">Trợ lý AI Luật Hóa chất</h2>
-              <p className="text-slate-400 text-xs">Online • Sẵn sàng hỗ trợ</p>
+              <h2 className="text-white font-semibold text-base leading-tight">
+                {chatLang === 'vi' ? 'Trợ lý AI Luật Hóa chất' : 'Chemical Law AI Assistant'}
+              </h2>
+              <p className="text-slate-400 text-xs">
+                {chatLang === 'vi' ? 'Online • Sẵn sàng hỗ trợ' : 'Online • Ready to help'}
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            {/* Language Toggle EN/VI */}
+            <Button
+              onClick={toggleLang}
+              variant="ghost"
+              size="sm"
+              className="text-slate-300 hover:text-white hover:bg-slate-700 transition-colors px-2 py-1 h-8 font-mono text-xs font-bold tracking-wider rounded gap-1"
+              aria-label="Toggle language"
+              title={chatLang === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
+            >
+              <Languages className="w-3.5 h-3.5" />
+              {chatLang === 'vi' ? 'EN' : 'VI'}
+            </Button>
+
             {/* Toggle Fullscreen Button */}
             <Button
               onClick={toggleMode}
               variant="ghost"
               size="icon"
-              className="text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
-              aria-label={mode === 'sidebar' ? 'Mở rộng toàn màn hình' : 'Thu nhỏ'}
+              className="w-8 h-8 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+              aria-label={isFullscreen ? (chatLang === 'vi' ? 'Thu nhỏ' : 'Minimize') : (chatLang === 'vi' ? 'Mở rộng toàn màn hình' : 'Fullscreen')}
             >
-              {mode === 'sidebar' ? (
-                <Maximize2 className="w-5 h-5" />
-              ) : (
-                <Minimize2 className="w-5 h-5" />
-              )}
+              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </Button>
 
             {/* Close Button */}
@@ -110,17 +125,22 @@ export function ExpandableChatWindow({ isOpen, onClose, initialMessage }: Expand
               onClick={handleClose}
               variant="ghost"
               size="icon"
-              className="text-slate-400 hover:text-white hover:bg-red-600 transition-colors"
-              aria-label="Đóng chat"
+              className="w-8 h-8 text-slate-400 hover:text-white hover:bg-red-600 transition-colors"
+              aria-label={chatLang === 'vi' ? 'Đóng chat' : 'Close chat'}
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </Button>
           </div>
         </div>
 
         {/* Chat Content */}
-        <div className="h-[calc(100vh-80px)] overflow-hidden">
-          <ChatInterface initialMessage={initialMessage} hideDisclaimer={false} hideHeader={true} />
+        <div className="h-[calc(100%-60px)] overflow-hidden">
+          <ChatInterface
+            initialMessage={initialMessage}
+            hideDisclaimer={false}
+            hideHeader={true}
+            isFullscreen={isFullscreen}
+          />
         </div>
       </div>
     </>

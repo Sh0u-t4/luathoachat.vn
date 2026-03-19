@@ -6,6 +6,8 @@ import { supabase, getSessionToken } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth/context';
 import { toast } from 'sonner';
 
+import { detectChatLanguage, type ChatLang } from '@/lib/chat-language';
+
 interface ChatContextType {
   messages: ChatMessage[];
   isTyping: boolean;
@@ -18,6 +20,8 @@ interface ChatContextType {
   showEmailGate: boolean;
   showLoginGate: boolean;
   sessionId: string | null;
+  chatLang: ChatLang;           // User-selected chat language preference
+  setChatLang: (lang: ChatLang) => void;
   sendMessage: (content: string) => Promise<void>;
   unlockContent: () => void;
   clearMessages: () => void;
@@ -55,18 +59,69 @@ async function searchKnowledgeBase(query: string): Promise<string> {
   }
 }
 
-async function callLegalAIChatAPI(query: string, knowledgeContext?: string): Promise<EdgeFunctionResponse> {
+interface StreamMeta {
+  full_text: string;
+  response_time_ms: number;
+  language: string;
+  question_type: string;
+  has_context: boolean;
+  detected_chemicals: string[];
+  model_used: string;
+}
+
+/**
+ * Streams from /api/chat using SSE.
+ * Calls onToken for each text chunk, resolves with final metadata.
+ */
+async function streamChatAPI(
+  query: string,
+  knowledgeContext: string,
+  onToken: (token: string) => void
+): Promise<StreamMeta> {
   const response = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, knowledge_context: knowledgeContext || '' }),
+    body: JSON.stringify({ query, knowledge_context: knowledgeContext }),
   });
 
-  if (!response.ok) {
-    throw new Error(`Chat API error: ${response.statusText}`);
+  if (!response.ok) throw new Error(`Chat API error: ${response.statusText}`);
+
+  // Non-streaming fallback (error JSON)
+  const contentType = response.headers.get('Content-Type') || '';
+  if (!contentType.includes('text/event-stream')) {
+    const data = await response.json();
+    onToken(data.summary || '');
+    return { full_text: data.summary || '', response_time_ms: data.response_time_ms || 0, language: data.language || 'vi', question_type: 'general', has_context: false, detected_chemicals: data.detected_chemicals || [], model_used: data.model_used || 'gemini-2.5-flash' };
   }
 
-  return await response.json();
+  // SSE streaming
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let meta: StreamMeta = { full_text: '', response_time_ms: 0, language: 'vi', question_type: 'general', has_context: false, detected_chemicals: [], model_used: 'gemini-2.5-flash' };
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const json = line.slice(6).trim();
+      if (!json || json === '[DONE]') continue;
+      try {
+        const chunk = JSON.parse(json);
+        if (chunk.done) {
+          meta = chunk as StreamMeta;
+        } else if (chunk.token) {
+          onToken(chunk.token);
+        }
+      } catch { /* skip malformed */ }
+    }
+  }
+  reader.releaseLock();
+  return meta;
 }
 
 
@@ -85,6 +140,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [guestEmail, setGuestEmail] = useState<string | null>(null);
   const [showEmailGate, setShowEmailGate] = useState(false);
   const [showLoginGate, setShowLoginGate] = useState(false);
+  const [chatLang, setChatLangState] = useState<ChatLang>('vi');
+
+  // setChatLang — persists to localStorage
+  const setChatLang = useCallback((lang: ChatLang) => {
+    setChatLangState(lang);
+    if (typeof window !== 'undefined') localStorage.setItem('chat_lang', lang);
+  }, []);
 
   // Initialize sessionId on mount
   useEffect(() => {
@@ -105,6 +167,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       if (savedCount) setQuestionCount(parseInt(savedCount, 10));
       if (savedEmail) setGuestEmail(savedEmail);
       if (savedCollected === 'true') setEmailCollected(true);
+      // Load chat language preference
+      const savedLang = localStorage.getItem('chat_lang');
+      if (savedLang === 'en' || savedLang === 'vi') setChatLangState(savedLang);
     }
   }, []);
 
@@ -424,32 +489,66 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     try {
       const startTime = Date.now();
-      // RAG: Search knowledge base for relevant context first
+      // RAG: Search knowledge base for relevant context
       const knowledgeContext = await searchKnowledgeBase(content);
-      const aiResponse = await callLegalAIChatAPI(content, knowledgeContext);
-      const responseTime = Date.now() - startTime;
 
-      // Create assistant message with temporary ID first
+      // Create assistant message with empty content — will be filled by streaming
+      const tempId = `assistant_${Date.now()}`;
       const tempAssistantMessage: ChatMessage = {
-        id: `assistant_${Date.now()}`,
+        id: tempId,
         role: 'assistant',
-        content: aiResponse.summary,
+        content: '',
         timestamp: new Date(),
         isBlurred: !hasUnlockedContent,
-        detailedContent: aiResponse.detailed,
-        citations: aiResponse.citations,
-        detectedChemicals: aiResponse.detected_chemicals,
+        detailedContent: '',
+        citations: [],
+        detectedChemicals: [],
+        metadata: { language: 'vi' },
       };
-
       setMessages((prev) => [...prev, tempAssistantMessage]);
-      setIsTyping(false);
 
-      // Increment question count for freemium gate tracking (only for non-authenticated users)
-      if (!user) {
-        setQuestionCount((prev) => prev + 1);
-      }
+      let firstToken = true;
+      let accumulatedText = '';
 
-      // Lưu assistant message vào database và lấy UUID thực
+      // Stream tokens — update message content as they arrive
+      const meta = await streamChatAPI(content, knowledgeContext, (token: string) => {
+        accumulatedText += token;
+        if (firstToken) {
+          setIsTyping(false); // Turn off typing indicator on first token
+          firstToken = false;
+        }
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === tempId
+              ? { ...msg, content: accumulatedText, detailedContent: accumulatedText }
+              : msg
+          )
+        );
+      });
+
+      const responseTime = Date.now() - startTime;
+      const finalText = meta.full_text || accumulatedText;
+
+      // Update message with final metadata (language, detectedChemicals)
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === tempId
+            ? {
+                ...msg,
+                content: finalText,
+                detailedContent: finalText,
+                detectedChemicals: meta.detected_chemicals || [],
+                metadata: { language: meta.language || 'vi' },
+              }
+            : msg
+        )
+      );
+      setIsTyping(false); // Ensure off if no tokens arrived
+
+      // Increment question count
+      if (!user) setQuestionCount((prev) => prev + 1);
+
+      // Save to database
       try {
         const { data: savedMessage, error: saveError } = await supabase
           .from('chat_messages')
@@ -457,14 +556,18 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             user_id: user?.id || null,
             session_id: sessionToken,
             role: 'assistant',
-            content: aiResponse.summary,
-            detailed_content: aiResponse.detailed,
-            detected_chemicals: aiResponse.detected_chemicals,
-            citations: aiResponse.citations,
+            content: finalText,
+            detailed_content: finalText,
+            detected_chemicals: meta.detected_chemicals || [],
+            citations: [],
             response_time_ms: responseTime,
             is_error: false,
             metadata: {
               response_source: 'legal-ai-chat',
+              question_type: meta.question_type || 'general',
+              has_context: meta.has_context || false,
+              model_used: meta.model_used || 'gemini-2.5-flash',
+              language: meta.language || 'vi',
               question_number: !user ? questionCount + 1 : null,
             },
           })
@@ -474,11 +577,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         if (saveError) {
           console.error('Failed to save assistant message:', saveError);
         } else if (savedMessage) {
-          // Update message in state with real UUID from database
-          console.log('[ChatContext] Message saved with UUID:', savedMessage.id);
           setMessages((prev) =>
             prev.map((msg) =>
-              msg.id === tempAssistantMessage.id
+              msg.id === tempId
                 ? { ...msg, id: savedMessage.id }
                 : msg
             )
@@ -498,7 +599,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         await supabase.from('chat_sessions').insert({
           session_token: sessionToken,
           query_summary: content,
-          response_summary: aiResponse.summary,
+          response_summary: finalText,
           is_converted: hasUnlockedContent,
         });
       } catch {
@@ -609,6 +710,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         loadChatHistory,
         chatSessions,
         deleteSession,
+        chatLang,
+        setChatLang,
         setShowEmailGate,
         setShowLoginGate,
         saveGuestEmail,
