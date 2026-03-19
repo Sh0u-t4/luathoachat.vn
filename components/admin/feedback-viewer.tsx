@@ -405,8 +405,8 @@ export function FeedbackViewer({ onViewChatLog }: FeedbackViewerProps) {
                           )}
                         </TableCell>
                         <TableCell>
-                          <code className="text-xs bg-slate-100 px-2 py-1 rounded">
-                            {feedback.session_id.slice(0, 12)}...
+                          <code className="text-xs font-mono bg-slate-100 px-2 py-1 rounded break-all">
+                            {feedback.session_id}
                           </code>
                         </TableCell>
                         <TableCell className="text-sm text-slate-500">

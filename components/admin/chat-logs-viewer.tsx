@@ -471,7 +471,7 @@ export function ChatLogsViewer({ initialSession, onSessionConsumed }: ChatLogsVi
                         <span className="text-slate-400">({log.user_email})</span>
                       )}
                     </div>
-                    <span>Session: {log.session_id.slice(0, 8)}...</span>
+                    <span className="flex items-center gap-1">Session: <code className="font-mono text-[10px] bg-slate-100 px-1 py-0.5 rounded break-all">{log.session_id}</code></span>
                     {log.response_time_ms && <span>⏱️ {log.response_time_ms}ms</span>}
                   </div>
 
