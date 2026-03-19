@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { MessageSquare, User, Bot, Calendar, Filter, Download, ThumbsUp, ThumbsDown, FileSpreadsheet, Trash2, AlertTriangle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { MessageSquare, User, Bot, Calendar, Filter, Download, ThumbsUp, ThumbsDown, FileSpreadsheet, Trash2, AlertTriangle, X, ExternalLink } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,12 @@ interface MessageRating {
   like_percentage: number;
 }
 
-export function ChatLogsViewer() {
+interface ChatLogsViewerProps {
+  initialSession?: string;
+  onSessionConsumed?: () => void;
+}
+
+export function ChatLogsViewer({ initialSession, onSessionConsumed }: ChatLogsViewerProps) {
   const [logs, setLogs] = useState<ChatLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'user' | 'assistant' | 'errors'>('all');
@@ -51,12 +56,27 @@ export function ChatLogsViewer() {
   const [ratings, setRatings] = useState<Map<string, MessageRating>>(new Map());
   const [deletingSession, setDeletingSession] = useState<string | null>(null);
   const [deletingMessage, setDeletingMessage] = useState<string | null>(null);
+  const [sessionFilter, setSessionFilter] = useState<string>('');
+  const [linkedSession, setLinkedSession] = useState<string | undefined>(undefined);
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  // When navigated from Feedback tab, pre-fill session filter
+  useEffect(() => {
+    if (initialSession) {
+      setSessionFilter(initialSession);
+      setLinkedSession(initialSession);
+      onSessionConsumed?.();
+      // Scroll the panel header into view
+      setTimeout(() => headerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSession]);
 
   useEffect(() => {
     loadUsers();
     loadChatLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, selectedUser]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, selectedUser, sessionFilter]);
 
   const loadUsers = async () => {
     try {
@@ -98,6 +118,11 @@ export function ChatLogsViewer() {
 
       if (selectedUser !== 'all') {
         query = query.eq('user_id', selectedUser);
+      }
+
+      // Session filter (from Feedback tab link OR manual input)
+      if (sessionFilter) {
+        query = query.eq('session_id', sessionFilter);
       }
 
       const { data: messages, error } = await query;
@@ -289,7 +314,26 @@ export function ChatLogsViewer() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={headerRef}>
+      {/* Linked session banner (shown when navigated from Feedback tab) */}
+      {linkedSession && (
+        <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <ExternalLink className="w-4 h-4 text-amber-600 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-amber-800">Đang xem chat log từ phản hồi tiêu cực</p>
+            <p className="text-xs text-amber-600 truncate">Session: <code className="font-mono">{linkedSession}</code></p>
+          </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 px-2 text-amber-700 hover:bg-amber-100"
+            onClick={() => { setLinkedSession(undefined); setSessionFilter(''); }}
+          >
+            <X className="w-3.5 h-3.5 mr-1" />
+            Xóa bộ lọc
+          </Button>
+        </div>
+      )}
       {/* Header & Filters */}
       <Card className="p-4">
         <div className="flex items-center justify-between mb-4">
@@ -303,7 +347,7 @@ export function ChatLogsViewer() {
           </Button>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <Select value={filter} onValueChange={(v: any) => setFilter(v)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Lọc theo loại" />

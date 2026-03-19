@@ -121,6 +121,17 @@ export default function AdminPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
+  // Cross-tab navigation: Feedback → Chat Logs
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [chatLogSession, setChatLogSession] = useState<string | undefined>(undefined);
+
+  const handleViewChatLog = (sessionId: string) => {
+    setChatLogSession(sessionId);
+    setActiveTab('chatlogs');
+    // Scroll to top of page so user sees the tab
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const fetchUsers = async () => {
     try {
       const { data, error } = await supabase
@@ -301,7 +312,7 @@ export default function AdminPage() {
           <p className="text-slate-500">{t.admin.subtitle}</p>
         </div>
 
-        <Tabs defaultValue="dashboard" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full max-w-6xl grid-cols-4 sm:grid-cols-7 h-auto sm:h-12 gap-1">
             <TabsTrigger value="dashboard" className="gap-2">
               <LayoutDashboard className="w-4 h-4" />
@@ -364,11 +375,11 @@ export default function AdminPage() {
           </TabsContent>
 
           <TabsContent value="feedback">
-            <FeedbackViewer />
+            <FeedbackViewer onViewChatLog={handleViewChatLog} />
           </TabsContent>
 
           <TabsContent value="chatlogs">
-            <ChatLogsViewer />
+            <ChatLogsViewer initialSession={chatLogSession} onSessionConsumed={() => setChatLogSession(undefined)} />
           </TabsContent>
 
           <TabsContent value="knowledge">

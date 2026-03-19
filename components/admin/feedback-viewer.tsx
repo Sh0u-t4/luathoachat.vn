@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, ThumbsUp, ThumbsDown, MessageSquare, Search, Filter, RefreshCw, User, FileDown } from 'lucide-react';
+import { Loader2, ThumbsUp, ThumbsDown, MessageSquare, Search, Filter, RefreshCw, User, FileDown, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -27,7 +27,11 @@ interface Feedback {
   is_quick_rating?: boolean; // Flag để phân biệt quick rating vs detailed feedback
 }
 
-export function FeedbackViewer() {
+interface FeedbackViewerProps {
+  onViewChatLog?: (sessionId: string) => void;
+}
+
+export function FeedbackViewer({ onViewChatLog }: FeedbackViewerProps) {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -343,6 +347,7 @@ export function FeedbackViewer() {
                       <TableHead className="min-w-[300px]">Nội dung góp ý</TableHead>
                       <TableHead>Session ID</TableHead>
                       <TableHead className="w-40">Thời gian</TableHead>
+                      {onViewChatLog && <TableHead className="w-32">Chat Log</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -410,6 +415,20 @@ export function FeedbackViewer() {
                             locale: vi,
                           })}
                         </TableCell>
+                        {onViewChatLog && (
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              variant={feedback.rating === 'negative' ? 'destructive' : 'outline'}
+                              className="h-7 text-xs gap-1"
+                              onClick={() => onViewChatLog(feedback.session_id)}
+                              title={`Xem chat log của session: ${feedback.session_id}`}
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              Xem log
+                            </Button>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
