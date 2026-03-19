@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import {
   Eye,
@@ -254,8 +254,9 @@ export function EditUserDialog({ user, open, onOpenChange, onSave }: EditUserDia
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Partial<UserProfile>>({});
 
-  const handleOpen = (isOpen: boolean) => {
-    if (isOpen && user) {
+  // Pre-fill form whenever the dialog opens with a user
+  useEffect(() => {
+    if (user) {
       setFormData({
         full_name: user.full_name,
         phone: user.phone || '',
@@ -267,8 +268,7 @@ export function EditUserDialog({ user, open, onOpenChange, onSave }: EditUserDia
         account_status: user.account_status,
       });
     }
-    onOpenChange(isOpen);
-  };
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -276,17 +276,8 @@ export function EditUserDialog({ user, open, onOpenChange, onSave }: EditUserDia
 
     setLoading(true);
     try {
-      // Filter out empty strings to preserve existing data
-      const updates: Partial<UserProfile> = {};
-      Object.entries(formData).forEach(([key, value]) => {
-        // Only include non-empty values, or if it's a role/status (which should always be set)
-        if (key === 'role' || key === 'account_status') {
-          updates[key as keyof UserProfile] = value as any;
-        } else if (value && value !== '') {
-          updates[key as keyof UserProfile] = value as any;
-        }
-      });
-
+      // Send all fields (include empty strings to allow clearing values)
+      const updates: Partial<UserProfile> = { ...formData };
       await onSave(user.id, updates);
       onOpenChange(false);
     } finally {
@@ -297,7 +288,7 @@ export function EditUserDialog({ user, open, onOpenChange, onSave }: EditUserDia
   if (!user) return null;
 
   return (
-    <Dialog open={open} onOpenChange={handleOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
