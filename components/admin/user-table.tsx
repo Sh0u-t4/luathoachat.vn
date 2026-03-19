@@ -2,10 +2,18 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { Download, Search, Users, UserCheck, ShieldCheck, Eye, Pencil, Trash2, UserPlus, MoreHorizontal, FileSpreadsheet } from 'lucide-react';
+import { Download, Search, Users, UserCheck, ShieldCheck, Eye, Pencil, Trash2, UserPlus, MoreHorizontal, FileSpreadsheet, KeyRound, Mail, EyeOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -24,6 +32,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { Translation } from '@/lib/i18n/types';
 import { exportToExcel } from '@/lib/excel-export';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 import {
   ViewUserDialog,
   EditUserDialog,
@@ -152,6 +162,66 @@ export function UserTable({
   const [editUser, setEditUser] = useState<UserProfile | null>(null);
   const [deleteUser, setDeleteUser] = useState<UserProfile | null>(null);
   const [addUserOpen, setAddUserOpen] = useState(false);
+
+  // Password management state
+  const [passwordUser, setPasswordUser] = useState<UserProfile | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [settingPassword, setSettingPassword] = useState(false);
+  const [sendingReset, setSendingReset] = useState<string | null>(null);
+
+  const handleSendResetEmail = async (user: UserProfile) => {
+    setSendingReset(user.id);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+        redirectTo: `${window.location.origin}/tai-khoan/cap-nhat-mat-khau`,
+      });
+      if (error) throw error;
+      toast.success('Đã gửi email đặt lại mật khẩu', {
+        description: `Email gửi đến: ${user.email}`,
+      });
+    } catch (err: any) {
+      toast.error('Gửi email thất bại', { description: err.message });
+    } finally {
+      setSendingReset(null);
+    }
+  };
+
+  const handleSetPassword = async () => {
+    if (!passwordUser) return;
+    if (newPassword.length < 6) {
+      toast.error('Mật khẩu phải ít nhất 6 ký tự');
+      return;
+    }
+    setSettingPassword(true);
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      if (!token) throw new Error('Không tìm thấy session');
+
+      const res = await fetch('/api/admin/set-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId: passwordUser.id, newPassword }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Lỗi không xác định');
+
+      toast.success('Đã cập nhật mật khẩu thành công', {
+        description: `Tài khoản: ${passwordUser.email}`,
+      });
+      setPasswordUser(null);
+      setNewPassword('');
+    } catch (err: any) {
+      toast.error('Cập nhật mật khẩu thất bại', { description: err.message });
+    } finally {
+      setSettingPassword(false);
+    }
+  };
 
   const totalUsers = users.length;
   const activeUsers = users.filter((u) => u.account_status === 'active').length;
@@ -297,7 +367,7 @@ export function UserTable({
                       {user.created_at ? format(new Date(user.created_at), 'dd/MM/yyyy') : '-'}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -325,6 +395,44 @@ export function UserTable({
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
+                        {/* Password management dropdown */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                              title="Quản lý mật khẩu"
+                            >
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel className="text-xs text-slate-500">Quản lý mật khẩu</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleSendResetEmail(user)}
+                              disabled={sendingReset === user.id}
+                              className="gap-2 cursor-pointer"
+                            >
+                              <Mail className="w-4 h-4 text-blue-500" />
+                              <div>
+                                <p className="text-sm font-medium">Gửi email reset</p>
+                                <p className="text-xs text-slate-400">User tự đặt lại qua email</p>
+                              </div>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => { setPasswordUser(user); setNewPassword(''); setShowPassword(false); }}
+                              className="gap-2 cursor-pointer"
+                            >
+                              <KeyRound className="w-4 h-4 text-amber-500" />
+                              <div>
+                                <p className="text-sm font-medium">Đặt mật khẩu mới</p>
+                                <p className="text-xs text-slate-400">Admin tự đặt trực tiếp</p>
+                              </div>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -353,6 +461,62 @@ export function UserTable({
       />
 
       <AddUserDialog open={addUserOpen} onOpenChange={setAddUserOpen} onAdd={onUserAdd} />
+
+      {/* Set Password Dialog */}
+      <Dialog open={!!passwordUser} onOpenChange={(open) => { if (!open) { setPasswordUser(null); setNewPassword(''); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="w-5 h-5 text-amber-500" />
+              Đặt mật khẩu mới
+            </DialogTitle>
+            <DialogDescription>
+              Đặt mật khẩu mới trực tiếp cho tài khoản:
+              <strong className="block mt-1 text-slate-700">{passwordUser?.email}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700">
+              ⚠️ Mật khẩu sẽ được thay đổi ngay lập tức. User sẽ cần dùng mật khẩu mới để đăng nhập.
+            </div>
+            <div className="relative">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSetPassword()}
+                className="pr-10"
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            {newPassword.length > 0 && newPassword.length < 6 && (
+              <p className="text-xs text-red-500">Mật khẩu phải ít nhất 6 ký tự</p>
+            )}
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setPasswordUser(null); setNewPassword(''); }}>
+              Hủy
+            </Button>
+            <Button
+              onClick={handleSetPassword}
+              disabled={settingPassword || newPassword.length < 6}
+              className="bg-amber-500 hover:bg-amber-600 text-white"
+            >
+              {settingPassword ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
