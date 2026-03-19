@@ -11,9 +11,11 @@ import { useLanguage } from '@/lib/i18n/context';
 import { formatDistanceToNow } from 'date-fns';
 import { vi, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/auth/context';
 
 export function ChatHistorySidebar() {
   const { chatSessions, loadChatHistory, isAuthenticated, clearMessages, deleteSession } = useChat();
+  const { user } = useAuth();
   const { openChat } = useChatUI();
   const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
@@ -80,9 +82,14 @@ export function ChatHistorySidebar() {
 
   const handleRestoreAll = () => {
     if (typeof window !== 'undefined') {
+      // Clear legacy shared key
       localStorage.removeItem('hidden_chat_message_ids');
-      window.location.reload(); // Reload to re-fetch sessions
+      // Clear new user-scoped key
+      if (user?.id) {
+        localStorage.removeItem(`hidden_chats_${user.id}`);
+      }
     }
+    window.location.reload();
   };
 
   return (
