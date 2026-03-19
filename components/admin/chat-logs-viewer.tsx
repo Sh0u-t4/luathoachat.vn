@@ -116,7 +116,10 @@ export function ChatLogsViewer({ initialSession, onSessionConsumed }: ChatLogsVi
         query = query.eq('is_error', true);
       }
 
-      if (selectedUser !== 'all') {
+      if (selectedUser === 'anonymous') {
+        // Filter for anonymous users (user_id IS NULL)
+        query = query.is('user_id', null);
+      } else if (selectedUser !== 'all') {
         query = query.eq('user_id', selectedUser);
       }
 
@@ -366,6 +369,12 @@ export function ChatLogsViewer({ initialSession, onSessionConsumed }: ChatLogsVi
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả users</SelectItem>
+              <SelectItem value="anonymous">
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />
+                  Người dùng ẩn danh
+                </span>
+              </SelectItem>
               {users.map((user) => (
                 <SelectItem key={user.id} value={user.id}>
                   {user.full_name ? `${user.full_name} (${user.email})` : user.email}
