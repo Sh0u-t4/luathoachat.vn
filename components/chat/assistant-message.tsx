@@ -61,30 +61,43 @@ export function AssistantMessage({
   // 2. This is one of the first 5 free messages (messageIndex < 5)
   const shouldShowUnblurred = isAuthenticated || messageIndex < 5;
   // Tách nội dung thành 2 phần: public (câu đầu đủ ý) và locked (phần còn lại)
-  // Luôn hoàn thành câu đầu tiên trước khi cắt — không cắt giữa chừng
+  // Tách nội dung thành 2 phần: public (câu đầu đủ ý) và locked (phần còn lại)
+  // Luôn hoàn thành câu đầu tiên trước khi cắt
   const splitContent = (content: string) => {
-    // Tìm dấu kết thúc câu (. ! ?) theo sau bởi khoảng trắng hoặc xuống dòng
-    // Regex: dấu câu + (space | newline | end of string)
-    const sentenceEndRegex = /[.!?]+(?:\s|\n|$)/g;
-    let lastValidCut = -1;
-    let match;
-
-    // Duyệt qua tất cả dấu câu, lấy điểm cắt đủ để hiển thị ít nhất 1 câu
-    // nhưng không quá 55% nội dung
     const maxPublic = Math.floor(content.length * 0.55);
+    let lastValidCut = -1;
 
-    while ((match = sentenceEndRegex.exec(content)) !== null) {
-      const cutAt = match.index + match[0].trimEnd().length; // bao gồm dấu câu
+    // Duyệt ký tự tìm điểm kết thúc câu hợp lệ:
+    // - Dấu . sau chữ KHÔNG phải chữ số → hợp lệ
+    // - Dấu . sau chữ số ("1.", "25/2026.", "Nghị định 100.") → BỎ QUA
+    // - Dấu ! và ? luôn hợp lệ
+    for (let i = 0; i < content.length; i++) {
+      const ch = content[i];
+      const isEndPunct = ch === '!' || ch === '?';
+      const isDot = ch === '.';
+
+      if (!isEndPunct && !isDot) continue;
+
+      // Bỏ qua dấu . ngay sau chữ số (số thứ tự, số nghị đinh, năm)
+      if (isDot) {
+        const prevChar = i > 0 ? content[i - 1] : '';
+        if (/\d/.test(prevChar)) continue;
+      }
+
+      // Phải được theo sau bởi khoảng trắng, newline hoặc end-of-string
+      const nextChar = content[i + 1];
+      if (nextChar !== undefined && nextChar !== ' ' && nextChar !== '\n' && nextChar !== '\r') continue;
+
+      const cutAt = i + 1; // bao gồm cả dấu câu
       if (cutAt <= maxPublic) {
         lastValidCut = cutAt;
       } else {
-        // Vượt quá giới hạn — nếu chưa có điểm cắt nào thì lấy điểm này
         if (lastValidCut === -1) lastValidCut = cutAt;
         break;
       }
     }
 
-    // Nếu không tìm được dấu câu → fallback cắt 30% thô
+    // Nếu không tìm được dấu câu hợp lệ → fallback cắt 30% thô
     if (lastValidCut === -1) {
       const rawSplit = Math.floor(content.length * 0.3);
       return {
