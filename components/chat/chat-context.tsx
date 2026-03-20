@@ -222,9 +222,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
       console.log('[loadUserSessions] Raw data from Supabase:', data);
 
-      // Load hidden message IDs from localStorage
+      // Load hidden message IDs from user-scoped localStorage key
+      // Using user.id prefix ensures each user's hidden list is separate
+      const hiddenKey = `hidden_chats_${user.id}`;
       const hiddenIds: string[] = typeof window !== 'undefined'
-        ? JSON.parse(localStorage.getItem('hidden_chat_message_ids') || '[]')
+        ? JSON.parse(localStorage.getItem(hiddenKey) || '[]')
         : [];
 
       // Mỗi user message là một item riêng biệt trong sidebar, filter out hidden ones
@@ -662,17 +664,30 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setCurrentQuery('');
   }, []);
 
-  // Soft-delete: ẩn session khỏi sidebar người dùng bằng localStorage
-  const deleteSession = useCallback((messageId: string) => {
+  // Soft-delete: ẩn session khỏi sidebar người dùng, dùng user-scoped localStorage key
+  const deleteSession = useCallback(async (messageId: string) => {
     if (typeof window === 'undefined') return;
-    const existing: string[] = JSON.parse(localStorage.getItem('hidden_chat_message_ids') || '[]');
-    if (!existing.includes(messageId)) {
-      existing.push(messageId);
-      localStorage.setItem('hidden_chat_message_ids', JSON.stringify(existing));
-    }
-    // Xóa khỏi state ngay lập tức không cần reload
+
+    // Xóa khỏi state ngay lập tức (instant UX)
     setChatSessions(prev => prev.filter(s => s.message_id !== messageId));
-  }, []);
+
+    // Lưu vào user-scoped key để persist qua logout/login trên cùng thiết bị
+    if (user) {
+      const hiddenKey = `hidden_chats_${user.id}`;
+      const existing: string[] = JSON.parse(localStorage.getItem(hiddenKey) || '[]');
+      if (!existing.includes(messageId)) {
+        existing.push(messageId);
+        localStorage.setItem(hiddenKey, JSON.stringify(existing));
+      }
+    } else {
+      // Fallback cho anonymous: dùng key chung
+      const existing: string[] = JSON.parse(localStorage.getItem('hidden_chat_message_ids') || '[]');
+      if (!existing.includes(messageId)) {
+        existing.push(messageId);
+        localStorage.setItem('hidden_chat_message_ids', JSON.stringify(existing));
+      }
+    }
+  }, [user]);
 
 
   return (
