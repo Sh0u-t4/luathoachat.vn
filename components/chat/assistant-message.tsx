@@ -78,10 +78,22 @@ export function AssistantMessage({
 
       if (!isEndPunct && !isDot) continue;
 
-      // Bỏ qua dấu . ngay sau chữ số (số thứ tự, số nghị đinh, năm)
+      // Bỏ qua dấu . ngay sau chữ số (số thứ tự, số nghị định, năm)
       if (isDot) {
         const prevChar = i > 0 ? content[i - 1] : '';
+        // Bỏ qua: sau chữ số
         if (/\d/.test(prevChar)) continue;
+
+        // Bỏ qua: sau chữ số La Mã (I, II, III, IV, V, VI, VII, VIII, IX, X, L, C...)
+        // Lấy token trước dấu . (tối đa 8 ký tự)
+        const tokenStart = Math.max(0, i - 8);
+        const tokenBefore = content.slice(tokenStart, i).split(/\s/).pop() || '';
+        if (/^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/i.test(tokenBefore) && tokenBefore.length > 0) {
+          continue;
+        }
+
+        // Bỏ qua: sau chữ viết tắt 1 ký tự (a., b., c., ...) → không phải kết thúc câu
+        if (tokenBefore.length === 1 && /[a-z]/i.test(tokenBefore)) continue;
       }
 
       // Phải được theo sau bởi khoảng trắng, newline hoặc end-of-string
