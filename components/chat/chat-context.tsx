@@ -209,11 +209,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('chat_messages')
-        .select('id, session_id, content, created_at')
+        .select('id, session_id, content, created_at, metadata')
         .eq('user_id', user.id)
         .eq('role', 'user')
         .order('created_at', { ascending: false })
-        .limit(50); // Giới hạn 50 câu hỏi gần nhất
+        .limit(50);
 
       if (error) {
         console.error('[loadUserSessions] Supabase error:', error);
@@ -223,19 +223,21 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       console.log('[loadUserSessions] Raw data from Supabase:', data);
 
       // Load hidden message IDs from user-scoped localStorage key
-      // Using user.id prefix ensures each user's hidden list is separate
       const hiddenKey = `hidden_chats_${user.id}`;
       const hiddenIds: string[] = typeof window !== 'undefined'
         ? JSON.parse(localStorage.getItem(hiddenKey) || '[]')
         : [];
 
-      // Mỗi user message là một item riêng biệt trong sidebar, filter out hidden ones
+      // Filter: skip messages where metadata.hidden = true (DB-level) OR in hiddenIds (localStorage)
       const sessions = (data?.map((msg) => ({
         session_id: msg.session_id,
         message_id: msg.id,
         first_message: msg.content,
         created_at: msg.created_at,
-      })) || []).filter(s => !hiddenIds.includes(s.message_id));
+        hidden: msg.metadata?.hidden === true,
+      })) || [])
+        .filter(s => !s.hidden && !hiddenIds.includes(s.message_id))
+        .map(({ hidden, ...s }) => s);
 
       console.log('[loadUserSessions] Processed sessions:', sessions.length, sessions);
       setChatSessions(sessions);
@@ -664,27 +666,52 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setCurrentQuery('');
   }, []);
 
-  // Soft-delete: ẩn session khỏi sidebar người dùng, dùng user-scoped localStorage key
+  // Soft-delete: ẩn session bằng cách cập nhật metadata.hidden=true trong Supabase
+  // và lưu vào user-scoped localStorage để filter ngay lập tức
   const deleteSession = useCallback(async (messageId: string) => {
     if (typeof window === 'undefined') return;
 
-    // Xóa khỏi state ngay lập tức (instant UX)
+    // 1. Xóa khỏi state ngay lập tức (instant UX)
     setChatSessions(prev => prev.filter(s => s.message_id !== messageId));
 
-    // Lưu vào user-scoped key để persist qua logout/login trên cùng thiết bị
+    // 2. Lưu vào localStorage (hoạt động ngay cả khi Supabase fail)
     if (user) {
       const hiddenKey = `hidden_chats_${user.id}`;
-      const existing: string[] = JSON.parse(localStorage.getItem(hiddenKey) || '[]');
-      if (!existing.includes(messageId)) {
-        existing.push(messageId);
-        localStorage.setItem(hiddenKey, JSON.stringify(existing));
+      const localHidden: string[] = JSON.parse(localStorage.getItem(hiddenKey) || '[]');
+      if (!localHidden.includes(messageId)) {
+        localHidden.push(messageId);
+        localStorage.setItem(hiddenKey, JSON.stringify(localHidden));
+      }
+
+      // 3. Cập nhật metadata.hidden=true trong Supabase (persist cross-device)
+      try {
+        const { data: existing } = await supabase
+          .from('chat_messages')
+          .select('metadata')
+          .eq('id', messageId)
+          .eq('user_id', user.id)
+          .single();
+
+        const updatedMetadata = {
+          ...(existing?.metadata || {}),
+          hidden: true,
+          hidden_at: new Date().toISOString(),
+        };
+
+        await supabase
+          .from('chat_messages')
+          .update({ metadata: updatedMetadata })
+          .eq('id', messageId)
+          .eq('user_id', user.id);
+      } catch (err) {
+        console.warn('[deleteSession] Supabase update failed, localStorage fallback active:', err);
       }
     } else {
-      // Fallback cho anonymous: dùng key chung
-      const existing: string[] = JSON.parse(localStorage.getItem('hidden_chat_message_ids') || '[]');
-      if (!existing.includes(messageId)) {
-        existing.push(messageId);
-        localStorage.setItem('hidden_chat_message_ids', JSON.stringify(existing));
+      // Anonymous user fallback
+      const localHidden: string[] = JSON.parse(localStorage.getItem('hidden_chat_message_ids') || '[]');
+      if (!localHidden.includes(messageId)) {
+        localHidden.push(messageId);
+        localStorage.setItem('hidden_chat_message_ids', JSON.stringify(localHidden));
       }
     }
   }, [user]);
