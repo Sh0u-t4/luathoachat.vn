@@ -17,7 +17,7 @@ const DEFAULT_CONFIGS = [
   { key: 'ai_match_threshold', value: '0.6', description: 'Ngưỡng similarity tối thiểu để lấy chunk (0.0 - 1.0)' },
   { key: 'ai_match_count', value: '5', description: 'Số chunks tối đa lấy từ Knowledge Base' },
   { key: 'ai_temperature', value: '0.3', description: 'Nhiệt độ AI (0 = chính xác, 1 = sáng tạo)' },
-  { key: 'ai_max_tokens', value: '2000', description: 'Số token tối đa trong câu trả lời' },
+  { key: 'ai_max_tokens', value: '3000', description: 'Số token tối đa trong câu trả lời' },
   { key: 'ai_model', value: 'gemini-2.5-pro', description: 'Model AI được sử dụng' },
 ];
 

@@ -99,18 +99,30 @@ phuc_hop: Chia trường hợp → kết luận.
 quy_trinh: Step-by-step có thời gian/chi phí.
 off_topic: Giải thích phạm vi + gợi ý 2-3 câu hỏi liên quan.
 
-═══ TRÍCH DẪN ═══
-• Chỉ ghi Điều/Khoản khi đoạn trích có số đó. Không suy đoán.
-• TUYỆT ĐỐI không viết "Điều chưa xác định".
+═══ QUY TẮC TRÍCH DẪN — BẮT BUỘC TUYỆT ĐỐI ═══
+1. CHỈ ghi "Điều X" khi đoạn văn trích dẫn từ tài liệu pháp lý CÓ GHI RÕ con số đó.
+2. NGHIÊM CẤM suy đoán, ước đoán, hoặc nhớ lại số Điều/Khoản từ kiến thức nền.
+3. Nếu tài liệu cung cấp không ghi số Điều → chỉ ghi tên văn bản: "(NĐ 25/2026)" KHÔNG có số Điều.
+4. Nếu tài liệu ghi "Điều 32" → phải ghi đúng "Điều 32", không được đổi thành số khác.
+5. TUYỆT ĐỐI không viết "Điều chưa xác định" hoặc bịa số điều.
+
+═══ QUY TẮC ĐẦY ĐỦ THÔNG TIN ═══
+Với mỗi câu trả lời về giấy phép, chứng chỉ, điều kiện → PHẢI kiểm tra trong tài liệu:
+• Thời hạn hiệu lực (ví dụ: 05 năm, 03 năm) — nếu có PHẢI nêu
+• Điều kiện gia hạn (nếu có)
+• Mức phạt khi vi phạm (nếu có trong tài liệu)
+• Đối tượng áp dụng (cá nhân hay tổ chức)
+Thiếu thông tin quan trọng có sẵn trong tài liệu = câu trả lời chưa hoàn chỉnh.
 
 ═══ HÓA CHẤT CỤ THỂ ═══
 Nếu có DỮ LIỆU HÓA CHẤT TỪ DATABASE trong prompt → sử dụng NGAY để trả lời dứt khoát về phân loại, không giải thích chung chung.
 
 ═══ KIỂM TRA TRƯỚC KHI OUTPUT ═══
-☑ Đủ từng phần? ☑ Đủ items? ☑ Có nguồn? ☑ Kết thúc hoàn chỉnh?
+☑ Đủ từng phần? ☑ Đủ items? ☑ Có nguồn đúng? ☑ Thời hạn/mức phạt đã nêu? ☑ Kết thúc hoàn chỉnh?
 Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
 
 KHÔNG dùng lời chào. Đi thẳng vào nội dung. Hoàn thành toàn bộ câu trả lời.`;
+
 
 // ── AI Config cache (TTL 60s) ──────────────────────────────────────────────
 interface AIConfigCache {
@@ -178,11 +190,16 @@ async function getAIConfig(): Promise<AIConfigCache> {
 function getTokenBudget(query: string, scenario: ScenarioType): number {
   const q = query.toLowerCase();
   const hasScenario = scenario !== 'none';
-  if (/so (sánh|sanh)|so với|vs\b|khác nhau/i.test(q)) return hasScenario ? 3000 : 2500;
-  if (/đồng thời|vừa.*vừa|kết hợp/i.test(q) || hasScenario) return 3000;
-  if (/thủ tục|quy trình|các bước/i.test(q)) return 2500;
-  if (/liệt kê|danh sách|các điều kiện/i.test(q)) return 2500;
-  return 1800;
+  // Phức tạp nhất: so sánh + scenario
+  if (/so (sánh|sanh)|so với|vs\b|khác nhau/i.test(q)) return hasScenario ? 4000 : 3000;
+  // Scenario luôn cần nhiều token
+  if (/đồng thời|vừa.*vừa|kết hợp/i.test(q) || hasScenario) return 4000;
+  // Quy trình thủ tục
+  if (/thủ tục|quy trình|các bước|hướng dẫn/i.test(q)) return 3000;
+  // Liệt kê, hồ sơ, điều kiện, yêu cầu — dễ bị cắt nhất nếu thiếu token
+  if (/liệt kê|danh sách|các điều kiện|hồ sơ|bao gồm|gồm những|yêu cầu|điều kiện/i.test(q)) return 3000;
+  // Câu hỏi đơn giản
+  return 2500;
 }
 
 // ── Streaming Gemini call ──────────────────────────────────────────────────
