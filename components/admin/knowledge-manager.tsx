@@ -206,6 +206,10 @@ export function KnowledgeManager() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedDoc, setSelectedDoc] = useState<KnowledgeDocument | null>(null);
   const [reprocessingAll, setReprocessingAll] = useState(false);
+  const [showTextInput, setShowTextInput] = useState(false);
+  const [textTitle, setTextTitle] = useState('');
+  const [textContent, setTextContent] = useState('');
+  const [submittingText, setSubmittingText] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleReprocessAll = async () => {
@@ -236,6 +240,40 @@ export function KnowledgeManager() {
       setLoading(false);
     }
   }, []);
+
+  const handleSubmitText = async () => {
+    if (!textTitle.trim()) { toast.error('Vui lòng nhập tiêu đề'); return; }
+    if (!textContent.trim() || textContent.trim().length < 20) { toast.error('Nội dung quá ngắn (tối thiểu 20 ký tự)'); return; }
+
+    setSubmittingText(true);
+    try {
+      // Tạo document record không có file upload
+      const res = await fetch('/api/knowledge/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: textTitle.trim(),
+          file_name: `${textTitle.trim()}.txt`,
+          file_type: 'txt',
+          file_size: new Blob([textContent]).size,
+          uploaded_by: user?.id,
+          storage_path: '',
+        }),
+      });
+      const docData = await res.json();
+      if (!res.ok) throw new Error(docData.error);
+
+      setShowTextInput(false);
+      setTextTitle('');
+      setTextContent('');
+      toast.info('Ðang tạo embeddings...');
+      await processDocument(docData.document.id, textContent.trim(), '', 'txt');
+    } catch (err) {
+      toast.error('Lỗi: ' + (err as Error).message);
+    } finally {
+      setSubmittingText(false);
+    }
+  };
 
   useEffect(() => { fetchDocuments(); }, [fetchDocuments]);
 
@@ -380,6 +418,53 @@ export function KnowledgeManager() {
         <DocumentDetailModal doc={selectedDoc} onClose={() => setSelectedDoc(null)} />
       )}
 
+      {/* Direct text input modal */}
+      {showTextInput && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowTextInput(false)} />
+          <div className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-slate-900 text-lg">Nhập văn bản trực tiếp</h3>
+              <button onClick={() => setShowTextInput(false)} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
+            </div>
+            <p className="text-xs text-slate-400">Dán nội dung điều luật trực tiếp — không cần tạo file. Hệ thống sẽ tự động chia chunks và tạo embeddings.</p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-slate-700 block mb-1">Tiêu đề tài liệu</label>
+                <input
+                  type="text"
+                  value={textTitle}
+                  onChange={e => setTextTitle(e.target.value)}
+                  placeholder="Ví dụ: Điều 18 NĐ 25/2026 - Thời hạn chứng chỉ tư vấn"
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 block mb-1">Nội dung văn bản</label>
+                <textarea
+                  value={textContent}
+                  onChange={e => setTextContent(e.target.value)}
+                  rows={12}
+                  placeholder="Dán nội dung điều luật vào đây..."
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-violet-300 resize-none"
+                />
+                <p className="text-xs text-slate-400 mt-1">{textContent.length} ký tự</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <button onClick={() => setShowTextInput(false)} className="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50">Hủy</button>
+              <button
+                onClick={handleSubmitText}
+                disabled={submittingText}
+                className="px-5 py-2 text-sm bg-violet-600 text-white rounded-xl hover:bg-violet-700 disabled:opacity-60 flex items-center gap-2"
+              >
+                {submittingText ? <><Loader2 className="w-4 h-4 animate-spin" /> Đang xử lý...</> : <><Brain className="w-4 h-4" /> Tạo Embedding</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -394,6 +479,14 @@ export function KnowledgeManager() {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={fetchDocuments} className="gap-2">
             <RefreshCw className="w-4 h-4" /> Làm mới
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowTextInput(true)}
+            className="gap-2 border-violet-200 text-violet-700 hover:bg-violet-50"
+          >
+            <FileText className="w-4 h-4" /> Nhập text
           </Button>
           <Button
             size="sm"
