@@ -314,18 +314,24 @@ export function KnowledgeManager() {
         // Server downloads from storage and uses pdf-parse
         await processDocument(docData.document.id, '', storagePath, 'pdf');
       } else {
-        // TXT: read content client-side
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const text = e.target?.result as string;
-          if (!text || text.trim().length < 10) {
-            toast.error('Không đọc được nội dung file TXT.');
-            return;
-          }
-          await processDocument(docData.document.id, text, '', 'txt');
-        };
-        reader.onerror = () => toast.error('Lỗi đọc file');
-        reader.readAsText(file, 'utf-8');
+        // TXT: đọc client-side với fallback encoding cho file Windows-ANSI tiếng Việt
+        const arrayBuffer = await file.arrayBuffer();
+
+        // Thử UTF-8 trước
+        let text = new TextDecoder('utf-8', { fatal: false }).decode(arrayBuffer);
+
+        // Nếu có ký tự lỗi (U+FFFD) → file là ANSI/Windows-1252
+        if (text.includes('\uFFFD')) {
+          text = new TextDecoder('windows-1252', { fatal: false }).decode(arrayBuffer);
+        }
+
+        // Nếu vẫn rỗng sau 2 lần thử
+        if (!text || text.trim().length < 5) {
+          toast.error('Không đọc được nội dung file TXT. Hãy lưu file với encoding UTF-8 và thử lại.');
+          return;
+        }
+
+        await processDocument(docData.document.id, text, '', 'txt');
       }
 
     } catch (err) {
