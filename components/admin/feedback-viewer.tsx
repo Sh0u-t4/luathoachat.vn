@@ -42,8 +42,14 @@ export function FeedbackViewer({ onViewChatLog }: FeedbackViewerProps) {
     negative: 0,
   });
 
-  const fetchFeedbacks = async () => {
-    setLoading(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchFeedbacks = async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
     try {
       // Get detailed feedbacks (from message_feedback table)
       const { data: feedbackData, error: feedbackError } = await supabase
@@ -123,6 +129,7 @@ export function FeedbackViewer({ onViewChatLog }: FeedbackViewerProps) {
       toast.error('Không thể tải danh sách phản hồi');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -208,6 +215,8 @@ export function FeedbackViewer({ onViewChatLog }: FeedbackViewerProps) {
     );
   }
 
+  const handleRefresh = () => fetchFeedbacks(true);
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
@@ -283,7 +292,7 @@ export function FeedbackViewer({ onViewChatLog }: FeedbackViewerProps) {
                 variant="outline"
                 size="sm"
                 onClick={handleExportExcel}
-                disabled={filteredFeedbacks.length === 0}
+                disabled={feedbacks.length === 0}
                 className="shrink-0"
               >
                 <FileDown className="w-4 h-4 mr-2" />
@@ -292,11 +301,12 @@ export function FeedbackViewer({ onViewChatLog }: FeedbackViewerProps) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={fetchFeedbacks}
+                onClick={handleRefresh}
+                disabled={refreshing}
                 className="shrink-0"
               >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Làm mới
+                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Đang tải...' : 'Làm mới'}
               </Button>
             </div>
           </div>
