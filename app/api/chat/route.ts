@@ -1,10 +1,11 @@
 import { NextRequest } from 'next/server';
 import { detectChemicalsInQuery, buildChemicalContext } from '@/lib/chemical-db';
+import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_STREAM_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent`;
+const GEMINI_BASE_URL = `https://generativelanguage.googleapis.com/v1beta/models`;
 
 // ── Language detection ─────────────────────────────────────────────────────
 function detectLanguage(query: string): 'vi' | 'en' {
@@ -82,8 +83,8 @@ const SCENARIO_CHECKLISTS: Record<Exclude<ScenarioType, 'none'>, string> = {
 7. Trách nhiệm xử lý môi trường bị ô nhiễm`,
 };
 
-// ── System instruction ─────────────────────────────────────────────────────
-const SYSTEM_INSTRUCTION = `Bạn là Trợ lý Pháp lý AI của LuatHoaChat.vn, chuyên về Luật Hóa chất Việt Nam (Luật 69/2025, NĐ 24/25/26/2026).
+// ── Default system instruction (fallback nếu DB không có dữ liệu) ──────────
+const DEFAULT_SYSTEM_INSTRUCTION = `Bạn là Trợ lý Pháp lý AI của LuatHoaChat.vn, chuyên về Luật Hóa chất Việt Nam (Luật 69/2025, NĐ 24/25/26/2026).
 
 PHẠM VI: Chỉ có dữ liệu về Luật 69/2025 và NĐ 24, 25, 26/2026.
 
@@ -111,7 +112,69 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
 
 KHÔNG dùng lời chào. Đi thẳng vào nội dung. Hoàn thành toàn bộ câu trả lời.`;
 
-// ── Token budget by question type ─────────────────────────────────────────
+// ── AI Config cache (TTL 60s) ──────────────────────────────────────────────
+interface AIConfigCache {
+  systemPrompt: string;
+  temperature: number;
+  model: string;
+  maxTokensOverride: number | null; // null = dùng auto-budget theo loại câu hỏi
+  fetchedAt: number;
+}
+
+let configCache: AIConfigCache | null = null;
+const CONFIG_CACHE_TTL_MS = 60 * 1000; // 60 giây
+
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
+
+async function getAIConfig(): Promise<AIConfigCache> {
+  // Trả về cache nếu còn hiệu lực
+  if (configCache && Date.now() - configCache.fetchedAt < CONFIG_CACHE_TTL_MS) {
+    return configCache;
+  }
+
+  try {
+    const { data } = await getSupabaseAdmin()
+      .from('system_config')
+      .select('key, value')
+      .in('key', ['ai_system_prompt', 'ai_temperature', 'ai_model', 'ai_max_tokens']);
+
+    const get = (key: string) => (data as any[])?.find(r => r.key === key)?.value;
+
+    const systemPromptRaw = get('ai_system_prompt');
+    const temperatureRaw  = get('ai_temperature');
+    const modelRaw        = get('ai_model');
+    const maxTokensRaw    = get('ai_max_tokens');
+
+    configCache = {
+      systemPrompt:      systemPromptRaw?.trim() ? systemPromptRaw : DEFAULT_SYSTEM_INSTRUCTION,
+      temperature:       temperatureRaw  ? parseFloat(temperatureRaw) : 0.15,
+      model:             modelRaw?.trim() ? modelRaw : 'gemini-2.5-flash',
+      maxTokensOverride: maxTokensRaw    ? parseInt(maxTokensRaw)    : null,
+      fetchedAt: Date.now(),
+    };
+
+    console.log(`[api/chat] Config loaded — model: ${configCache.model}, temp: ${configCache.temperature}`);
+  } catch (err) {
+    console.warn('[api/chat] DB config unavailable, using defaults:', err);
+    configCache = {
+      systemPrompt:      DEFAULT_SYSTEM_INSTRUCTION,
+      temperature:       0.15,
+      model:             'gemini-2.5-flash',
+      maxTokensOverride: null,
+      fetchedAt: Date.now(),
+    };
+  }
+
+  return configCache;
+}
+
+// ── Token budget theo loại câu hỏi ────────────────────────────────────────
 function getTokenBudget(query: string, scenario: ScenarioType): number {
   const q = query.toLowerCase();
   const hasScenario = scenario !== 'none';
@@ -119,25 +182,29 @@ function getTokenBudget(query: string, scenario: ScenarioType): number {
   if (/đồng thời|vừa.*vừa|kết hợp/i.test(q) || hasScenario) return 3000;
   if (/thủ tục|quy trình|các bước/i.test(q)) return 2500;
   if (/liệt kê|danh sách|các điều kiện/i.test(q)) return 2500;
-  return 1800; // Simple lookup
+  return 1800;
 }
 
 // ── Streaming Gemini call ──────────────────────────────────────────────────
 async function streamGemini(
   systemInstruction: string,
   userMessage: string,
-  maxTokens: number
+  maxTokens: number,
+  temperature: number,
+  model: string
 ): Promise<ReadableStream | null> {
   if (!GEMINI_API_KEY) return null;
 
-  const res = await fetch(`${GEMINI_STREAM_URL}?key=${GEMINI_API_KEY}&alt=sse`, {
+  const streamUrl = `${GEMINI_BASE_URL}/${model}:streamGenerateContent`;
+
+  const res = await fetch(`${streamUrl}?key=${GEMINI_API_KEY}&alt=sse`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       system_instruction: { parts: [{ text: systemInstruction }] },
       contents: [{ role: 'user', parts: [{ text: userMessage }] }],
       generationConfig: {
-        temperature: 0.15,
+        temperature,
         maxOutputTokens: maxTokens,
         topP: 0.9,
         topK: 40,
@@ -146,14 +213,14 @@ async function streamGemini(
   });
 
   if (!res.ok || !res.body) {
-    console.warn(`[api/chat] Gemini stream failed (${res.status})`);
+    console.warn(`[api/chat] Gemini stream failed (${res.status}) for model: ${model}`);
     return null;
   }
 
   return res.body;
 }
 
-// ── Main handler ─────────────────────────────────────────────────────────
+// ── Main handler ──────────────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
@@ -168,21 +235,25 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: 'GEMINI_API_KEY not configured' }), { status: 500 });
     }
 
-    // 1. Detect language, scenario, chemicals
-    const lang = detectLanguage(query);
-    const scenario = detectScenario(query);
-    const foundChemicals = detectChemicalsInQuery(query);
-    const chemicalContext = buildChemicalContext(foundChemicals);
+    // 1. Đọc AI config từ DB (cache 60s)
+    const aiConfig = await getAIConfig();
+
+    // 2. Detect language, scenario, chemicals
+    const lang             = detectLanguage(query);
+    const scenario         = detectScenario(query);
+    const foundChemicals   = detectChemicalsInQuery(query);
+    const chemicalContext  = buildChemicalContext(foundChemicals);
     const scenarioChecklist = scenario !== 'none' ? SCENARIO_CHECKLISTS[scenario] : '';
 
-    const maxTokens = getTokenBudget(query, scenario);
+    // Dùng max_tokens từ DB nếu có, ngược lại tự tính theo loại câu hỏi
+    const maxTokens = aiConfig.maxTokensOverride ?? getTokenBudget(query, scenario);
 
-    // 2. Build language prefix
+    // 3. Language prefix
     const langPrefix = lang === 'en'
       ? '[LANGUAGE: Respond entirely in English. Use [Source: Decree 26/2026, Article 9] for citations.]\n'
       : '';
 
-    // 3. Build user message
+    // 4. Build user message
     const hasContext = !!(knowledge_context && knowledge_context.trim().length > 0);
     const contextSection = hasContext
       ? `# TÀI LIỆU PHÁP LÝ:\n${knowledge_context}`
@@ -191,13 +262,19 @@ export async function POST(request: NextRequest) {
     const userMessage = [
       langPrefix,
       contextSection,
-      chemicalContext,  // Chemical DB facts (empty string if no chemicals detected)
-      scenarioChecklist, // Scenario checklist (empty string if no scenario)
+      chemicalContext,
+      scenarioChecklist,
       `---\n# CÂU HỎI: ${query}`,
     ].filter(Boolean).join('\n\n');
 
-    // 4. Stream response
-    const geminiStream = await streamGemini(SYSTEM_INSTRUCTION, userMessage, maxTokens);
+    // 5. Gọi Gemini với config từ DB
+    const geminiStream = await streamGemini(
+      aiConfig.systemPrompt,
+      userMessage,
+      maxTokens,
+      aiConfig.temperature,
+      aiConfig.model
+    );
 
     if (!geminiStream) {
       return new Response(JSON.stringify({
@@ -207,14 +284,14 @@ export async function POST(request: NextRequest) {
       }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // 5. Transform Gemini SSE stream → our streaming format
+    // 6. Transform Gemini SSE → our streaming format
     const detected = foundChemicals.map(c => c.info.canonicalName);
 
     const transformedStream = new ReadableStream({
       async start(controller) {
-        const reader = geminiStream.getReader();
+        const reader  = geminiStream.getReader();
         const decoder = new TextDecoder();
-        let buffer = '';
+        let buffer   = '';
         let fullText = '';
 
         try {
@@ -235,16 +312,14 @@ export async function POST(request: NextRequest) {
                 const token: string = chunk?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
                 if (token) {
                   fullText += token;
-                  // Send token as SSE
-                  const payload = JSON.stringify({ token });
-                  controller.enqueue(new TextEncoder().encode(`data: ${payload}\n\n`));
+                  controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ token })}\n\n`));
                 }
               } catch { /* malformed chunk, skip */ }
             }
           }
 
-          // Send final metadata
-          const responseMeta = JSON.stringify({
+          // Final metadata
+          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({
             done: true,
             full_text: fullText,
             response_time_ms: Date.now() - startTime,
@@ -252,9 +327,8 @@ export async function POST(request: NextRequest) {
             question_type: scenario !== 'none' ? `scenario_${scenario}` : 'general',
             has_context: hasContext,
             detected_chemicals: detected,
-            model_used: 'gemini-2.5-flash',
-          });
-          controller.enqueue(new TextEncoder().encode(`data: ${responseMeta}\n\n`));
+            model_used: aiConfig.model,
+          })}\n\n`));
         } catch (err) {
           console.error('[api/chat] Stream error:', err);
         } finally {
