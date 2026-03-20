@@ -347,29 +347,12 @@ export function KnowledgeManager() {
 
       toast.info('📤 Đang xử lý và tạo embeddings...');
 
-      // 3. Process: TXT = read client-side, PDF = extract server-side
+      // 3. Process: cả TXT và PDF đều đọc server-side từ Storage
       if (fileType === 'pdf') {
-        // Server downloads from storage and uses pdf-parse
         await processDocument(docData.document.id, '', storagePath, 'pdf');
       } else {
-        // TXT: đọc client-side với fallback encoding cho file Windows-ANSI tiếng Việt
-        const arrayBuffer = await file.arrayBuffer();
-
-        // Thử UTF-8 trước
-        let text = new TextDecoder('utf-8', { fatal: false }).decode(arrayBuffer);
-
-        // Nếu có ký tự lỗi (U+FFFD) → file là ANSI/Windows-1252
-        if (text.includes('\uFFFD')) {
-          text = new TextDecoder('windows-1252', { fatal: false }).decode(arrayBuffer);
-        }
-
-        // Nếu vẫn rỗng sau 2 lần thử
-        if (!text || text.trim().length < 5) {
-          toast.error('Không đọc được nội dung file TXT. Hãy lưu file với encoding UTF-8 và thử lại.');
-          return;
-        }
-
-        await processDocument(docData.document.id, text, '', 'txt');
+        // TXT: server download + decode (hỗ trợ mọi encoding: UTF-8, BOM, Windows-1252)
+        await processDocument(docData.document.id, '', storagePath, 'txt');
       }
 
     } catch (err) {

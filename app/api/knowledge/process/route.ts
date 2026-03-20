@@ -204,6 +204,37 @@ async function extractPdfText(storagePath: string): Promise<string> {
   return parsed.text;
 }
 
+// Extract text from TXT file stored in Supabase Storage
+async function extractTxtText(storagePath: string): Promise<string> {
+  const { data, error } = await supabaseAdmin.storage
+    .from('knowledge-documents')
+    .download(storagePath);
+
+  if (error || !data) {
+    throw new Error(`Cannot download TXT from storage: ${error?.message}`);
+  }
+
+  const arrayBuffer = await data.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  // Strip BOM if present (EF BB BF for UTF-8, FF FE for UTF-16 LE)
+  let text: string;
+  if (buffer[0] === 0xEF && buffer[1] === 0xBB && buffer[2] === 0xBF) {
+    text = buffer.slice(3).toString('utf-8');
+  } else if (buffer[0] === 0xFF && buffer[1] === 0xFE) {
+    text = buffer.slice(2).toString('utf16le');
+  } else {
+    // Try UTF-8 first, fallback to latin1 (covers Windows-1252)
+    text = buffer.toString('utf-8');
+    // If result has replacement chars, retry with latin1
+    if (text.includes('\uFFFD')) {
+      text = buffer.toString('latin1');
+    }
+  }
+
+  return text;
+}
+
 
 export async function POST(request: NextRequest) {
   let document_id: string | undefined;
@@ -228,11 +259,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }
 
-    // Extract text: PDF from storage, or use provided text_content
+    // Extract text: PDF from storage, TXT from storage, or use provided text_content
     let textToProcess: string;
     if (file_type === 'pdf' && storage_path) {
       console.log(`[process] Extracting text from PDF: ${storage_path}`);
       textToProcess = await extractPdfText(storage_path);
+    } else if (file_type === 'txt' && storage_path) {
+      console.log(`[process] Reading TXT from storage: ${storage_path}`);
+      textToProcess = await extractTxtText(storage_path);
     } else if (text_content) {
       textToProcess = text_content;
     } else {
