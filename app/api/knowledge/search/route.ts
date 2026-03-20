@@ -91,20 +91,51 @@ export async function POST(request: NextRequest) {
     if (embedding) {
       const { data, error } = await supabaseAdmin.rpc('search_knowledge_base', {
         query_embedding: `[${embedding.join(',')}]`,
-        match_threshold: 0.45,
+        match_threshold: 0.30,  // Đủ thấp để catch chunk có similarity trung bình
         match_count: matchCount,
       });
 
-      if (!error && data && data.length > 0) {
-        const chunks = data as { document_title: string; content: string; similarity: number; chunk_index: number }[];
-        const context = chunks
+      // Tìm thêm chunks từ documents có title khớp với keyword câu hỏi
+      // (Đảm bảo chunks như "Điều 18" luôn được include dù similarity thấp)
+      const queryWords = query.split(/\s+/).filter((w: string) => w.length > 3).slice(0, 5);
+      const titleConditions = queryWords.map((w: string) => `knowledge_documents.title.ilike.%${w}%`).join(',');
+      let supplementaryChunks: { document_title: string; content: string; similarity: number; chunk_index: number }[] = [];
+
+      if (titleConditions) {
+        const { data: suppData } = await supabaseAdmin
+          .from('knowledge_chunks')
+          .select('content, chunk_index, knowledge_documents!inner(title, status)')
+          .or(titleConditions, { foreignTable: 'knowledge_documents' })
+          .limit(5);
+
+        if (suppData && suppData.length > 0) {
+          supplementaryChunks = (suppData as any[]).map(c => ({
+            content: c.content,
+            document_title: (Array.isArray(c.knowledge_documents) ? c.knowledge_documents[0]?.title : c.knowledge_documents?.title) || 'Văn bản pháp luật',
+            similarity: 0.29, // Thấp hơn threshold — chỉ dùng khi vector search tìm được ít
+            chunk_index: c.chunk_index,
+          }));
+        }
+      }
+
+      const vectorChunks = (!error && data && data.length > 0)
+        ? (data as { document_title: string; content: string; similarity: number; chunk_index: number }[])
+        : [];
+
+      // Merge: vector results first, then supplementary (dedup by content)
+      const seenContent = new Set(vectorChunks.map(c => c.content.slice(0, 50)));
+      const uniqueSupp = supplementaryChunks.filter(c => !seenContent.has(c.content.slice(0, 50)));
+      const allChunks = [...vectorChunks, ...uniqueSupp].slice(0, matchCount + 3);
+
+      if (allChunks.length > 0) {
+        const context = allChunks
           .map((c) => `[Nguồn: ${c.document_title}]\n${c.content}`)
           .join('\n\n---\n\n');
         return NextResponse.json({
           context,
-          chunks, // structured chunks with document_title for chat route
-          search_mode: 'vector',
-          chunks_found: chunks.length,
+          chunks: allChunks,
+          search_mode: vectorChunks.length > 0 ? 'vector' : 'title_match',
+          chunks_found: allChunks.length,
         });
       }
     }
