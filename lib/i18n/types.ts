@@ -37,6 +37,7 @@ export interface Translation {
     suggestion1: string;
     suggestion2: string;
     suggestion3: string;
+    loadingDocs: string;
   };
   features: {
     penalties: {
@@ -275,6 +276,36 @@ export interface Translation {
     ratingSuccess: string;
     ratingError: string;
     headerOnline: string;
+  };
+  promptLibrary: {
+    sectionBadge: string;
+    title: string;
+    subtitle: string;
+    subtitleLaw: string;
+    subtitleDecrees: string;
+    ctaText: string;
+    ctaLink: string;
+    askNow: string;
+    sentToast: string;
+    sentToastDesc: string;
+    card1Category: string;
+    card1Question: string;
+    card1Preview: string;
+    card2Category: string;
+    card2Question: string;
+    card2Preview: string;
+    card3Category: string;
+    card3Question: string;
+    card3Preview: string;
+    card4Category: string;
+    card4Question: string;
+    card4Preview: string;
+    card5Category: string;
+    card5Question: string;
+    card5Preview: string;
+    card6Category: string;
+    card6Question: string;
+    card6Preview: string;
   };
   seo: {
     home: {

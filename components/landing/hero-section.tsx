@@ -207,7 +207,7 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
         {!visibilityLoading && visibility.download_buttons && (
           <div className="flex flex-wrap justify-center gap-3 mb-10">
             {loading ? (
-              <div className="text-slate-400">Đang tải văn bản...</div>
+            <div className="text-slate-400">{t.hero.loadingDocs}</div>
             ) : (
               <>
                 {documents
@@ -230,7 +230,7 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
                   <DropdownMenuTrigger asChild>
                     <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-green-500/50">
                       <FileText className="w-4 h-4" />
-                      <span>Nghị định</span>
+                      <span>{t.hero.badge1.startsWith('Chemical') ? 'Decree' : 'Nghị định'}</span>
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </DropdownMenuTrigger>
@@ -260,7 +260,7 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
                   <DropdownMenuTrigger asChild>
                     <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-amber-500/50">
                       <FileText className="w-4 h-4" />
-                      <span>Thông tư</span>
+                      <span>{t.hero.badge1.startsWith('Chemical') ? 'Circular' : 'Thông tư'}</span>
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </DropdownMenuTrigger>
