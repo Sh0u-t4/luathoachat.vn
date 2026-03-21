@@ -38,6 +38,14 @@ export interface Translation {
     suggestion2: string;
     suggestion3: string;
     loadingDocs: string;
+    chatTitle: string;
+    chatTitleHighlight: string;
+    chatTitleSuffix: string;
+    chatSubtitle: string;
+    chatPlaceholder: string;
+    chatButton: string;
+    chatButtonMobile: string;
+    recentSearches: string;
   };
   features: {
     penalties: {

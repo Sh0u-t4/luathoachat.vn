@@ -110,16 +110,16 @@ export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
       <div className="relative z-10 max-w-3xl mx-auto text-center w-full">
         {/* Main Heading */}
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 leading-tight tracking-tight">
-          Bạn muốn tư vấn{' '}
+          {t.hero.chatTitle}{' '}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-400 animate-gradient">
-            Luật Hóa chất
+            {t.hero.chatTitleHighlight}
           </span>{' '}
-          hôm nay?
+          {t.hero.chatTitleSuffix}
         </h1>
 
         {/* Subtitle */}
         <p className="text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto">
-          Trợ lý AI thông minh giúp doanh nghiệp tuân thủ Luật Hóa chất 69/2025 và các Nghị định 2026.
+          {t.hero.chatSubtitle}
         </p>
 
         {/* Chat Input Box (Centered) */}
@@ -137,7 +137,7 @@ export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
                   onKeyDown={handleKeyDown}
                   onFocus={() => isMounted && setShowRecentSearches(true)}
                   onBlur={() => isMounted && setTimeout(() => setShowRecentSearches(false), 200)}
-                  placeholder="Hỏi về Luật Hóa chất, khai báo, giấy phép..."
+                  placeholder={t.hero.chatPlaceholder}
                   maxLength={MAX_CHARS}
                   className="flex-1 bg-transparent text-white placeholder:text-slate-500 px-4 py-3 text-base focus:outline-none"
                   aria-label="Search input - Press Cmd/Ctrl+K to focus"
@@ -155,8 +155,8 @@ export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
                   disabled={!inputValue.trim()}
                   className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl px-6 py-3 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                 >
-                  <span className="hidden sm:inline">Tư vấn ngay</span>
-                  <span className="sm:hidden">Gửi</span>
+                  <span className="hidden sm:inline">{t.hero.chatButton}</span>
+                  <span className="sm:hidden">{t.hero.chatButtonMobile}</span>
                   <Send className="w-4 h-4 ml-2" />
                 </Button>
               </div>
@@ -167,7 +167,7 @@ export function HeroSectionWithChat({ onSearch }: HeroSectionWithChatProps) {
                   <div className="flex items-center justify-between px-2 py-1 mb-1">
                     <span className="text-xs text-slate-400 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      Tìm kiếm gần đây
+                      {t.hero.recentSearches}
                     </span>
                   </div>
                   <div className="space-y-1">

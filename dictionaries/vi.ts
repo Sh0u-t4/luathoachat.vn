@@ -38,6 +38,14 @@ export const vi: Translation = {
     suggestion2: 'Khoảng cách an toàn kho hóa chất?',
     suggestion3: 'Thủ tục khai báo nhập khẩu Methanol?',
     loadingDocs: 'Đang tải văn bản...',
+    chatTitle: 'Bạn muốn tư vấn',
+    chatTitleHighlight: 'Luật Hóa chất',
+    chatTitleSuffix: 'hôm nay?',
+    chatSubtitle: 'Trợ lý AI thông minh giúp doanh nghiệp tuân thủ Luật Hóa chất 69/2025 và các Nghị định 2026.',
+    chatPlaceholder: 'Hỏi về Luật Hóa chất, khai báo, giấy phép...',
+    chatButton: 'Tư vấn ngay',
+    chatButtonMobile: 'Gửi',
+    recentSearches: 'Tìm kiếm gần đây',
   },
   features: {
     penalties: {

@@ -38,6 +38,14 @@ export const en: Translation = {
     suggestion2: 'Safety distance for chemical warehouse?',
     suggestion3: 'Methanol import declaration procedure?',
     loadingDocs: 'Loading documents...',
+    chatTitle: 'Need advice on',
+    chatTitleHighlight: 'Chemical Law',
+    chatTitleSuffix: 'today?',
+    chatSubtitle: 'Smart AI assistant helping businesses comply with Chemical Law 69/2025 and Decrees 2026.',
+    chatPlaceholder: 'Ask about Chemical Law, declarations, permits...',
+    chatButton: 'Ask AI',
+    chatButtonMobile: 'Send',
+    recentSearches: 'Recent searches',
   },
   features: {
     penalties: {
