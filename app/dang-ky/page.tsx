@@ -164,24 +164,7 @@ function RegisterForm() {
             ))}
           </div>
 
-          <div className="mt-12 pt-8 border-t border-slate-700/50">
-            <div className="flex items-center gap-6">
-              <div>
-                <div className="text-2xl font-bold text-white">1,000+</div>
-                <div className="text-xs text-slate-500">Hóa chất trong danh mục</div>
-              </div>
-              <div className="w-px h-10 bg-slate-700" />
-              <div>
-                <div className="text-2xl font-bold text-white">4</div>
-                <div className="text-xs text-slate-500">Văn bản pháp luật</div>
-              </div>
-              <div className="w-px h-10 bg-slate-700" />
-              <div>
-                <div className="text-2xl font-bold text-white">24/7</div>
-                <div className="text-xs text-slate-500">AI hỗ trợ</div>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
 
