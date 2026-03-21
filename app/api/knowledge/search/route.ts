@@ -85,8 +85,20 @@ export async function POST(request: NextRequest) {
     const matchCount = Math.min(Math.max(top_k ?? 6, 3), 15); // clamp 3-15
     if (!query) return NextResponse.json({ error: 'query required' }, { status: 400 });
 
+    // ── Query expansion for critical documents ──────────────────────────────
+    // Detect if query is about GHS/labeling/TT02 or toxic criteria/NĐ26 Đ2
+    const needsTT02 = /nh[ãa]n|ghi nh[ãa]n|sds|phi[eế]u an to[àa]n|ghs|c[aả]nh b[aá]o|picto|bi[eể]u t[uư][ợo]ng|th[oô]ng t[uư]|tt.?02/i.test(query);
+    const needsGHS26 = /ch[aấ]t đ[oộ]c|ti[eê]u ch[ií] (?:độc|phân loại)|ph[aâ]n lo[aạ]i đ[oộ]c|toxic|LD50|LC50|ghs categor/i.test(query);
+
+    // If needed, expand the embedding query to pull in relevant documents
+    const embeddingQuery = needsTT02
+      ? query + ' thông tư 02 2026 nhãn hóa chất SDS phiếu an toàn'
+      : needsGHS26
+        ? query + ' nghị định 26 điều 2 khoản 4 chất độc tiêu chí GHS'
+        : query;
+
     // Try vector search first
-    const embedding = await generateEmbedding(query);
+    const embedding = await generateEmbedding(embeddingQuery);
 
     if (embedding) {
       const { data, error } = await supabaseAdmin.rpc('search_knowledge_base', {
@@ -96,7 +108,6 @@ export async function POST(request: NextRequest) {
       });
 
       // Tìm thêm chunks từ documents có title khớp với keyword câu hỏi
-      // (Đảm bảo chunks như "Điều 18" luôn được include dù similarity thấp)
       const queryWords = query.split(/\s+/).filter((w: string) => w.length > 3).slice(0, 5);
       const titleConditions = queryWords.map((w: string) => `knowledge_documents.title.ilike.%${w}%`).join(',');
       let supplementaryChunks: { document_title: string; content: string; similarity: number; chunk_index: number }[] = [];
@@ -106,15 +117,58 @@ export async function POST(request: NextRequest) {
           .from('knowledge_chunks')
           .select('content, chunk_index, knowledge_documents!inner(title, status)')
           .or(titleConditions, { foreignTable: 'knowledge_documents' })
-          .limit(5);
+          .limit(8);  // Tăng từ 5 → 8
 
         if (suppData && suppData.length > 0) {
           supplementaryChunks = (suppData as any[]).map(c => ({
             content: c.content,
             document_title: (Array.isArray(c.knowledge_documents) ? c.knowledge_documents[0]?.title : c.knowledge_documents?.title) || 'Văn bản pháp luật',
-            similarity: 0.29, // Thấp hơn threshold — chỉ dùng khi vector search tìm được ít
+            similarity: 0.29,
             chunk_index: c.chunk_index,
           }));
+        }
+      }
+
+      // ── Dedicated fetch cho TT 02/2026 khi query liên quan ───────────────
+      if (needsTT02) {
+        const { data: tt02Data } = await supabaseAdmin
+          .from('knowledge_chunks')
+          .select('content, chunk_index, knowledge_documents!inner(title, status)')
+          .or('knowledge_documents.title.ilike.%02/2026%,knowledge_documents.title.ilike.%TT-BCT%,knowledge_documents.title.ilike.%thông tư%', { foreignTable: 'knowledge_documents' })
+          .order('chunk_index', { ascending: true })
+          .limit(8);
+
+        if (tt02Data && tt02Data.length > 0) {
+          const tt02Chunks = (tt02Data as any[]).map(c => ({
+            content: c.content,
+            document_title: (Array.isArray(c.knowledge_documents) ? c.knowledge_documents[0]?.title : c.knowledge_documents?.title) || 'Thông tư 02/2026/TT-BCT',
+            similarity: 0.31, // Cao hơn supplementary threshold — ưu tiên include
+            chunk_index: c.chunk_index,
+          }));
+          supplementaryChunks = [...tt02Chunks, ...supplementaryChunks];
+          console.log(`[knowledge-search] Fetched ${tt02Chunks.length} TT02/2026 dedicated chunks`);
+        }
+      }
+
+      // ── Dedicated fetch cho NĐ 26 Điều 2 khi query về chất độc GHS ───────
+      if (needsGHS26) {
+        const { data: nd26Data } = await supabaseAdmin
+          .from('knowledge_chunks')
+          .select('content, chunk_index, knowledge_documents!inner(title, status)')
+          .ilike('knowledge_documents.title', '%26/2026%')
+          .or('content.ilike.%tiêu chí%,content.ilike.%chất độc%,content.ilike.%GHS%,content.ilike.%Khoản 4%', { foreignTable: 'knowledge_chunks' })
+          .order('chunk_index', { ascending: true })
+          .limit(5);
+
+        if (nd26Data && nd26Data.length > 0) {
+          const nd26Chunks = (nd26Data as any[]).map(c => ({
+            content: c.content,
+            document_title: (Array.isArray(c.knowledge_documents) ? c.knowledge_documents[0]?.title : c.knowledge_documents?.title) || 'NĐ 26/2026',
+            similarity: 0.31,
+            chunk_index: c.chunk_index,
+          }));
+          supplementaryChunks = [...nd26Chunks, ...supplementaryChunks];
+          console.log(`[knowledge-search] Fetched ${nd26Chunks.length} NĐ26 GHS-criteria dedicated chunks`);
         }
       }
 
@@ -125,7 +179,7 @@ export async function POST(request: NextRequest) {
       // Merge: vector results first, then supplementary (dedup by content)
       const seenContent = new Set(vectorChunks.map(c => c.content.slice(0, 50)));
       const uniqueSupp = supplementaryChunks.filter(c => !seenContent.has(c.content.slice(0, 50)));
-      const allChunks = [...vectorChunks, ...uniqueSupp].slice(0, matchCount + 3);
+      const allChunks = [...vectorChunks, ...uniqueSupp].slice(0, matchCount + 5); // Tăng buffer từ +3 → +5
 
       if (allChunks.length > 0) {
         const context = allChunks
@@ -139,6 +193,7 @@ export async function POST(request: NextRequest) {
         });
       }
     }
+
 
     // Fallback: keyword ILIKE search with relevance ranking
     console.log('[knowledge-search] Using keyword ILIKE search');

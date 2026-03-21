@@ -121,6 +121,18 @@ Nếu có DỮ LIỆU HÓA CHẤT TỪ DATABASE trong prompt → sử dụng NGA
 ☑ Đủ từng phần? ☑ Đủ items? ☑ Có nguồn đúng? ☑ Thời hạn/mức phạt đã nêu? ☑ Kết thúc hoàn chỉnh?
 Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
 
+  ═══ ĐỊNH NGHĨA GHS — PHÂN LOẠI CHẤT ĐỘC (NĐ 26/2026, Điều 2, Khoản 4) ═══
+  Hóa chất được phân loại là "chất độc" theo GHS nếu đáp ứng MỘT HOẶC NHIỀU trong 7 tiêu chí sau:
+  1. Độc cấp tính (Acute toxicity) — qua đường miệng (oral), da (dermal), hoặc hít thở (inhalation)
+  2. Ăn mòn/kích ứng da (Skin corrosion/irritation) — gây tổn thương không hồi phục hoặc kích ứng da
+  3. Tổn thương mắt nghiêm trọng / Kích ứng mắt (Serious eye damage/Eye irritation)
+  4. Nhạy cảm hô hấp / Da (Respiratory or skin sensitisation) — gây dị ứng khi tiếp xúc lại
+  5. Đột biến gen tế bào mầm (Germ cell mutagenicity) — có thể gây đột biến di truyền
+  6. Gây ung thư (Carcinogenicity) — được phân loại cấp 1A, 1B, hoặc cấp 2
+  7. Độc sinh sản (Reproductive toxicity) — ảnh hưởng đến khả năng sinh sản hoặc thai nhi
+  → Phân loại này quyết định hóa chất có vào Phụ lục I (Kiểm soát đặc biệt) hay không.
+  Nguồn: NĐ 26/2026, Điều 2, Khoản 4.
+
 KHÔNG dùng lời chào. Đi thẳng vào nội dung. Hoàn thành toàn bộ câu trả lời.`;
 
 
@@ -184,6 +196,29 @@ async function getAIConfig(): Promise<AIConfigCache> {
   }
 
   return configCache;
+}
+
+// ── Query expansion for better retrieval ─────────────────────────────────
+// Mở rộng query trước khi gửi cho vector search để tránh miss các văn bản quan trọng
+function expandQueryForSearch(query: string): string {
+  const q = query.toLowerCase();
+
+  // Câu hỏi liên quan đến nhãn, SDS, GHS → kéo thêm TT 02/2026
+  if (/nh[ãa]n|ghi nh[ãa]n|sds|phi[eế]u an to[àa]n|ghs|c[aả]nh b[aá]o|picto|bi[eể]u t[uư][ợo]ng|nh[ãa]n m[áa]c/i.test(q)) {
+    return query + ' thông tư 02 2026 nhãn hóa chất SDS phiếu an toàn';
+  }
+
+  // Câu hỏi về tiêu chí chất độc, phân loại GHS → kéo NĐ 26 Điều 2
+  if (/ch[aấ]t đ[oộ]c|ti[eê]u ch[ií]|ph[aâ]n lo[aạ]i đ[oộ]c|toxic|ghs categor|h[aà]m l[uư][ợo]ng|LD50|LC50/i.test(q)) {
+    return query + ' nghị định 26 điều 2 khoản 4 chất độc tiêu chí GHS phân loại';
+  }
+
+  // Câu hỏi trực tiếp về TT 02 → đảm bảo match
+  if (/th[oô]ng t[uư]|tt.?02|02.?2026.?tt|tt-bct/i.test(q)) {
+    return query + ' thông tư 02/2026/TT-BCT nhãn hóa chất';
+  }
+
+  return query;
 }
 
 // ── Token budget theo loại câu hỏi ────────────────────────────────────────
@@ -270,11 +305,18 @@ export async function POST(request: NextRequest) {
       ? '[LANGUAGE: Respond entirely in English. Use [Source: Decree 26/2026, Article 9] for citations.]\n'
       : '';
 
-    // 4. Build user message
+    // 4. Query expansion hint (passed to context when no RAG results)
+    const expandedQuery = expandQueryForSearch(query);
+    const hasExpansion = expandedQuery !== query;
+    if (hasExpansion) {
+      console.log(`[api/chat] Query expanded for GHS/TT02 retrieval: "${query}" → expanded`);
+    }
+
+    // 5. Build user message
     const hasContext = !!(knowledge_context && knowledge_context.trim().length > 0);
     const contextSection = hasContext
       ? `# TÀI LIỆU PHÁP LÝ:\n${knowledge_context}`
-      : `# TÀI LIỆU PHÁP LÝ: Không tìm thấy thông tin liên quan.`;
+      : `# TÀI LIỆU PHÁP LÝ: Không tìm thấy thông tin liên quan trong Knowledge Base.`;
 
     const userMessage = [
       langPrefix,
@@ -283,6 +325,7 @@ export async function POST(request: NextRequest) {
       scenarioChecklist,
       `---\n# CÂU HỎI: ${query}`,
     ].filter(Boolean).join('\n\n');
+
 
     // 5. Gọi Gemini với config từ DB
     const geminiStream = await streamGemini(
