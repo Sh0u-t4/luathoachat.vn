@@ -105,7 +105,6 @@ off_topic: Giải thích phạm vi + gợi ý 2-3 câu hỏi liên quan.
 3. Nếu tài liệu cung cấp không ghi số Điều → chỉ ghi tên văn bản: "(NĐ 25/2026)" KHÔNG có số Điều.
 4. Nếu tài liệu ghi "Điều 32" → phải ghi đúng "Điều 32", không được đổi thành số khác.
 5. TUYỆT ĐỐI không viết "Điều chưa xác định" hoặc bịa số điều.
-6. TUYỆT ĐỐI KHÔNG DÙNG CÁC KÝ HIỆU ĐẶT CHỖ NHƯ [X], [Y], [Z] HOẶC TƯƠNG TỰ.
 
 ═══ QUY TẮC ĐẦY ĐỦ THÔNG TIN ═══
 Với mỗi câu trả lời về giấy phép, chứng chỉ, điều kiện → PHẢI kiểm tra trong tài liệu:
@@ -122,79 +121,17 @@ Nếu có DỮ LIỆU HÓA CHẤT TỪ DATABASE trong prompt → sử dụng NGA
 ☑ Đủ từng phần? ☑ Đủ items? ☑ Có nguồn đúng? ☑ Thời hạn/mức phạt đã nêu? ☑ Kết thúc hoàn chỉnh?
 Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
 
-══════════════════════════════════════════════════════════════════
-  KIẾN THỨC TĨNH ĐÃ XÁC MINH — ƯU TIÊN SỬ DỤNG KHI CÓ LIÊN QUAN
-══════════════════════════════════════════════════════════════════
-
-  ─── A. PHỤ LỤC NGHỊ ĐỊNH 24/2026/NĐ-CP ───
-  Nghị định 24/2026/NĐ-CP (ngày 17/01/2026) quy định danh mục hóa chất, gồm:
-  • Phụ lục I   — Hóa chất có điều kiện (thuộc Chương 28, 29 biểu thuế XNK; cần khai báo hoặc GCN)
-  • Phụ lục II  — Hóa chất cần kiểm soát đặc biệt (tiền chất công nghiệp, hóa chất độc bảng)
-  • Phụ lục III — Hóa chất Bảng (Bảng 1, 2, 3 theo Công ước Cấm vũ khí hóa học)
-  • Phụ lục IV  — Hóa chất cấm
-  LƯU Ý QUAN TRỌNG: NĐ 24/2026 CÓ QUY ĐỊNH mã HS (mã số hàng hóa) cho từng hóa chất trong các Phụ lục.
-  NGHIÊM CẤM trả lời rằng "NĐ 24 không có mã HS" — đây là sai hoàn toàn.
-  Mã HS áp dụng theo Danh mục hàng hóa XNK VN (Bộ Tài chính ban hành), tương ứng với Chương 28/29.
-  Khai báo HS code nhập khẩu hóa chất: thực hiện qua Cổng thông tin một cửa quốc gia [Nguồn: NĐ 26/2026, Điều 6, Khoản 1].
-
-  ─── B. CHỨNG CHỈ TƯ VẤN CHUYÊN NGÀNH HÓA CHẤT (NĐ 25/2026, Chương IV) ───
-  QUAN TRỌNG: Không có "Hạng I" hay "Hạng II". Chỉ tồn tại: Hạng A1, A2, A3 (công nghệ) và Hạng B (an toàn).
-
-  B1) Chứng chỉ tư vấn LỰA CHỌN CÔNG NGHỆ, THIẾT BỊ cho dự án hóa chất (Điều 16 NĐ 25):
-  • Hạng A1: Kinh nghiệm ≥7 năm về công nghệ/kỹ thuật hóa học; đã tư vấn ≥2 dự án có công trình cấp II trở lên
-             → Phạm vi: Được tư vấn TẤT CẢ các dự án hóa chất (không giới hạn cấp)
-  • Hạng A2: Kinh nghiệm ≥4 năm; đã tư vấn ≥2 dự án có công trình cấp III trở lên
-             → Phạm vi: Tư vấn dự án hóa chất có công trình từ cấp II trở xuống
-  • Hạng A3: Kinh nghiệm ≥4 năm (không yêu cầu số dự án cụ thể)
-             → Phạm vi: Tư vấn dự án hóa chất có công trình từ cấp III trở xuống
-  • Thời hạn chứng chỉ: 05 năm [Nguồn: NĐ 25/2026, Điều 20, Khoản 2]
-  • Thẩm quyền cấp: UBND cấp tỉnh nơi cá nhân đăng ký thường trú [Nguồn: NĐ 25/2026, Điều 23, Khoản 6]
-  Điều kiện tổ chức tư vấn công nghệ (Điều 17 NĐ 25):
-  • Dự án cấp I trở lên → ≥2 tư vấn viên Hạng A1 (trọn thời gian)
-  • Dự án cấp II        → ≥1 tư vấn viên Hạng A1 hoặc A2 (trọn thời gian)
-  • Dự án cấp III, IV   → ≥1 tư vấn viên Hạng A1, A2 hoặc A3 (trọn thời gian)
-
-  B2) Chứng chỉ tư vấn AN TOÀN, AN NINH HÓA CHẤT — chỉ có Hạng B (Điều 18 NĐ 25):
-  • Hạng B (diễn tập cấp quốc gia): ≥5 chương trình diễn tập cấp tỉnh
-  • Hạng B (kế hoạch PCƯSC quốc gia): ≥2 kế hoạch cấp tỉnh được duyệt trong 2 năm gần nhất
-  • Hạng B (diễn tập cơ sở hóa chất): ≥2 chương trình diễn tập cơ sở
-  • Hạng B (diễn tập cấp tỉnh + cơ sở): ≥2 chương trình diễn tập cấp tỉnh
-  • Hạng B (kế hoạch PCƯSC cơ sở/dự án): ≥2 kế hoạch cơ sở được duyệt trong 2 năm
-  • Hạng B (kế hoạch PCƯSC cấp tỉnh): ≥2 kế hoạch cấp tỉnh được duyệt trong 2 năm
-  • Hạng B (huấn luyện an toàn nhóm I, II, III): ≥5 chương trình huấn luyện trong 2 năm
-  • Hạng B (cơ bản): Bằng cử nhân hóa học + kinh nghiệm thực tế → tư vấn phân loại, ghi nhãn, lập SDS, đăng ký hóa chất mới
-
-  ─── C. 16 MỤC NỘI DUNG PHIẾU AN TOÀN HÓA CHẤT (SDS) ───
-  Theo quy định tại Điều 25 Luật Hóa chất 69/2025/QH15 (ủy quyền cho Bộ Công Thương quy định chi tiết)
-  và Thông tư 02/2026/TT-BCT, Phiếu an toàn hóa chất (SDS) phải có đủ 16 mục:
-  1.  Nhận dạng hóa chất (tên gọi, nhà sản xuất/nhà cung cấp, mục đích sử dụng, thông tin liên hệ khẩn cấp)
-  2.  Nhận dạng đặc tính nguy hiểm (phân loại GHS, hình đồ cảnh báo, từ cảnh báo, cảnh báo nguy cơ H, khuyến cáo P)
-  3.  Thành phần/thông tin về các chất (tên hóa chất, số CAS, hàm lượng % trong hỗn hợp)
-  4.  Biện pháp sơ cứu (qua đường miệng, tiếp xúc da, tiếp xúc mắt, hít thở; khi nào cần bác sĩ)
-  5.  Biện pháp chữa cháy (loại bình chữa cháy phù hợp/không phù hợp, trang bị bảo hộ chữa cháy)
-  6.  Biện pháp xử lý khi phát tán ngẫu nhiên (cô lập khu vực, thu gom rò rỉ/tràn đổ, việc cần tránh)
-  7.  Yêu cầu bảo quản và sử dụng (điều kiện nhiệt độ, độ ẩm, container phù hợp, không tương thích)
-  8.  Kiểm soát phơi nhiễm và phương tiện bảo vệ cá nhân (giới hạn tiếp xúc OEL/PEL, PPE: găng tay, kính, mặt nạ)
-  9.  Tính chất lý hóa (trạng thái, màu, mùi, pH, điểm sôi, điểm nóng chảy, điểm chớp cháy, khả năng hòa tan...)
-  10. Độ ổn định và khả năng phản ứng (điều kiện cần tránh, vật liệu tương kỵ, sản phẩm phân hủy nguy hiểm)
-  11. Thông tin độc học (LD50, LC50, đường phơi nhiễm cấp tính/mãn tính, tác động lâu dài, gây ung thư)
-  12. Thông tin sinh thái học (độc tính với thủy sinh, khả năng tích lũy sinh học, khả năng phân hủy)
-  13. Xem xét thải bỏ (phương pháp xử lý/tiêu hủy, quy định pháp luật về chất thải nguy hại)
-  14. Thông tin vận chuyển (số UN, tên vận chuyển đúng quy cách, phân nhóm nguy hiểm, nhóm đóng gói, EMS)
-  15. Thông tin quy định pháp luật (phân loại theo pháp luật Việt Nam, giấy phép/GCN cần có, kiểm soát đặc biệt)
-  16. Thông tin khác (ngày lập/cập nhật SDS, phiên bản, tên người lập, tài liệu tham khảo)
-  [Nguồn: Điều 25 Luật 69/2025/QH15 (ủy quyền); Thông tư 02/2026/TT-BCT của Bộ Công Thương]
-
-  ─── D. PHÂN LOẠI CHẤT ĐỘC THEO GHS (NĐ 26/2026, Điều 2, Khoản 4) ───
-  Hóa chất là "chất độc" khi có MỘT trong các tiêu chí sau (theo phân loại GHS cấp nghiêm trọng nhất):
-  a) Độc cấp tính cấp 1 (oral/dermal/inhalation)
-  b) Tổn thương nghiêm trọng / kích ứng mắt cấp 1
-  c) Ăn mòn / kích ứng da cấp 1A
-  d) Tác nhân gây ung thư cấp 1A
-  đ) Đột biến tế bào mầm cấp 1A
-  e) Độc tính sinh sản cấp 1A
-  g) Nguy hại môi trường cấp 1
-  [Nguồn: NĐ 26/2026, Điều 2, Khoản 4]
+  ═══ ĐỊNH NGHĨA GHS — PHÂN LOẠI CHẤT ĐỘC (NĐ 26/2026, Điều 2, Khoản 4) ═══
+  Hóa chất được phân loại là "chất độc" theo GHS nếu đáp ứng MỘT HOẶC NHIỀU trong 7 tiêu chí sau:
+  1. Độc cấp tính (Acute toxicity) — qua đường miệng (oral), da (dermal), hoặc hít thở (inhalation)
+  2. Ăn mòn/kích ứng da (Skin corrosion/irritation) — gây tổn thương không hồi phục hoặc kích ứng da
+  3. Tổn thương mắt nghiêm trọng / Kích ứng mắt (Serious eye damage/Eye irritation)
+  4. Nhạy cảm hô hấp / Da (Respiratory or skin sensitisation) — gây dị ứng khi tiếp xúc lại
+  5. Đột biến gen tế bào mầm (Germ cell mutagenicity) — có thể gây đột biến di truyền
+  6. Gây ung thư (Carcinogenicity) — được phân loại cấp 1A, 1B, hoặc cấp 2
+  7. Độc sinh sản (Reproductive toxicity) — ảnh hưởng đến khả năng sinh sản hoặc thai nhi
+  → Phân loại này quyết định hóa chất có vào Phụ lục I (Kiểm soát đặc biệt) hay không.
+  Nguồn: NĐ 26/2026, Điều 2, Khoản 4.
 
 KHÔNG dùng lời chào. Đi thẳng vào nội dung. Hoàn thành toàn bộ câu trả lời.`;
 
@@ -258,23 +195,13 @@ async function getAIConfig(): Promise<AIConfigCache> {
     };
   }
 
-  return configCache!;
+  return configCache;
 }
 
 // ── Query expansion for better retrieval ─────────────────────────────────
 // Mở rộng query trước khi gửi cho vector search để tránh miss các văn bản quan trọng
 function expandQueryForSearch(query: string): string {
   const q = query.toLowerCase();
-
-  // Câu hỏi về mã HS, mã số hàng hóa, khai báo nhập khẩu → kéo NĐ 24/26 Điều 6
-  if (/m[aã] hs|hs.?code|m[aã] s[oố] h[aà]ng h[oó]a|ch[uươ][oở]ng 28|ch[uươ][oở]ng 29|khai b[aá]o nh[aậ]p kh[aẩ]u/i.test(q)) {
-    return query + ' nghị định 24 2026 mã HS hóa chất chương 28 chương 29 khai báo nhập khẩu';
-  }
-
-  // Câu hỏi về chứng chỉ tư vấn, hạng A1, A2, A3, hạng B, tư vấn viên → kéo NĐ 25 Chương IV
-  if (/ch[uứ]ng ch[ỉi]|t[uư] v[aấ]n vi[eê]n|h[aạ]ng A|h[aạ]ng B|t[uư] v[aấ]n chuy[eê]n ng[aà]nh|đi[eề]u ki[eệ]n t[uư] v[aấ]n/i.test(q)) {
-    return query + ' nghị định 25 chương IV điều 16 điều 17 điều 18 điều 20 chứng chỉ tư vấn hóa chất';
-  }
 
   // Câu hỏi liên quan đến nhãn, SDS, GHS → kéo thêm TT 02/2026
   if (/nh[ãa]n|ghi nh[ãa]n|sds|phi[eế]u an to[àa]n|ghs|c[aả]nh b[aá]o|picto|bi[eể]u t[uư][ợo]ng|nh[ãa]n m[áa]c/i.test(q)) {
