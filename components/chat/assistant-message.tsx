@@ -437,28 +437,47 @@ export function AssistantMessage({
         <div key={blockIdx} className="space-y-1">
           {textLines.map((line, li) => {
             if (line.trim() === '') return <br key={li} />;
-            // Numbered list
-            const numMatch = line.match(/^(\d+)\.\s+(.+)/);
+
+            // Detect indentation level (leading spaces/tabs)
+            const indent = line.match(/^(\s+)/)?.[1]?.length ?? 0;
+            const isSubItem = indent >= 2;
+            const indentClass = isSubItem ? 'ml-4' : '';
+
+            const trimmed = line.trim();
+
+            // Numbered list: "1." or "16."
+            const numMatch = trimmed.match(/^(\d+)\.\s+(.+)/);
             if (numMatch) return (
-              <div key={li} className="flex gap-2">
-                <span className="font-semibold text-slate-500 shrink-0 min-w-[1.2rem]">{numMatch[1]}.</span>
-                <span>{renderInline(numMatch[2], li)}</span>
+              <div key={li} className={`flex gap-2 ${indentClass}`}>
+                <span className="font-semibold text-slate-500 shrink-0 min-w-[1.5rem] text-right">{numMatch[1]}.</span>
+                <span className="flex-1">{renderInline(numMatch[2], li)}</span>
               </div>
             );
-            // Bullet
-            const bulletMatch = line.match(/^[-•*]\s+(.+)/);
+
+            // Letter bullet: "a)" "b)" "đ)" with optional indent
+            const letterMatch = trimmed.match(/^([a-zđ])\)\s+(.+)/i);
+            if (letterMatch) return (
+              <div key={li} className={`flex gap-2 ml-4 ${indentClass}`}>
+                <span className="font-semibold text-slate-400 shrink-0 min-w-[1.2rem]">{letterMatch[1]})</span>
+                <span className="flex-1">{renderInline(letterMatch[2], li)}</span>
+              </div>
+            );
+
+            // Bullet: "• " or "- " or "* "
+            const bulletMatch = trimmed.match(/^[-•*]\s+(.+)/);
             if (bulletMatch) return (
-              <div key={li} className="flex gap-2">
+              <div key={li} className={`flex gap-2 ${indentClass}`}>
                 <span className="text-cyan-600 mt-0.5 shrink-0">•</span>
-                <span>{renderInline(bulletMatch[1], li)}</span>
+                <span className="flex-1">{renderInline(bulletMatch[1], li)}</span>
               </div>
             );
+
             // Heading (## or **text**)
-            if (/^#{1,3}\s/.test(line)) {
-              const heading = line.replace(/^#{1,3}\s/, '');
+            if (/^#{1,3}\s/.test(trimmed)) {
+              const heading = trimmed.replace(/^#{1,3}\s/, '');
               return <p key={li} className="font-bold text-slate-800 mt-2">{renderInline(heading, li)}</p>;
             }
-            return <p key={li}>{renderInline(line, li)}</p>;
+            return <p key={li} className={indentClass}>{renderInline(trimmed, li)}</p>;
           })}
         </div>
       );

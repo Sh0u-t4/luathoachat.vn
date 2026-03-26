@@ -16,7 +16,8 @@ const pdfFiles = [
   },
   {
     input: 'nghi-dinh-24-2026ndcp.pdf',
-    output: 'nghi_dinh_24_2026.txt'
+    output: 'nghi_dinh_24_2026.txt',
+    forceReextract: true  // File was empty — always re-extract
   },
   {
     input: 'nghi_dinh_so_25.2026.nd-cp_ngay_17.01.2026_ptcn_hoa_chat_anat_hc.pdf',
@@ -28,7 +29,7 @@ const pdfFiles = [
   }
 ];
 
-async function extractPDF(inputFile, outputFile) {
+async function extractPDF(inputFile, outputFile, forceReextract = false) {
   try {
     const inputPath = path.join(pdfDirectory, inputFile);
     const outputPath = path.join(outputDirectory, outputFile);
@@ -38,12 +39,16 @@ async function extractPDF(inputFile, outputFile) {
       return false;
     }
 
-    if (fs.existsSync(outputPath)) {
+    if (!forceReextract && fs.existsSync(outputPath)) {
       console.log(`✅ Already extracted: ${outputFile}`);
       return true;
     }
 
-    console.log(`📄 Extracting: ${inputFile}...`);
+    if (forceReextract && fs.existsSync(outputPath)) {
+      console.log(`🔄 Force re-extracting: ${outputFile} (previous file may have been empty)`);
+    } else {
+      console.log(`📄 Extracting: ${inputFile}...`);
+    }
 
     const dataBuffer = fs.readFileSync(inputPath);
     const data = await pdfParse(dataBuffer);
@@ -74,7 +79,7 @@ async function main() {
   let failCount = 0;
 
   for (const file of pdfFiles) {
-    const success = await extractPDF(file.input, file.output);
+    const success = await extractPDF(file.input, file.output, file.forceReextract || false);
     if (success) {
       successCount++;
     } else {

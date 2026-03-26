@@ -196,6 +196,64 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   g) Nguy hại môi trường cấp 1
   [Nguồn: NĐ 26/2026, Điều 2, Khoản 4]
 
+  ─── E. DANH MỤC HÓA CHẤT KIỂM SOÁT ĐẶC BIỆT CHI TIẾT (NĐ 24/2026, Phụ lục II) ───
+  Phụ lục II NĐ 24/2026 gồm 4 nhóm hóa chất cần kiểm soát đặc biệt:
+
+  E1) TIỀN CHẤT CÔNG NGHIỆP (Nhóm I — Phụ lục II):
+  Các hóa chất phổ biến trong sản xuất nhưng có thể bị lạm dụng sản xuất ma túy:
+  • Acetic anhydride (C₄H₆O₃) — tiền chất heroin
+  • Acetone (C₃H₆O) — dung môi, tiền chất methamphetamine
+  • Ethyl ether / Diethyl ether — dung môi, tiền chất cocaine
+  • Potassium permanganate (KMnO₄) — tiền chất cocaine
+  • Toluene (C₇H₈) — dung môi hữu cơ
+  • Sulfuric acid (H₂SO₄) — axit công nghiệp mạnh
+  • Hydrochloric acid (HCl) — axit loãng/đặc
+  • Ephedrine — tiền chất methamphetamine (cần kiểm soát đặc biệt)
+  • Pseudoephedrine — tiền chất methamphetamine
+  → Yêu cầu: Khai báo nhập khẩu + Giấy xác nhận khai báo hóa chất [NĐ 26, Điều 6]
+
+  E2) TIỀN CHẤT THUỐC NỔ (Nhóm II — Phụ lục II):
+  Hóa chất có thể dùng chế tạo thuốc nổ tự chế:
+  • Ammonium nitrate (NH₄NO₃) ≥ 45% khối lượng — nguyên liệu ANFO
+  • Potassium nitrate (KNO₃) — thuốc súng đen
+  • Sodium nitrate (NaNO₃) — phân bón/thuốc nổ
+  • Hydrogen peroxide (H₂O₂) ≥ 12% — chất oxy hóa mạnh
+  • Nitric acid (HNO₃) ≥ 3% — axit nitric
+  → Yêu cầu: Giấy phép xuất khẩu, nhập khẩu [NĐ 26, Điều 14]
+
+  E3) HÓA CHẤT BẢNG 2 (Phụ lục III NĐ 24 — Công ước Cấm vũ khí hóa học):
+  • Thiodiglycol (CAS 111-48-8) — tiền chất chất độc mù tạt (mustard gas)
+  • Methyl phosphonic dichloride (CAS 676-97-1)
+  • Dimethyl methylphosphonate (DMMP, CAS 756-79-6)
+  • Amiton (CAS 78-53-5)
+  → Kiểm soát rất chặt: cần phê duyệt của Bộ Công Thương + thông báo OPCW
+
+  E4) HÓA CHẤT BẢNG 3 (Phụ lục III NĐ 24 — Công ước Cấm vũ khí hóa học):
+  • Phosgene (COCl₂, CAS 75-44-5) — khí độc chiến tranh lịch sử
+  • Hydrogen cyanide (HCN, CAS 74-90-8) — cực độc, dùng trong hóa chất/khai mỏ
+  • Chloropicrin (CCl₃NO₂, CAS 76-06-2)
+  • Triethanolamine (TEA, CAS 102-71-6) — tiền chất nitrogen mustard
+  → Sản xuất trong nước phải khai báo với OPCW hàng năm
+
+  ─── F. HỘI ĐỒNG THẨM ĐỊNH KẾ HOẠCH PHÒNG NGỪA ỨNG PHÓ SỰ CỐ HÓA CHẤT (KHPN) ───
+  Căn cứ: Điều 29, 30, 31 Nghị định 25/2026/NĐ-CP
+
+  F1) Hội đồng thẩm định KHPN cấp tỉnh (Điều 29 NĐ 25/2026):
+  • Chủ tịch: Lãnh đạo Sở Công Thương tỉnh/thành phố
+  • Thành viên: Đại diện Sở Tài nguyên & Môi trường, Công an tỉnh, Y tế tỉnh, Cảnh sát PCCC
+  • Thư ký: Chuyên viên Sở Công Thương
+  • Chức năng: Thẩm định KHPN của cơ sở hóa chất thuộc thẩm quyền cấp tỉnh
+
+  F2) Thủ tục thẩm định, phê duyệt KHPN (Điều 30 NĐ 25/2026):
+  • Nộp hồ sơ: Tại Sở Công Thương hoặc qua Cổng dịch vụ công trực tuyến
+  • Hồ sơ gồm: Văn bản đề nghị + dự thảo KHPN + bản đồ khu vực + sơ đồ hóa chất
+  • Phí thẩm định: Theo quy định của Bộ Tài chính
+
+  F3) Thời hạn thẩm định (Điều 31 NĐ 25/2026):
+  • Trong 15 ngày làm việc kể từ ngày nhận đủ hồ sơ hợp lệ, Hội đồng thẩm định họp
+  • Trong 5 ngày làm việc sau khi Hội đồng thẩm định thông qua, cơ quan có thẩm quyền phê duyệt KHPN
+  • KHPN phải được cập nhật, thẩm định lại khi có thay đổi lớn về quy mô sản xuất/hóa chất
+
 KHÔNG dùng lời chào. Đi thẳng vào nội dung. Hoàn thành toàn bộ câu trả lời.`;
 
 
