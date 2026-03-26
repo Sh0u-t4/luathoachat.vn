@@ -11,9 +11,11 @@
     "extract-pdfs": "node scripts/extract-pdfs.js",
     "ocr-scanned-pdfs": "node scripts/ocr-pdf-online.js",
     "verify-extraction": "node scripts/verify-extraction.js",
-    "ingest-legal-docs": "tsx scripts/ingest-legal-documents.ts"
+    "ingest-legal-docs": "tsx scripts/ingest-legal-documents.ts",
+    "ocr-nd24-gemini": "node scripts/ocr-with-gemini.mjs"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.9.0",
     "@netlify/plugin-nextjs": "^5.15.8",
     "@radix-ui/react-accordion": "^1.2.0",
