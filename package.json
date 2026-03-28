@@ -12,7 +12,8 @@
     "ocr-scanned-pdfs": "node scripts/ocr-pdf-online.js",
     "verify-extraction": "node scripts/verify-extraction.js",
     "ingest-legal-docs": "tsx scripts/ingest-legal-documents.ts",
-    "ocr-nd24-gemini": "node scripts/ocr-with-gemini.mjs"
+    "ocr-nd24-gemini": "node scripts/ocr-with-gemini.mjs",
+    "ocr-69qh-gemini": "node scripts/ocr-69qh-gemini.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

@@ -13,34 +13,61 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import OpenAI from 'openai';
 import fs from 'fs/promises';
 import path from 'path';
+import { readFileSync, existsSync } from 'fs';
+
+// Load .env manually (tsx doesn't auto-load dotenv)
+const envPath = path.join(process.cwd(), '.env');
+if (existsSync(envPath)) {
+  for (const line of readFileSync(envPath, 'utf-8').split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq < 0) continue;
+    const k = trimmed.slice(0, eq).trim();
+    const v = trimmed.slice(eq + 1).trim().replace(/^["']|["']$/g, '');
+    if (!process.env[k]) process.env[k] = v;
+  }
+}
 
 // ============================================================================
-// CONFIGURATION
+// CONFIGURATION (read AFTER .env is loaded)
 // ============================================================================
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || '';
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+const GEMINI_EMBED_MODEL = 'gemini-embedding-2-preview';
 
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+// Lazy getter — ensures env is already loaded before reading
+function getConfig() {
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+  const GEMINI_EMBED_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_EMBED_MODEL}:embedContent?key=${GEMINI_API_KEY}`;
 
-// Mapping văn bản -> document_id (cần query từ DB hoặc hardcode)
+  if (!SUPABASE_URL) throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL in .env');
+  if (!SUPABASE_SERVICE_KEY) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY in .env');
+  if (!GEMINI_API_KEY) throw new Error('Missing GEMINI_API_KEY in .env');
+
+  return { SUPABASE_URL, SUPABASE_SERVICE_KEY, GEMINI_API_KEY, GEMINI_EMBED_URL };
+}
+
+// Supabase client — initialized lazily inside main()
+let supabase: ReturnType<typeof createClient>;
+
+// Mapping văn bản -> document_id
+// Keys must match substrings of actual filenames in extracted-text/
 const DOCUMENT_MAPPING: Record<string, { id: string; code: string; name: string }> = {
-  'nghi_dinh_so_24': {
-    id: '', // Sẽ được fill sau khi query
+  'nghi_dinh_24': {
+    id: '',
     code: '24/2026/NĐ-CP',
     name: 'Nghị định 24/2026/NĐ-CP',
   },
-  'nghi_dinh_so_25': {
+  'nghi_dinh_25': {
     id: '',
     code: '25/2026/NĐ-CP',
     name: 'Nghị định 25/2026/NĐ-CP',
   },
-  'nghi_dinh_so_26': {
+  'nghi_dinh_26': {
     id: '',
     code: '26/2026/NĐ-CP',
     name: 'Nghị định 26/2026/NĐ-CP',
@@ -91,7 +118,9 @@ const PATTERNS = {
  */
 function semanticChunk(rawText: string, documentInfo: { code: string; name: string }): LegalChunk[] {
   const chunks: LegalChunk[] = [];
-  const lines = rawText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+  // Strip the "     N→" line-number prefix added by OCR scripts
+  const stripPrefix = (line: string) => line.replace(/^\s*\d+→/, '').trim();
+  const lines = rawText.split('\n').map(line => stripPrefix(line)).filter(line => line.length > 0);
 
   let currentArticle: number | null = null;
   let currentClause: number | null = null;
@@ -233,60 +262,61 @@ function extractChemicalNames(content: string): string[] {
 }
 
 // ============================================================================
-// EMBEDDING GENERATION
+// EMBEDDING GENERATION — Gemini gemini-embedding-2-preview (output 1536 dims)
 // ============================================================================
 
 /**
- * Tạo embedding vector với OpenAI text-embedding-3-small
+ * Tạo embedding vector với Gemini text-embedding-004
  */
 async function generateEmbedding(text: string): Promise<number[]> {
-  try {
-    const response = await openai.embeddings.create({
-      model: 'text-embedding-3-small',
-      input: text,
-      encoding_format: 'float',
-    });
+  const { GEMINI_EMBED_URL } = getConfig();
+  const response = await fetch(GEMINI_EMBED_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: `models/${GEMINI_EMBED_MODEL}`,
+      content: { parts: [{ text }] },
+      taskType: 'RETRIEVAL_DOCUMENT',
+      outputDimensionality: 1536,   // Reduce from 3072 → 1536 to match vector(1536) in Supabase
+    }),
+  });
 
-    return response.data[0].embedding;
-  } catch (error) {
-    console.error('Error generating embedding:', error);
-    throw error;
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Gemini embed error ${response.status}: ${err.substring(0, 200)}`);
   }
+
+  const data = await response.json();
+  return data.embedding.values as number[];
 }
 
 /**
- * Tạo embedding cho batch chunks (tối ưu API calls)
+ * Tạo embedding cho batch chunks (từng item với delay nhỏ — Gemini free tier)
  */
 async function generateEmbeddingsBatch(chunks: LegalChunk[]): Promise<Map<string, number[]>> {
   const embeddings = new Map<string, number[]>();
+  console.log(`Generating embeddings for ${chunks.length} chunks using Gemini text-embedding-004...`);
 
-  console.log(`Generating embeddings for ${chunks.length} chunks...`);
-
-  // OpenAI cho phép batch tối đa 2048 texts/request
-  const BATCH_SIZE = 100;
-
-  for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
-    const batch = chunks.slice(i, i + BATCH_SIZE);
-    const texts = batch.map(chunk => chunk.content);
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i];
+    const key = `${chunk.document_code}-${chunk.article_number}-${chunk.clause_number || 0}-${i}`;
 
     try {
-      const response = await openai.embeddings.create({
-        model: 'text-embedding-3-small',
-        input: texts,
-        encoding_format: 'float',
-      });
+      const embedding = await generateEmbedding(chunk.content);
+      embeddings.set(key, embedding);
 
-      batch.forEach((chunk, index) => {
-        const key = `${chunk.document_code}-${chunk.article_number}-${chunk.clause_number || 0}`;
-        embeddings.set(key, response.data[index].embedding);
-      });
+      if ((i + 1) % 10 === 0) {
+        console.log(`  Embedded ${i + 1}/${chunks.length} chunks`);
+      }
 
-      console.log(`Processed ${Math.min(i + BATCH_SIZE, chunks.length)}/${chunks.length} chunks`);
+      // Small delay to avoid rate limiting on free tier
+      await new Promise(r => setTimeout(r, 100));
     } catch (error) {
-      console.error(`Error in batch ${i}-${i + BATCH_SIZE}:`, error);
+      console.error(`Error embedding chunk ${i} (${chunk.document_code} Điều ${chunk.article_number}):`, error);
     }
   }
 
+  console.log(`Embedding complete: ${embeddings.size}/${chunks.length} successful`);
   return embeddings;
 }
 
@@ -308,7 +338,7 @@ async function getDocumentIds(): Promise<void> {
   }
 
   // Map document_code -> id
-  data?.forEach(doc => {
+  data?.forEach((doc: { id: string; document_code: string }) => {
     Object.keys(DOCUMENT_MAPPING).forEach(key => {
       if (DOCUMENT_MAPPING[key].code === doc.document_code) {
         DOCUMENT_MAPPING[key].id = doc.id;
@@ -330,8 +360,9 @@ async function insertChunks(chunks: LegalChunk[], embeddings: Map<string, number
   for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
     const batch = chunks.slice(i, i + BATCH_SIZE);
 
-    const records = batch.map(chunk => {
-      const key = `${chunk.document_code}-${chunk.article_number}-${chunk.clause_number || 0}`;
+    const records = batch.map((chunk, batchIndex) => {
+      const globalIndex = i + batchIndex;
+      const key = `${chunk.document_code}-${chunk.article_number}-${chunk.clause_number || 0}-${globalIndex}`;
       const embedding = embeddings.get(key);
 
       // Tìm document_id
@@ -353,7 +384,7 @@ async function insertChunks(chunks: LegalChunk[], embeddings: Map<string, number
       };
     });
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('legal_knowledge_chunks')
       .insert(records);
 
@@ -371,6 +402,12 @@ async function insertChunks(chunks: LegalChunk[], embeddings: Map<string, number
 
 async function main() {
   console.log('🚀 Starting Legal Document Ingestion with Semantic Chunking...\n');
+
+  // Initialize supabase client AFTER env is loaded
+  const { SUPABASE_URL, SUPABASE_SERVICE_KEY } = getConfig();
+  supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+  console.log('✓ Supabase client initialized');
+  console.log('  URL:', SUPABASE_URL.substring(0, 40) + '...');
 
   // 1. Load document IDs
   await getDocumentIds();
@@ -422,9 +459,7 @@ async function main() {
   }
 }
 
-// Run if executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
+// Always run main when executed as a script
+main();
 
 export { semanticChunk, generateEmbedding, generateEmbeddingsBatch };
