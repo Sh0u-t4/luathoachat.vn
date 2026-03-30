@@ -11,7 +11,11 @@
     "extract-pdfs": "node scripts/extract-pdfs.js",
     "ocr-scanned-pdfs": "node scripts/ocr-pdf-online.js",
     "verify-extraction": "node scripts/verify-extraction.js",
-    "ingest-legal-docs": "tsx scripts/ingest-legal-documents.ts"
+    "ingest-legal-docs": "tsx scripts/ingest-legal-documents.ts",
+    "ocr-nd24": "node scripts/ocr-gemini-vision.mjs nd24",
+    "ocr-69qh": "node scripts/ocr-gemini-vision.mjs 69qh",
+    "ocr-all": "node scripts/ocr-gemini-vision.mjs",
+    "ingest-text": "node scripts/ingest-text-files.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
