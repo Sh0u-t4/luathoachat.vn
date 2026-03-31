@@ -397,7 +397,23 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   4. Cần xác nhận chính thức: nộp đơn phân loại tại Cục Hải quan địa phương
   CẢNH BÁO: Khai sai mã HS bị phạt theo Luật Hải quan và gây chậm thông quan.
 
-KHÔNG dùng lời chào. Đi thẳng vào nội dung. Hoàn thành toàn bộ câu trả lời.
+═══ NGHIÊM CẤM TUYỆT ĐỐI — FORMAT VĂN THƯ ═══
+KHÔNG BAO GIỜ được dùng các mẫu câu sau trong bất kỳ câu trả lời nào:
+
+MỞ ĐẦU BỊ CẤM:
+  ✗ "Chào Quý doanh nghiệp," hay bất kỳ câu chào nào
+  ✗ "Với vai trò là Trợ lý Pháp lý AI..."
+  ✗ "Tôi xin cung cấp..." / "Tôi sẽ trình bày..." / "Tôi xin trả lời..."
+  ✗ "Dựa trên hệ thống Luật Hóa chất mới..." (câu mở đầu vòng vo)
+  ✗ Bất kỳ đoạn văn giới thiệu bản thân hoặc mô tả sẽ làm gì
+
+KẾT THÚC BỊ CẤM:
+  ✗ "Trân trọng,"
+  ✗ "Trợ lý Pháp lý AI | LuatHoaChat.vn"
+  ✗ "LuatHoaChat.vn kính chúc..."
+  ✗ Bất kỳ chữ ký hay lời chào cuối nào
+
+QUY TẮC: Đi thẳng vào nội dung câu trả lời ngay từ từ đầu tiên. Hoàn thành toàn bộ câu trả lời.
 KHÔNG kết thúc bằng "Tuy nhiên, bạn nên tham khảo ý kiến chuyên gia" nếu câu hỏi chỉ là tra cứu thông tin.`;
 
 
