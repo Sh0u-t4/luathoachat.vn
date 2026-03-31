@@ -64,65 +64,49 @@ export function AssistantMessage({
   // Tách nội dung thành 2 phần: public (câu đầu đủ ý) và locked (phần còn lại)
   // Luôn hoàn thành câu đầu tiên trước khi cắt
   const splitContent = (content: string) => {
-    const maxPublic = Math.floor(content.length * 0.55);
-    let lastValidCut = -1;
+    // Cắt tại ranh giới ĐOẠN VĂN (dòng trống) để không phá vỡ giữa câu/list
+    const targetMinRatio = 0.45; // phần public tối thiểu ~45% nội dung
+    const targetMaxRatio = 0.70; // phần public tối đa ~70%
+    const minLen = Math.floor(content.length * targetMinRatio);
+    const maxLen = Math.floor(content.length * targetMaxRatio);
 
-    // Duyệt ký tự tìm điểm kết thúc câu hợp lệ:
-    // - Dấu . sau chữ KHÔNG phải chữ số → hợp lệ
-    // - Dấu . sau chữ số ("1.", "25/2026.", "Nghị định 100.") → BỎ QUA
-    // - Dấu ! và ? luôn hợp lệ
-    for (let i = 0; i < content.length; i++) {
-      const ch = content[i];
-      const isEndPunct = ch === '!' || ch === '?';
-      const isDot = ch === '.';
+    // Tìm tất cả vị trí dòng trống (paragraph break: '\n\n' hoặc '\n\r\n')
+    const breakpoints: number[] = [];
+    const re = /\n\s*\n/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(content)) !== null) {
+      breakpoints.push(m.index + m[0].length); // sau dòng trống
+    }
 
-      if (!isEndPunct && !isDot) continue;
-
-      // Bỏ qua dấu . ngay sau chữ số (số thứ tự, số nghị định, năm)
-      if (isDot) {
-        const prevChar = i > 0 ? content[i - 1] : '';
-        // Bỏ qua: sau chữ số
-        if (/\d/.test(prevChar)) continue;
-
-        // Bỏ qua: sau chữ số La Mã (I, II, III, IV, V, VI, VII, VIII, IX, X, L, C...)
-        // Lấy token trước dấu . (tối đa 8 ký tự)
-        const tokenStart = Math.max(0, i - 8);
-        const tokenBefore = content.slice(tokenStart, i).split(/\s/).pop() || '';
-        if (/^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/i.test(tokenBefore) && tokenBefore.length > 0) {
-          continue;
-        }
-
-        // Bỏ qua: sau chữ viết tắt 1 ký tự (a., b., c., ...) → không phải kết thúc câu
-        if (tokenBefore.length === 1 && /[a-z]/i.test(tokenBefore)) continue;
-      }
-
-      // Phải được theo sau bởi khoảng trắng, newline hoặc end-of-string
-      const nextChar = content[i + 1];
-      if (nextChar !== undefined && nextChar !== ' ' && nextChar !== '\n' && nextChar !== '\r') continue;
-
-      const cutAt = i + 1; // bao gồm cả dấu câu
-      if (cutAt <= maxPublic) {
-        lastValidCut = cutAt;
-      } else {
-        if (lastValidCut === -1) lastValidCut = cutAt;
-        break;
+    // Lấy breakpoint gần nhất nằm trong [minLen, maxLen]
+    let bestCut = -1;
+    for (const bp of breakpoints) {
+      if (bp >= minLen && bp <= maxLen) {
+        bestCut = bp;
+        break; // lấy breakpoint đầu tiên hợp lệ
       }
     }
 
-    // Nếu không tìm được dấu câu hợp lệ → fallback cắt 30% thô
-    if (lastValidCut === -1) {
-      const rawSplit = Math.floor(content.length * 0.3);
-      return {
-        publicPart: content.substring(0, rawSplit),
-        lockedPart: content.substring(rawSplit),
-      };
+    // Fallback: breakpoint đầu tiên sau minLen (dù vượt maxLen)
+    if (bestCut === -1) {
+      for (const bp of breakpoints) {
+        if (bp >= minLen) { bestCut = bp; break; }
+      }
+    }
+
+    // Không có paragraph break nào → cắt tại cuối dòng gần mốc 55%
+    if (bestCut === -1) {
+      const approx = Math.floor(content.length * 0.55);
+      const nlIdx = content.indexOf('\n', approx);
+      bestCut = nlIdx !== -1 ? nlIdx + 1 : approx;
     }
 
     return {
-      publicPart: content.substring(0, lastValidCut).trim(),
-      lockedPart: content.substring(lastValidCut).trim(),
+      publicPart: content.substring(0, bestCut).trimEnd(),
+      lockedPart: content.substring(bestCut).trimStart(),
     };
   };
+
 
 
 
@@ -379,8 +363,8 @@ export function AssistantMessage({
       const bodyRows = dataRows.slice(1);
       const dataCols = headers.length; // number of data columns
 
-      // Narrow mode + wide table: convert to bullet list
-      if (!isFullscreen && dataCols > 2) {
+      // Narrow mode + very wide table (>3 cols): convert to bullet card list for readability
+      if (!isFullscreen && dataCols > 3) {
         return (
           <div key={blockIdx} className="space-y-2 my-2">
             {bodyRows.map((row, ri) => {
@@ -402,14 +386,14 @@ export function AssistantMessage({
         );
       }
 
-      // Normal table render (≤2 cols or fullscreen)
+      // Normal table render (fullscreen, or ≤3 cols in narrow)
       return (
-        <div key={blockIdx} className="overflow-x-auto my-3 rounded-lg border border-slate-200">
+        <div key={blockIdx} className="overflow-x-auto my-3 rounded-lg border border-slate-200 -mx-1">
           <table className="min-w-full text-sm border-collapse">
             <thead>
               <tr className="bg-slate-100">
                 {headers.map((h, i) => (
-                  <th key={i} className="px-3 py-2 text-left font-semibold text-slate-700 border-b border-slate-200 whitespace-nowrap">{h}</th>
+                  <th key={i} className="px-3 py-2 text-left font-semibold text-slate-700 border-b border-slate-200 whitespace-nowrap text-xs">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -417,9 +401,9 @@ export function AssistantMessage({
               {bodyRows.map((row, ri) => {
                 const cells = parseCells(row);
                 return (
-                  <tr key={ri} className={ri % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                  <tr key={ri} className={ri % 2 === 0 ? 'bg-white' : 'bg-slate-50/70'}>
                     {cells.map((cell, ci) => (
-                      <td key={ci} className="px-3 py-2 text-slate-800 border-b border-slate-100 break-words max-w-[180px]">{cell}</td>
+                      <td key={ci} className="px-3 py-2 text-slate-800 border-b border-slate-100 break-words" style={{maxWidth: isFullscreen ? '320px' : '160px'}}>{cell}</td>
                     ))}
                   </tr>
                 );
@@ -448,9 +432,9 @@ export function AssistantMessage({
             // Numbered list: "1." or "16."
             const numMatch = trimmed.match(/^(\d+)\.\s+(.+)/);
             if (numMatch) return (
-              <div key={li} className={`flex gap-2 ${indentClass}`}>
-                <span className="font-semibold text-slate-500 shrink-0 min-w-[1.5rem] text-right">{numMatch[1]}.</span>
-                <span className="flex-1">{renderInline(numMatch[2], li)}</span>
+              <div key={li} className={`flex gap-2 items-start ${indentClass}`}>
+                <span className="font-semibold text-slate-500 shrink-0 min-w-[1.75rem] text-right leading-relaxed">{numMatch[1]}.</span>
+                <span className="flex-1 min-w-0">{renderInline(numMatch[2], li)}</span>
               </div>
             );
 
