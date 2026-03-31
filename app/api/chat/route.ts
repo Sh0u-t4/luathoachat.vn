@@ -491,24 +491,27 @@ function expandQueryForSearch(query: string): string {
 }
 
 // ── Token budget theo loại câu hỏi ────────────────────────────────────────
+// Lưu ý: maxOutputTokens bao gồm cả thinking tokens (2048).
+// Mỗi mức đã được cộng thêm ~3000-4000 để bù vào phần thinking.
 function getTokenBudget(query: string, scenario: ScenarioType): number {
   const q = query.toLowerCase();
   const hasScenario = scenario !== 'none';
 
   // Hướng dẫn toàn diện A-Z / đầy đủ / multi-step — cần nhiều token nhất
-  if (/từ a.*z|a-z|toàn bộ|toàn diện|đầy đủ|chi tiết nhất|hướng dẫn chi tiết|tất cả các bước|quy trình đầy đủ|chu trình|cần biết gì/i.test(q)) return 8000;
+  if (/từ a.*z|a-z|toàn bộ|toàn diện|đầy đủ|chi tiết nhất|hướng dẫn chi tiết|tất cả các bước|quy trình đầy đủ|chu trình|cần biết gì/i.test(q)) return 12000;
 
   // Phức tạp: so sánh + scenario đồng thời
-  if (/so (sánh|sanh)|so với|vs\b|khác nhau/i.test(q)) return hasScenario ? 6000 : 5000;
+  if (/so (sánh|sanh)|so với|vs\b|khác nhau/i.test(q)) return hasScenario ? 10000 : 8000;
   // Scenario luôn cần nhiều token
-  if (/đồng thời|vừa.*vừa|kết hợp/i.test(q) || hasScenario) return 6000;
+  if (/đồng thời|vừa.*vừa|kết hợp/i.test(q) || hasScenario) return 10000;
   // Quy trình thủ tục (nhiều bước)
-  if (/thủ tục|quy trình|các bước|hướng dẫn/i.test(q)) return 4000;
+  if (/thủ tục|quy trình|các bước|hướng dẫn/i.test(q)) return 8000;
   // Liệt kê, hồ sơ, điều kiện, trường hợp, ngoại lệ — dễ bị cắt nhất
-  if (/liệt kê|danh sách|các điều kiện|hồ sơ|bao gồm|gồm những|yêu cầu|điều kiện|trường hợp|ngoại lệ|được miễn/i.test(q)) return 4000;
+  if (/liệt kê|danh sách|các điều kiện|hồ sơ|bao gồm|gồm những|yêu cầu|điều kiện|trường hợp|ngoại lệ|được miễn/i.test(q)) return 8000;
   // Câu hỏi đơn giản (tra cứu 1 thông tin)
-  return 3000;
+  return 6000;
 }
+
 
 
 
@@ -535,6 +538,10 @@ async function streamGemini(
         maxOutputTokens: maxTokens,
         topP: 0.85,
         topK: 20,
+        // Giới hạn thinking tokens: không để mặc định (-1 = dynamic) vì Gemini 2.5 Flash
+        // có thể dùng 2000-5000 thinking tokens → Response bị cắt.
+        // thinkingConfig phải nằm BÊN TRONG generationConfig (không phải top-level).
+        thinkingConfig: { thinkingBudget: 2048 },
       },
     }),
   });
