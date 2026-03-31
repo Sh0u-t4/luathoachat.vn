@@ -414,6 +414,9 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
                   ? Math.floor(index / 2)
                   : 0;
 
+                // Ẩn card khi assistant message chưa có nội dung (đang chờ token đầu)
+                if (message.role === 'assistant' && !message.content && message.id === latestAssistantId) return null;
+
                 return (
                   <div
                     key={`${message.id}-${index}`}
@@ -604,6 +607,9 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
                 const assistantMessageIndex = message.role === 'assistant'
                   ? Math.floor(index / 2)
                   : 0;
+
+                // Ẩn card khi assistant message chưa có nội dung (đang chờ token đầu)
+                if (message.role === 'assistant' && !message.content && message.id === latestAssistantId) return null;
 
                 return (
                   <div

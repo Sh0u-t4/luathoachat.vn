@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lock, LogIn, ThumbsUp, ThumbsDown, MessageSquare, Copy, Check } from 'lucide-react';
+import { Lock, LogIn, ThumbsUp, ThumbsDown, MessageSquare, Copy, Check, Table2, Maximize2 } from 'lucide-react';
+
 import { useTypingEffect } from '@/hooks/use-typing-effect';
 import { LegalCitation } from './legal-citation';
 import { FeedbackDialog } from './feedback-dialog';
@@ -363,37 +364,60 @@ export function AssistantMessage({
       const bodyRows = dataRows.slice(1);
       const dataCols = headers.length; // number of data columns
 
-      // Narrow mode + very wide table (>3 cols): convert to bullet card list for readability
-      if (!isFullscreen && dataCols > 3) {
+      // ── NARROW MODE: placeholder — bảng chỉ render trong fullscreen ──────
+      if (!isFullscreen) {
+        // Tóm tắt nội dung bảng để user biết có gì
+        const previewRows = bodyRows.slice(0, 3).map(row => {
+          const cells = parseCells(row);
+          return cells[0] || ''; // lấy cột đầu làm preview
+        }).filter(Boolean);
+
         return (
-          <div key={blockIdx} className="space-y-2 my-2">
-            {bodyRows.map((row, ri) => {
-              const cells = parseCells(row);
-              return (
-                <div key={ri} className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 text-sm">
-                  {cells.map((cell, ci) => (
-                    <div key={ci} className="flex gap-1.5 min-w-0">
-                      {headers[ci] && (
-                        <span className="font-semibold text-slate-600 shrink-0">{headers[ci]}:</span>
-                      )}
-                      <span className="text-slate-800 break-words">{cell}</span>
-                    </div>
-                  ))}
+          <div key={blockIdx} className="my-3 rounded-xl border border-cyan-200 bg-cyan-50/60 px-4 py-3">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center shrink-0">
+                <Table2 className="w-4 h-4 text-cyan-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-semibold text-cyan-800 text-sm">Bảng so sánh</span>
+                  <span className="text-xs text-cyan-600 bg-cyan-100 px-2 py-0.5 rounded-full">
+                    {bodyRows.length} hàng · {dataCols} cột
+                  </span>
                 </div>
-              );
-            })}
+                {/* Preview 3 row đầu */}
+                {previewRows.length > 0 && (
+                  <div className="mt-1.5 space-y-0.5">
+                    {previewRows.map((row, i) => (
+                      <div key={i} className="text-xs text-cyan-700 truncate">
+                        · {row}
+                      </div>
+                    ))}
+                    {bodyRows.length > 3 && (
+                      <div className="text-xs text-cyan-500 italic">và {bodyRows.length - 3} hàng khác...</div>
+                    )}
+                  </div>
+                )}
+                <div className="mt-2 flex items-center gap-1 text-xs text-cyan-600">
+                  <Maximize2 className="w-3 h-3" />
+                  <span>Nhấn <strong>↗</strong> góc trên phải để xem bảng đầy đủ</span>
+                </div>
+              </div>
+            </div>
           </div>
         );
       }
 
-      // Normal table render (fullscreen, or ≤3 cols in narrow)
+      // ── FULLSCREEN: HTML table chuẩn với scroll ──────────────────────────
       return (
-        <div key={blockIdx} className="overflow-x-auto my-3 rounded-lg border border-slate-200 -mx-1">
+        <div key={blockIdx} className="overflow-x-auto my-3 rounded-lg border border-slate-200">
           <table className="min-w-full text-sm border-collapse">
             <thead>
               <tr className="bg-slate-100">
                 {headers.map((h, i) => (
-                  <th key={i} className="px-3 py-2 text-left font-semibold text-slate-700 border-b border-slate-200 whitespace-nowrap text-xs">{h}</th>
+                  <th key={i} className="px-4 py-2.5 text-left font-semibold text-slate-700 border-b border-slate-200 whitespace-nowrap text-xs">
+                    {renderInline(h, i)}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -403,7 +427,9 @@ export function AssistantMessage({
                 return (
                   <tr key={ri} className={ri % 2 === 0 ? 'bg-white' : 'bg-slate-50/70'}>
                     {cells.map((cell, ci) => (
-                      <td key={ci} className="px-3 py-2 text-slate-800 border-b border-slate-100 break-words" style={{maxWidth: isFullscreen ? '320px' : '160px'}}>{cell}</td>
+                      <td key={ci} className="px-4 py-2.5 text-slate-800 border-b border-slate-100 break-words max-w-xs">
+                        {renderInline(cell, ci + ri * 10)}
+                      </td>
                     ))}
                   </tr>
                 );
@@ -477,6 +503,9 @@ export function AssistantMessage({
       </div>
     );
   };
+
+  // Chưa có nội dung + đang chờ stream → không render gì (typing indicator đang hiện ở ngoài)
+  if (!fullContent && isLatest) return null;
 
   return (
     <div className="p-4">
