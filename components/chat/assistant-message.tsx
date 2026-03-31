@@ -57,6 +57,9 @@ export function AssistantMessage({
   // Copy state
   const [isCopied, setIsCopied] = useState(false);
 
+  // Expandable chi tiết — cho response dài đã được authenticate
+  const [isDetailExpanded, setIsDetailExpanded] = useState(false);
+
   // Unlock logic: Show unblurred content if:
   // 1. User is authenticated, OR
   // 2. This is one of the first 5 free messages (messageIndex < 5)
@@ -532,46 +535,58 @@ export function AssistantMessage({
           )}
         </div>
 
-        {/* Phần locked - chỉ hiển thị nếu đã đăng nhập */}
-        {lockedPart && (
+        {/* Phần locked - authenticated: expandable toggle; guest: blur+login gate */}
+        {lockedPart && !isLatest && (
           <div className="relative mt-4 pt-4 border-t border-slate-200">
-            <div className="flex items-center gap-2 mb-3">
-              <Lock
-                className={`w-4 h-4 ${
-                  shouldShowUnblurred ? 'text-cyan-600' : 'text-slate-400'
-                }`}
-              />
-              <span className="text-sm font-medium text-slate-700">
-                Chi tiết trích dẫn luật & Mức phạt
-              </span>
-            </div>
-
-            <div className="relative">
-              <div
-                className={`text-slate-700 ${
-                  !shouldShowUnblurred ? 'blur-content' : ''
-                }`}
-              >
-                {renderMarkdownContent(finalLocked)}
-                {shouldShowUnblurred &&
-                  isLatest &&
-                  finalLocked.length < lockedPart.length && (
-                    <span className="inline-block w-1 h-4 bg-cyan-600 ml-0.5 animate-pulse" />
-                  )}
-              </div>
-
-              {!shouldShowUnblurred && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-white/60 to-white/90">
-                  <Button
-                    onClick={onUnlockClick}
-                    className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-xl"
-                  >
-                    <LogIn className="w-4 h-4 mr-2" />
-                    {t.auth.loginButton}
-                  </Button>
+            {shouldShowUnblurred ? (
+              /* ─ Authenticated: Expandable "Xem thêm" ─ */
+              <>
+                <div
+                  className="overflow-hidden transition-all duration-300 ease-in-out"
+                  style={{ maxHeight: isDetailExpanded ? '9999px' : '0px' }}
+                >
+                  <div className="text-slate-700 pb-2">
+                    {renderMarkdownContent(lockedPart)}
+                  </div>
                 </div>
-              )}
-            </div>
+                <button
+                  onClick={() => setIsDetailExpanded(v => !v)}
+                  className="flex items-center gap-1.5 text-xs text-cyan-600 hover:text-cyan-800 font-medium mt-1 transition-colors"
+                >
+                  <span className={`inline-block transition-transform duration-200 ${isDetailExpanded ? 'rotate-180' : ''}`}>▾</span>
+                  {isDetailExpanded ? 'Thu gọn' : 'Xem thêm chi tiết'}
+                </button>
+              </>
+            ) : (
+              /* ─ Guest: blur + login gate (giữ nguyên) ─ */
+              <>
+                <div className="flex items-center gap-2 mb-3">
+                  <Lock className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm font-medium text-slate-700">Chi tiết trích dẫn luật &amp; Mức phạt</span>
+                </div>
+                <div className="relative">
+                  <div className="text-slate-700 blur-content">
+                    {renderMarkdownContent(lockedPart)}
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-white/60 to-white/90">
+                    <Button onClick={onUnlockClick} className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-xl">
+                      <LogIn className="w-4 h-4 mr-2" />
+                      {t.auth.loginButton}
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Khi đang stream (isLatest): hiện phần locked thẳng không collapse */}
+        {lockedPart && isLatest && shouldShowUnblurred && (
+          <div className="mt-4 pt-4 border-t border-slate-200 text-slate-700">
+            {renderMarkdownContent(finalLocked)}
+            {finalLocked.length < lockedPart.length && (
+              <span className="inline-block w-1 h-4 bg-cyan-600 ml-0.5 animate-pulse" />
+            )}
           </div>
         )}
       </div>

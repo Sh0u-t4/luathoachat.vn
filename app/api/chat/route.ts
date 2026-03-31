@@ -106,17 +106,21 @@ PHẠM VI: Chỉ có dữ liệu về Luật 69/2025 và NĐ 24, 25, 26/2026.
 Loại: tra_cuu_don | liet_ke | so_sanh | phuc_hop | quy_trinh | off_topic
 
 ═══ BƯỚC 2: FORMAT PHẢN HỒI ═══
-tra_cuu_don: Trả lời trực tiếp, ≤3 câu + [Nguồn: ...].
-liet_ke: Numbered list đầy đủ. KHÔNG bỏ sót.
-so_sanh: BẮT BUỘC dùng bảng Markdown ≤3 cột. Tối đa 20 từ/ô.
-phuc_hop: Chia trường hợp → kết luận.
-quy_trinh: Step-by-step có thời gian/chi phí.
+tra_cuu_don: Trả lời trực tiếp, ≤3 câu + [Nguồn: ...]. KHÔNG dùng header.
+liet_ke: Numbered list (1. 2. 3.) đầy đủ. KHÔNG bỏ sót. Nếu có nhóm con: dùng **Bold header** — KHÔNG dùng I. II. III.
+so_sanh: BắT BUỘC dùng bảng Markdown ≤3 cột. Tối đa 20 từ/ô. KHÔNG viết mở đầu dài.
+phuc_hop: Chia trường hợp bằng **bold header**. Mỗi trường hợp ≤ 3 gach đầu dòng. KHÔNG dùng I. II. III.
+quy_trinh: Step-by-step có thời gian/chi phí. Dùng 1. 2. 3. hoặc **Bước 1:** — KHÔNG dùng I. II.
 off_topic: Giải thích phạm vi + gợi ý 2-3 câu hỏi liên quan.
 
-═══ QUY TẮC CHỐNG BỊ CẮT CỤT — BẮT BUỘC ═══
-① NGHIÊM CẤM dùng cấu trúc "I. Tổng quan / II. Chi tiết / III. Kết luận" (Roman numeral section)
-   → Thay bằng: bold header hoặc danh sách có số thứ tự thông thường.
-② Viết súc tích: mỗi điểm tối đa 25 từ. Không nhắc lại câu hỏi ở đầu.
+═══ QUY TẮc ROMAN NUMERAL — ÁP DỤNG TOI TẤT CẢ LOẠI CÂU Hỏi ═══
+NGHIÊM CẤM dùng chỹ số La Mã làm header bất kỳ đâu trong câu trả lời:
+  ✗ "I. Tổng quan" / "II. Phân tích" / "III. Kừt luận"
+  ✗ "I. Quy định chung" / "II. Điều kiện"
+  ✗ Bất kỳ header bắt đầu bằng chữ số La Mã (I, II, III, IV...)
+→ THAY BẰᶠNG:
+  ✓ "**Tổng quan:**" / "**Phân tích:**" / "**Điều kiện:**" (bold header thường)
+  ✓ Danh sách 1. 2. 3. trực tiếp không có header cha
 
 ═══ QUY TẮC KHÔNG VIẾT KẾT LUẬN — BẮT BUỘC ═══
 NGHIÊM CẤM viết đoạn kết luận cuối câu trả lời. Cụ thể, KHÔNG được dùng các cụm sau:
@@ -490,7 +494,11 @@ function expandQueryForSearch(query: string): string {
 function getTokenBudget(query: string, scenario: ScenarioType): number {
   const q = query.toLowerCase();
   const hasScenario = scenario !== 'none';
-  // Phức tạp nhất: so sánh + scenario (cần bảng + giải thích dài)
+
+  // Hướng dẫn toàn diện A-Z / đầy đủ / multi-step — cần nhiều token nhất
+  if (/từ a.*z|a-z|toàn bộ|toàn diện|đầy đủ|chi tiết nhất|hướng dẫn chi tiết|tất cả các bước|quy trình đầy đủ|chu trình|cần biết gì/i.test(q)) return 8000;
+
+  // Phức tạp: so sánh + scenario đồng thời
   if (/so (sánh|sanh)|so với|vs\b|khác nhau/i.test(q)) return hasScenario ? 6000 : 5000;
   // Scenario luôn cần nhiều token
   if (/đồng thời|vừa.*vừa|kết hợp/i.test(q) || hasScenario) return 6000;
@@ -501,6 +509,7 @@ function getTokenBudget(query: string, scenario: ScenarioType): number {
   // Câu hỏi đơn giản (tra cứu 1 thông tin)
   return 3000;
 }
+
 
 
 // ── Streaming Gemini call ──────────────────────────────────────────────────
