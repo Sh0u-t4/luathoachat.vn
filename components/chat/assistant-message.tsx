@@ -447,7 +447,7 @@ export function AssistantMessage({
     const renderTextBlock = (raw: string, blockIdx: number) => {
       const textLines = raw.split('\n');
       return (
-        <div key={blockIdx} className="space-y-1">
+        <div key={blockIdx} className="space-y-1.5">
           {textLines.map((line, li) => {
             if (line.trim() === '') return <br key={li} />;
 
@@ -463,25 +463,25 @@ export function AssistantMessage({
             if (numMatch) return (
               <div key={li} className={`flex gap-2 items-start ${indentClass}`}>
                 <span className="font-semibold text-slate-500 shrink-0 min-w-[1.75rem] text-right leading-relaxed">{numMatch[1]}.</span>
-                <span className="flex-1 min-w-0">{renderInline(numMatch[2], li)}</span>
+                <span className="flex-1 min-w-0 leading-snug">{renderInline(numMatch[2], li)}</span>
               </div>
             );
 
             // Letter bullet: "a)" "b)" "đ)" with optional indent
             const letterMatch = trimmed.match(/^([a-zđ])\)\s+(.+)/i);
             if (letterMatch) return (
-              <div key={li} className={`flex gap-2 ml-4 ${indentClass}`}>
-                <span className="font-semibold text-slate-400 shrink-0 min-w-[1.2rem]">{letterMatch[1]})</span>
-                <span className="flex-1">{renderInline(letterMatch[2], li)}</span>
+              <div key={li} className={`flex gap-2 ml-4 items-start ${indentClass}`}>
+                <span className="font-semibold text-slate-400 shrink-0 min-w-[1.2rem] leading-relaxed">{letterMatch[1]})</span>
+                <span className="flex-1 leading-snug">{renderInline(letterMatch[2], li)}</span>
               </div>
             );
 
             // Bullet: "• " or "- " or "* "
             const bulletMatch = trimmed.match(/^[-•*]\s+(.+)/);
             if (bulletMatch) return (
-              <div key={li} className={`flex gap-2 ${indentClass}`}>
-                <span className="text-cyan-600 mt-0.5 shrink-0">•</span>
-                <span className="flex-1">{renderInline(bulletMatch[1], li)}</span>
+              <div key={li} className={`flex gap-2 items-start ${indentClass}`}>
+                <span className="text-cyan-600 mt-0.5 shrink-0 leading-snug">•</span>
+                <span className="flex-1 leading-snug">{renderInline(bulletMatch[1], li)}</span>
               </div>
             );
 

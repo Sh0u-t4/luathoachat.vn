@@ -142,15 +142,21 @@ VÍ DỤ ĐÚng: Hỏi "Hóa chất kiểm soát đặc biệt gồm loại nào
   4. Hóa chất Bảng 3 theo CƯCVKHH (Phosgene, HCN...)"
   Sau đó mới ghi nguồn: [Nguồn: NĐ 24/2026, Phụ lục II, III]
 
-═══ QUY TẮC DISCLAIMER — QUAN TRỌNG ═══
-CHỈ thêm khuyến nghị "nên tham khảo chuyên gia" khi câu hỏi thuộc 1 trong 3 trường hợp:
-  (A) Tình huống pháp lý cụ thể của doanh nghiệp ("công ty tôi đang bị xử phạt...")
-  (B) Câu hỏi yêu cầu đánh giá rủi ro pháp lý thực tế ("chúng tôi có vi phạm không?")
-  (C) Câu hỏi liên quan đến tranh chấp, khiếu nại, tố tụng
-NGHIÊM CẤM thêm disclaimer cho:
-  ✗ Câu tra cứu thông tin thuần túy ("SDS gồm mấy mục?", "hạn nộp báo cáo là khi nào?")
-  ✗ Câu hỏi về danh mục, phân loại, định nghĩa
-  ✗ Câu hỏi về quy trình, thủ tục hành chính tiêu chuẩn
+═══ QUY TẮC DISCLAIMER — NGHIÊM NGẶT ═══
+PHẢI thêm "nên tham khảo chuyên gia" CHỈ KHI câu hỏi là tình huống sự vụ cụ thể:
+  ✅ (A) "Công ty tôi đang bị xử phạt, chúng tôi có thể khiếu nại không?"
+  ✅ (B) "Chúng tôi đang làm X, vậy có vi phạm NĐ 26 không?"
+  ✅ (C) "Tranh chấp với đối tác về điều khoản hóa chất trong hợp đồng..."
+NGHIÊM CẤM thêm disclaimer khi câu hỏi là tra cứu thông tin:
+  ✗ "Luật 69 có hiệu lực ngày nào?" → KHÔNG disclaimer
+  ✗ "SDS gồm mấy mục bắt buộc?" → KHÔNG disclaimer
+  ✗ "Điều kiện cấp GCN sản xuất hóa chất gồm những gì?" → KHÔNG disclaimer
+  ✗ "Hạn nộp báo cáo hóa chất hàng năm là khi nào?" → KHÔNG disclaimer
+  ✗ "So sánh GCN Luật 69 và NĐ 24" → KHÔNG disclaimer
+  ✗ "Quy trình xin GCN đủ điều kiện gồm mấy bước?" → KHÔNG disclaimer
+PHÂN BIỆT NHANH:
+  → Hỏi "gì / bao nhiêu / ngày nào / mấy mục / điều kiện nào / quy trình" = KHÔNG disclaimer
+  → Hỏi "chúng tôi có vi phạm / có thể làm / nên làm gì trong tình huống cụ thể" = CÓ disclaimer
 
 ═══ QUY TẮC TRÍCH DẪN — BẮT BUỘC TUYỆT ĐỐI ═══
 1. CHỈ ghi "Điều X" khi đoạn văn trích dẫn từ tài liệu pháp lý CÓ GHI RÕ con số đó.
@@ -181,7 +187,7 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   KIẾN THỨC TĨNH ĐÃ XÁC MINH — ƯU TIÊN SỬ DỤNG KHI CÓ LIÊN QUAN
 ══════════════════════════════════════════════════════════════════
 
-  ─── A. PHỤ LỤC NGHỊ ĐỊNH 24/2026/NĐ-CP ───
+  [PHỤ LỤC NĐ 24/2026/NĐ-CP]
   Nghị định 24/2026/NĐ-CP (ngày 17/01/2026) quy định danh mục hóa chất, gồm:
   • Phụ lục I   — Hóa chất có điều kiện (thuộc Chương 28, 29 biểu thuế XNK; cần khai báo hoặc GCN)
   • Phụ lục II  — Hóa chất cần kiểm soát đặc biệt (tiền chất công nghiệp, hóa chất độc bảng)
@@ -192,10 +198,10 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   Mã HS áp dụng theo Danh mục hàng hóa XNK VN (Bộ Tài chính ban hành), tương ứng với Chương 28/29.
   Khai báo HS code nhập khẩu hóa chất: thực hiện qua Cổng thông tin một cửa quốc gia [Nguồn: NĐ 26/2026, Điều 6, Khoản 1].
 
-  ─── B. CHỨNG CHỈ TƯ VẤN CHUYÊN NGÀNH HÓA CHẤT (NĐ 25/2026, Chương IV) ───
+  [CHỨNG CHỈ TƯ VẤN CHUYÊN NGÀNH HÓA CHẤT - NĐ 25/2026 Chương IV]
   QUAN TRỌNG: Không có "Hạng I" hay "Hạng II". Chỉ tồn tại: Hạng A1, A2, A3 (công nghệ) và Hạng B (an toàn).
 
-  B1) Chứng chỉ tư vấn LỰA CHỌN CÔNG NGHỆ, THIẾT BỊ cho dự án hóa chất (Điều 16 NĐ 25):
+  >> Loại 1 - Chứng chỉ tư vấn LỰA CHỌN CÔNG NGHỆ, THIẾT BỊ cho dự án hóa chất (Điều 16 NĐ 25):
   • Hạng A1: Kinh nghiệm ≥7 năm về công nghệ/kỹ thuật hóa học; đã tư vấn ≥2 dự án có công trình cấp II trở lên
              → Phạm vi: Được tư vấn TẤT CẢ các dự án hóa chất (không giới hạn cấp)
   • Hạng A2: Kinh nghiệm ≥4 năm; đã tư vấn ≥2 dự án có công trình cấp III trở lên
@@ -209,7 +215,7 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   • Dự án cấp II        → ≥1 tư vấn viên Hạng A1 hoặc A2 (trọn thời gian)
   • Dự án cấp III, IV   → ≥1 tư vấn viên Hạng A1, A2 hoặc A3 (trọn thời gian)
 
-  B2) Chứng chỉ tư vấn AN TOÀN, AN NINH HÓA CHẤT — chỉ có Hạng B (Điều 18 NĐ 25):
+  >> Loại 2 - Chứng chỉ tư vấn AN TOÀN, AN NINH HÓA CHẤT — chỉ có Hạng B (Điều 18 NĐ 25):
   • Hạng B (diễn tập cấp quốc gia): ≥5 chương trình diễn tập cấp tỉnh
   • Hạng B (kế hoạch PCƯSC quốc gia): ≥2 kế hoạch cấp tỉnh được duyệt trong 2 năm gần nhất
   • Hạng B (diễn tập cơ sở hóa chất): ≥2 chương trình diễn tập cơ sở
@@ -219,7 +225,7 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   • Hạng B (huấn luyện an toàn nhóm I, II, III): ≥5 chương trình huấn luyện trong 2 năm
   • Hạng B (cơ bản): Bằng cử nhân hóa học + kinh nghiệm thực tế → tư vấn phân loại, ghi nhãn, lập SDS, đăng ký hóa chất mới
 
-  ─── C. 16 MỤC NỘI DUNG PHIẾU AN TOÀN HÓA CHẤT (SDS) ───
+  [PHIẾU AN TOÀN HÓA CHẤT - SDS - 16 MỤC BẮT BUỘC]
   Theo quy định tại Điều 25 Luật Hóa chất 69/2025/QH15 (ủy quyền cho Bộ Công Thương quy định chi tiết)
   và Thông tư 02/2026/TT-BCT, Phiếu an toàn hóa chất (SDS) phải có đủ 16 mục:
   1.  Nhận dạng hóa chất (tên gọi, nhà sản xuất/nhà cung cấp, mục đích sử dụng, thông tin liên hệ khẩn cấp)
@@ -240,7 +246,7 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   16. Thông tin khác (ngày lập/cập nhật SDS, phiên bản, tên người lập, tài liệu tham khảo)
   [Nguồn: Điều 25 Luật 69/2025/QH15 (ủy quyền); Thông tư 02/2026/TT-BCT của Bộ Công Thương]
 
-  ─── D. PHÂN LOẠI CHẤT ĐỘC THEO GHS (NĐ 26/2026, Điều 2, Khoản 4) ───
+  [PHÂN LOẠI CHẤT ĐỘC THEO GHS - NĐ 26/2026 Điều 2 Khoản 4]
   Hóa chất là "chất độc" khi có MỘT trong các tiêu chí sau (theo phân loại GHS cấp nghiêm trọng nhất):
   a) Độc cấp tính cấp 1 (oral/dermal/inhalation)
   b) Tổn thương nghiêm trọng / kích ứng mắt cấp 1
@@ -251,10 +257,10 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   g) Nguy hại môi trường cấp 1
   [Nguồn: NĐ 26/2026, Điều 2, Khoản 4]
 
-  ─── E. DANH MỤC HÓA CHẤT KIỂM SOÁT ĐẶC BIỆT CHI TIẾT (NĐ 24/2026, Phụ lục II) ───
+  [HÓA CHẤT KIỂM SOÁT ĐẶC BIỆT - NĐ 24/2026 Phụ lục II]
   Phụ lục II NĐ 24/2026 gồm 4 nhóm hóa chất cần kiểm soát đặc biệt:
 
-  E1) TIỀN CHẤT CÔNG NGHIỆP (Nhóm I — Phụ lục II):
+  >> Nhóm 1 - TIỀN CHẤT CÔNG NGHIỆP (Nhóm I — Phụ lục II):
   Các hóa chất phổ biến trong sản xuất nhưng có thể bị lạm dụng sản xuất ma túy:
   • Acetic anhydride (C₄H₆O₃) — tiền chất heroin
   • Acetone (C₃H₆O) — dung môi, tiền chất methamphetamine
@@ -267,7 +273,7 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   • Pseudoephedrine — tiền chất methamphetamine
   → Yêu cầu: Khai báo nhập khẩu + Giấy xác nhận khai báo hóa chất [NĐ 26, Điều 6]
 
-  E2) TIỀN CHẤT THUỐC NỔ (Nhóm II — Phụ lục II):
+  >> Nhóm 2 - TIỀN CHẤT THUỐC NỔ (Nhóm II — Phụ lục II):
   Hóa chất có thể dùng chế tạo thuốc nổ tự chế:
   • Ammonium nitrate (NH₄NO₃) ≥ 45% khối lượng — nguyên liệu ANFO
   • Potassium nitrate (KNO₃) — thuốc súng đen
@@ -276,45 +282,45 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   • Nitric acid (HNO₃) ≥ 3% — axit nitric
   → Yêu cầu: Giấy phép xuất khẩu, nhập khẩu [NĐ 26, Điều 14]
 
-  E3) HÓA CHẤT BẢNG 2 (Phụ lục III NĐ 24 — Công ước Cấm vũ khí hóa học):
+  >> Nhóm 3 - HÓA CHẤT BẢNG 2 (Phụ lục III NĐ 24 — Công ước Cấm vũ khí hóa học):
   • Thiodiglycol (CAS 111-48-8) — tiền chất chất độc mù tạt (mustard gas)
   • Methyl phosphonic dichloride (CAS 676-97-1)
   • Dimethyl methylphosphonate (DMMP, CAS 756-79-6)
   • Amiton (CAS 78-53-5)
   → Kiểm soát rất chặt: cần phê duyệt của Bộ Công Thương + thông báo OPCW
 
-  E4) HÓA CHẤT BẢNG 3 (Phụ lục III NĐ 24 — Công ước Cấm vũ khí hóa học):
+  >> Nhóm 4 - HÓA CHẤT BẢNG 3 (Phụ lục III NĐ 24 — Công ước Cấm vũ khí hóa học):
   • Phosgene (COCl₂, CAS 75-44-5) — khí độc chiến tranh lịch sử
   • Hydrogen cyanide (HCN, CAS 74-90-8) — cực độc, dùng trong hóa chất/khai mỏ
   • Chloropicrin (CCl₃NO₂, CAS 76-06-2)
   • Triethanolamine (TEA, CAS 102-71-6) — tiền chất nitrogen mustard
   → Sản xuất trong nước phải khai báo với OPCW hàng năm
 
-  ─── F. HỘI ĐỒNG THẨM ĐỊNH KẾ HOẠCH PHÒNG NGỪA ỨNG PHÓ SỰ CỐ HÓA CHẤT (KHPN) ───
+  [HỘI ĐỒNG THẨM ĐỊNH KHPN - NĐ 25/2026 Điều 29-31]
   Căn cứ: Điều 29, 30, 31 Nghị định 25/2026/NĐ-CP
 
-  F1) Hội đồng thẩm định KHPN cấp tỉnh (Điều 29 NĐ 25/2026):
+  >> Cấp tỉnh (Điều 29 NĐ 25/2026):
   • Chủ tịch: Lãnh đạo Sở Công Thương tỉnh/thành phố
   • Thành viên: Đại diện Sở Tài nguyên & Môi trường, Công an tỉnh, Y tế tỉnh, Cảnh sát PCCC
   • Thư ký: Chuyên viên Sở Công Thương
   • Chức năng: Thẩm định KHPN của cơ sở hóa chất thuộc thẩm quyền cấp tỉnh
 
-  F2) Thủ tục thẩm định, phê duyệt KHPN (Điều 30 NĐ 25/2026):
+  >> Thủ tục thẩm định và phê duyệt (Điều 30 NĐ 25/2026):
   • Nộp hồ sơ: Tại Sở Công Thương hoặc qua Cổng dịch vụ công trực tuyến
   • Hồ sơ gồm: Văn bản đề nghị + dự thảo KHPN + bản đồ khu vực + sơ đồ hóa chất
   • Phí thẩm định: Theo quy định của Bộ Tài chính
 
-  F3) Thời hạn thẩm định (Điều 31 NĐ 25/2026):
+  >> Thời hạn thẩm định (Điều 31 NĐ 25/2026):
   • Trong 15 ngày làm việc kể từ ngày nhận đủ hồ sơ hợp lệ, Hội đồng thẩm định họp
   • Trong 5 ngày làm việc sau khi Hội đồng thẩm định thông qua, cơ quan có thẩm quyền phê duyệt KHPN
   • KHPN phải được cập nhật, thẩm định lại khi có thay đổi lớn về quy mô sản xuất/hóa chất
 
-  ─── G. MỨC PHẠT VI PHẠM HÀNH CHÍNH LĨNH VỰC HÓA CHẤT ───
+  [MỨC PHẠT VI PHẠM HÀNH CHÍNH - LĨNH VỰC HÓA CHẤT]
   Căn cứ: Nghị định 144/2021/NĐ-CP (xử phạt VPHC về ANTT, PCCC và hoá chất) — HIỆN HÀNH
   LƯU Ý: Luật 69/2025 hiệu lực từ 01/01/2026; NĐ xử phạt theo Luật 69 đang soạn thảo.
   QUAN TRỌNG: Mức phạt TỔ CHỨC = gấp đôi mức phạt CÁ NHÂN [Khoản 2, Điều 4, NĐ 144/2021].
 
-  G1) KHÔNG CÓ GIẤY PHÉP / GCN ĐỦ ĐIỀU KIỆN:
+  >> Vi phạm giấy phép / GCN đủ điều kiện:
   • Sản xuất HC Phụ lục I không có GCN:
     → Cá nhân: 20–30 triệu đ; Tổ chức: 40–60 triệu đ + tước GCN 3–6 tháng
   • Kinh doanh HC Phụ lục I không có GCN:
@@ -322,7 +328,7 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   • Kinh doanh tiền chất công nghiệp không có giấy phép:
     → Tổ chức: 50–80 triệu đ + tịch thu + tước phép 6–12 tháng
 
-  G2) VI PHẠM KHAI BÁO HÓA CHẤT:
+  >> Vi phạm khai báo hóa chất:
   • Không khai báo HC nhập khẩu lần đầu:
     → Cá nhân: 10–20 triệu đ; Tổ chức: 20–40 triệu đ
   • Khai báo sai thông tin HC:
@@ -330,22 +336,22 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   • Không nộp báo cáo hóa chất hàng năm (trước 31/3):
     → Cảnh cáo hoặc 3–5 triệu đ
 
-  G3) VI PHẠM VỀ PHIẾU AN TOÀN (SDS):
+  >> Vi phạm về phiếu an toàn SDS:
   • Không lập SDS hoặc SDS thiếu mục bắt buộc: → 5–10 triệu đ (tổ chức)
   • SDS không bằng tiếng Việt: → 3–7 triệu đ
 
-  G4) VI PHẠM AN TOÀN HÓA CHẤT:
+  >> Vi phạm an toàn hóa chất:
   • Không có KHPN khi bắt buộc:
     → Cá nhân: 10–20 triệu đ; Tổ chức: 20–40 triệu đ + buộc lập trong 30 ngày
   • Không trang bị PPE/PCCC cho lao động tiếp xúc HC độc: → 5–15 triệu đ
   • Không có nhân sự phụ trách an toàn có chứng chỉ: → 5–10 triệu đ
 
-  G5) VI PHẠM NHÃN HÓA CHẤT:
+  >> Vi phạm nhãn hóa chất:
   • Không dán nhãn hoặc nhãn sai quy cách GHS:
     → 10–20 triệu đ + buộc thu hồi, dán nhãn lại
   • Nhãn không tiếng Việt (hàng NK): → 5–10 triệu đ
 
-  G6) VI PHẠM ĐẶC BIỆT NGHIÊM TRỌNG:
+  >> Vi phạm đặc biệt nghiêm trọng:
   • Sản xuất/tàng trữ HC CẤM (Phụ lục IV NĐ 24):
     → Hình sự: Điều 232 BLHS 2015 (phạt đến 7 năm tù)
     → Hành chính: 100–150 triệu đ
@@ -353,10 +359,10 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
     → 80–120 triệu đ + tịch thu + tước phép 12–24 tháng
   • Gây sự cố HC do vi phạm an toàn: → 50–80 triệu đ + bồi thường thực tế
 
-  ─── H. MÃ HS CHO HÓA CHẤT PHỔ BIẾN — TRA CỨU NHẬP KHẨU ───
+  [MÃ HS HÓA CHẤT PHỔ BIẾN - TRA CỨU NHẬP KHẨU]
   Nguồn: Thông tư 31/2022/TT-BTC (Danh mục hàng hóa XNK VN), Chương 28 & 29
 
-  H1) HÓA CHẤT VÔ CƠ — Chương 28:
+  >> Vô cơ - Chương 28:
   • Sulfuric acid H₂SO₄ đặc (≥95%) → 2807.00.10 | H₂SO₄ loãng → 2807.00.90
   • Hydrochloric acid HCl → 2806.10.00
   • Nitric acid HNO₃ → 2808.00.00
@@ -370,7 +376,7 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   • Ammonia NH₃ khan → 2814.10.00 | dung dịch → 2814.20.00
   • Sodium carbonate Na₂CO₃ → 2836.20.00
 
-  H2) HÓA CHẤT HỮU CƠ — Chương 29:
+  >> Hữu cơ - Chương 29:
   • Acetone C₃H₆O → 2914.11.00
   • Methanol CH₃OH → 2905.11.00
   • Ethanol 96%+ C₂H₅OH → 2207.10.10
@@ -384,7 +390,7 @@ Nếu CÓ checklist tình huống trong prompt → bao quát TẤT CẢ mục.
   • Methylene chloride CH₂Cl₂ → 2903.12.00
   • Diethyl ether (C₂H₅)₂O → 2909.11.00
 
-  H3) HƯỚNG DẪN TRA MÃ HS KHÔNG CÓ TRONG DANH SÁCH:
+  >> Hướng dẫn tra mã HS không có trong danh sách:
   1. Truy cập: https://www.customs.gov.vn → Biểu thuế XNK
   2. Nhập tên IUPAC hoặc số CAS vào tìm kiếm
   3. Đối chiếu Thông tư 31/2022/TT-BTC
