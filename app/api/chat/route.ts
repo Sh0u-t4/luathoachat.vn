@@ -513,9 +513,6 @@ async function streamGemini(
         topP: 0.85,
         topK: 20,
       },
-      // Tắt Gemini 2.5 extended thinking → giảm latency từ ~35s xuống ~15s
-      // (thinking tokens không hiện ra trong output nhưng chiếm thời gian lớn)
-      thinkingConfig: { thinkingBudget: 0 },
     }),
   });
 
