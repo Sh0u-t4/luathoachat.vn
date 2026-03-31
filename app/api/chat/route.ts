@@ -113,6 +113,19 @@ phuc_hop: Chia trường hợp → kết luận.
 quy_trinh: Step-by-step có thời gian/chi phí.
 off_topic: Giải thích phạm vi + gợi ý 2-3 câu hỏi liên quan.
 
+═══ QUY TẮC CHỐNG BỊ CẮT CỤT — BẮT BUỘC ═══
+① NGHIÊM CẤM dùng cấu trúc "I. Tổng quan / II. Chi tiết / III. Kết luận" (Roman numeral section)
+   → Thay bằng: bold header hoặc danh sách có số thứ tự thông thường.
+② Viết súc tích: mỗi điểm tối đa 25 từ. Không nhắc lại câu hỏi ở đầu.
+
+═══ QUY TẮC KHÔNG VIẾT KẾT LUẬN — BẮT BUỘC ═══
+NGHIÊM CẤM viết đoạn kết luận cuối câu trả lời. Cụ thể, KHÔNG được dùng các cụm sau:
+  ✗ "Kết luận:", "Tóm lại,", "Như vậy,", "Nhìn chung,", "Tổng kết,"
+  ✗ "Hy vọng thông tin trên...", "Trên đây là...", "Để đảm bảo tuân thủ..."
+  ✗ Bất kỳ đoạn văn nào chỉ tóm tắt lại những gì vừa nói
+→ Kết thúc câu trả lời ngay sau điểm cuối cùng của nội dung.
+→ NGOẠI LỆ: Chỉ viết kết luận nếu user hỏi rõ "cho tôi bản tóm tắt" hoặc "kết luận là gì?".
+
 ═══ QUY TẮC TRẢ LỜI TRỰC TIẾP — BẮT BUỘC ═══
 KHI được hỏi về nội dung (danh sách, phân loại, điều kiện), PHẢI theo thứ tự:
   ① Trả lời thẳng vào câu hỏi TRƯỚC (liệt kê, nêu tên, đưa con số cụ thể)
@@ -477,17 +490,18 @@ function expandQueryForSearch(query: string): string {
 function getTokenBudget(query: string, scenario: ScenarioType): number {
   const q = query.toLowerCase();
   const hasScenario = scenario !== 'none';
-  // Phức tạp nhất: so sánh + scenario
-  if (/so (sánh|sanh)|so với|vs\b|khác nhau/i.test(q)) return hasScenario ? 4000 : 3000;
+  // Phức tạp nhất: so sánh + scenario (cần bảng + giải thích dài)
+  if (/so (sánh|sanh)|so với|vs\b|khác nhau/i.test(q)) return hasScenario ? 6000 : 5000;
   // Scenario luôn cần nhiều token
-  if (/đồng thời|vừa.*vừa|kết hợp/i.test(q) || hasScenario) return 4000;
-  // Quy trình thủ tục
-  if (/thủ tục|quy trình|các bước|hướng dẫn/i.test(q)) return 3000;
-  // Liệt kê, hồ sơ, điều kiện, yêu cầu — dễ bị cắt nhất nếu thiếu token
-  if (/liệt kê|danh sách|các điều kiện|hồ sơ|bao gồm|gồm những|yêu cầu|điều kiện/i.test(q)) return 3000;
-  // Câu hỏi đơn giản
-  return 2500;
+  if (/đồng thời|vừa.*vừa|kết hợp/i.test(q) || hasScenario) return 6000;
+  // Quy trình thủ tục (nhiều bước)
+  if (/thủ tục|quy trình|các bước|hướng dẫn/i.test(q)) return 4000;
+  // Liệt kê, hồ sơ, điều kiện, trường hợp, ngoại lệ — dễ bị cắt nhất
+  if (/liệt kê|danh sách|các điều kiện|hồ sơ|bao gồm|gồm những|yêu cầu|điều kiện|trường hợp|ngoại lệ|được miễn/i.test(q)) return 4000;
+  // Câu hỏi đơn giản (tra cứu 1 thông tin)
+  return 3000;
 }
+
 
 // ── Streaming Gemini call ──────────────────────────────────────────────────
 async function streamGemini(

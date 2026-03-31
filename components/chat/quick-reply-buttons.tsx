@@ -1,7 +1,6 @@
 'use client';
 
-import { MessageCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { MessageCircle, ChevronRight } from 'lucide-react';
 
 interface QuickReplyButtonsProps {
   suggestions: string[];
@@ -13,27 +12,27 @@ export function QuickReplyButtons({ suggestions, onSelect, className = '' }: Qui
   if (suggestions.length === 0) return null;
 
   return (
-    <div className={`flex flex-col gap-2 mt-3 ${className}`}>
-      <div className="flex items-center gap-2 text-xs text-slate-500">
+    <div className={`flex flex-col gap-1.5 mt-3 ${className}`}>
+      <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-0.5">
         <MessageCircle className="w-3 h-3" />
-        <span>Câu hỏi liên quan:</span>
+        <span>Câu hỏi liên quan</span>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-1">
         {suggestions.map((suggestion, index) => (
-          <Button
+          <button
             key={index}
-            variant="outline"
-            size="sm"
             onClick={() => onSelect(suggestion)}
-            className="text-xs bg-slate-800/50 border-slate-700 hover:bg-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-300 transition-all duration-200 rounded-lg"
+            className="w-full flex items-center gap-2 text-left text-xs px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:border-cyan-400 hover:bg-cyan-50 hover:text-cyan-700 transition-all duration-150 group"
           >
-            {suggestion}
-          </Button>
+            <ChevronRight className="w-3 h-3 shrink-0 text-slate-400 group-hover:text-cyan-500 transition-colors" />
+            <span className="flex-1 leading-snug">{suggestion}</span>
+          </button>
         ))}
       </div>
     </div>
   );
 }
+
 
 // ── Suggestion deduplication pool ─────────────────────────────────────────
 // Track suggestions shown globally per session to avoid repetition
