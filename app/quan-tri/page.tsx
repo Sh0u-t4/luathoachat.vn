@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { ShieldAlert, ArrowLeft, Loader2, FlaskConical, LayoutDashboard, Brain, Bot, BarChart3 } from 'lucide-react';
+import { ShieldAlert, ArrowLeft, Loader2, FlaskConical, LayoutDashboard, Brain, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/lib/auth/context';
@@ -58,14 +58,6 @@ const KnowledgeManager = dynamic(() => import('@/components/admin/knowledge-mana
   ssr: false
 });
 
-const AIConfigManager = dynamic(() => import('@/components/admin/ai-config-manager').then(mod => ({ default: mod.AIConfigManager })), {
-  loading: () => (
-    <div className="flex items-center justify-center py-24">
-      <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
-    </div>
-  ),
-  ssr: false
-});
 
 const AIAnalyticsDashboard = dynamic(() => import('@/components/admin/ai-analytics-dashboard').then(mod => ({ default: mod.AIAnalyticsDashboard })), {
   loading: () => (
@@ -313,7 +305,7 @@ export default function AdminPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-6xl grid-cols-4 sm:grid-cols-7 h-auto sm:h-12 gap-1">
+          <TabsList className="grid w-full max-w-5xl grid-cols-4 sm:grid-cols-6 h-auto sm:h-12 gap-1">
             <TabsTrigger value="dashboard" className="gap-2">
               <LayoutDashboard className="w-4 h-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -336,13 +328,8 @@ export default function AdminPage() {
             </TabsTrigger>
             <TabsTrigger value="knowledge" className="gap-2">
               <Brain className="w-4 h-4" />
-              <span className="hidden sm:inline">Knowledge Base</span>
-              <span className="sm:hidden">KB</span>
-            </TabsTrigger>
-            <TabsTrigger value="ai-config" className="gap-2">
-              <Bot className="w-4 h-4" />
-              <span className="hidden sm:inline">Cấu hình AI</span>
-              <span className="sm:hidden">AI</span>
+              <span className="hidden sm:inline">Knowledge & AI</span>
+              <span className="sm:hidden">KB & AI</span>
             </TabsTrigger>
           </TabsList>
 
@@ -392,10 +379,6 @@ export default function AdminPage() {
                 <ContentVerifyPanel />
               </div>
             </div>
-          </TabsContent>
-
-          <TabsContent value="ai-config">
-            <AIConfigManager />
           </TabsContent>
         </Tabs>
       </main>

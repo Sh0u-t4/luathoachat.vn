@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Upload, FileText, Trash2, CheckCircle, AlertCircle, Loader2, Brain, RefreshCw, Eye, X, ChevronDown, ChevronUp, Hash } from 'lucide-react';
+import { Upload, FileText, Trash2, CheckCircle, AlertCircle, Loader2, Brain, RefreshCw, Eye, X, ChevronDown, ChevronUp, Hash, Settings2 } from 'lucide-react';
+import { AIConfigManager } from '@/components/admin/ai-config-manager';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
@@ -646,6 +647,15 @@ export function KnowledgeManager() {
             <li>• Chỉ Admin mới có thể upload/xóa tài liệu</li>
           </ul>
         </div>
+      </div>
+
+      {/* ─── AI Configuration ────────────────────────────── */}
+      <div className="border-t-2 border-dashed border-slate-200 pt-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Settings2 className="w-4 h-4 text-orange-400" />
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Cấu hình AI</span>
+        </div>
+        <AIConfigManager />
       </div>
     </div>
   );
