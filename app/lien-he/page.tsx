@@ -28,44 +28,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ChatProvider } from '@/components/chat/chat-context';
+import { useLanguage } from '@/lib/i18n/context';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 
-const contactInfo = [
-  {
-    icon: Mail,
-    title: 'Email Hỗ trợ',
-    value: 'info@luathoachat.vn',
-    href: 'mailto:info@luathoachat.vn',
-    subtext: 'Phản hồi trong 24h',
-  },
-  {
-    icon: MessageCircle,
-    title: 'Zalo OA',
-    value: 'LuatHoaChat.vn',
-    href: 'https://zalo.me/luathoachat',
-    subtext: 'Chat trực tuyến qua Zalo',
-  },
-  {
-    icon: MapPin,
-    title: 'Văn phòng',
-    value: '65 N4 KDC Phú Mỹ Hiệp, Tân Đông Hiệp, HCM',
-    href: 'https://maps.google.com/?q=65+N4+KDC+Phu+My+Hiep+Tan+Dong+Hiep+HCM',
-    subtext: 'Liên hệ để hẹn gặp',
-  },
-];
-
-const inquiryTypes = [
-  { value: 'tu_van_luat', label: 'Tư vấn pháp luật hóa chất' },
-  { value: 'ho_tro_giay_phep', label: 'Hỗ trợ thủ tục giấy phép' },
-  { value: 'dao_tao', label: 'Đăng ký đào tạo ATVSLĐ' },
-  { value: 'msds', label: 'Yêu cầu bản MSDS' },
-  { value: 'khac', label: 'Vấn đề khác' },
-];
+// Vietnamese phone number regex: 0[3|5|7|8|9][0-9]{8} or +84[3|5|7|8|9][0-9]{8}
+const PHONE_REGEX = /^(\+84|0)(3[2-9]|5[2689]|7[06-9]|8[0-9]|9[0-9])\d{7}$/;
 
 export default function ContactPage() {
+  const { t } = useLanguage();
+  const tc = t.contact;
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     company: '',
@@ -75,11 +51,28 @@ export default function ContactPage() {
     message: '',
   });
 
+  const validatePhone = (phone: string) => {
+    if (!phone) return tc.errorRequired;
+    if (!PHONE_REGEX.test(phone.replace(/[\s\-\.]/g, ''))) return tc.errorPhoneFormat;
+    return '';
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setFormData({ ...formData, phone: value });
+    if (phoneError) setPhoneError(validatePhone(value));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const phoneErr = validatePhone(formData.phone);
+    if (phoneErr) {
+      setPhoneError(phoneErr);
+      return;
+    }
+
     if (!formData.email || !formData.phone || !formData.inquiryType) {
-      toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
+      toast.error(tc.errorRequired);
       return;
     }
 
@@ -100,27 +93,52 @@ export default function ContactPage() {
       if (error) throw error;
 
       setIsSuccess(true);
-      toast.success('Gửi thông tin thành công!');
+      toast.success(tc.toastSuccess);
 
       setTimeout(() => {
         setIsSuccess(false);
-        setFormData({
-          fullName: '',
-          company: '',
-          email: '',
-          phone: '',
-          inquiryType: '',
-          message: '',
-        });
+        setFormData({ fullName: '', company: '', email: '', phone: '', inquiryType: '', message: '' });
       }, 3000);
 
     } catch (err) {
       console.error('Contact form error:', err);
-      toast.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
+      toast.error(tc.errorSubmit);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const contactInfo = [
+    {
+      icon: Mail,
+      title: tc.emailTitle,
+      value: 'info@luathoachat.vn',
+      href: 'mailto:info@luathoachat.vn',
+      subtext: tc.emailSubtext,
+    },
+    {
+      icon: MessageCircle,
+      title: tc.zaloTitle,
+      value: 'LuatHoaChat.vn',
+      href: 'https://zalo.me/luathoachat',
+      subtext: tc.zaloSubtext,
+    },
+    {
+      icon: MapPin,
+      title: tc.officeTitle,
+      value: '65 N4 KDC Phú Mỹ Hiệp, Tân Đông Hiệp, HCM',
+      href: 'https://maps.google.com/?q=65+N4+KDC+Phu+My+Hiep+Tan+Dong+Hiep+HCM',
+      subtext: tc.officeSubtext,
+    },
+  ];
+
+  const inquiryTypes = [
+    { value: 'tu_van_luat', label: tc.inquiryTypes.legal },
+    { value: 'ho_tro_giay_phep', label: tc.inquiryTypes.permit },
+    { value: 'dao_tao', label: tc.inquiryTypes.training },
+    { value: 'msds', label: tc.inquiryTypes.msds },
+    { value: 'khac', label: tc.inquiryTypes.other },
+  ];
 
   return (
     <ChatProvider>
@@ -135,7 +153,7 @@ export default function ContactPage() {
                 className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-cyan-600 mb-4"
               >
                 <ChevronLeft className="w-4 h-4" />
-                Quay lại Trang chủ
+                {tc.backHome}
               </Link>
 
               <div className="flex items-center gap-3 mb-2">
@@ -144,11 +162,9 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
-                    Liên hệ Hỗ trợ
+                    {tc.pageTitle}
                   </h1>
-                  <p className="text-slate-600">
-                    Đội ngũ chuyên gia sẵn sàng hỗ trợ bạn 24/7
-                  </p>
+                  <p className="text-slate-600">{tc.pageSubtitle}</p>
                 </div>
               </div>
             </div>
@@ -180,10 +196,8 @@ export default function ContactPage() {
               <div className="lg:col-span-3">
                 <Card className="border-0 shadow-md">
                   <CardHeader>
-                    <CardTitle>Gửi Yêu cầu Tư vấn</CardTitle>
-                    <CardDescription>
-                      Điền thông tin để nhận tư vấn từ chuyên gia trong vòng 24h
-                    </CardDescription>
+                    <CardTitle>{tc.formTitle}</CardTitle>
+                    <CardDescription>{tc.formSubtitle}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {isSuccess ? (
@@ -192,17 +206,15 @@ export default function ContactPage() {
                           <CheckCircle className="w-8 h-8 text-green-600" />
                         </div>
                         <h3 className="text-xl font-semibold text-slate-900 mb-2">
-                          Gửi thành công!
+                          {tc.successTitle}
                         </h3>
-                        <p className="text-slate-600">
-                          Chuyên gia sẽ liên hệ với bạn trong thời gian sớm nhất.
-                        </p>
+                        <p className="text-slate-600">{tc.successMessage}</p>
                       </div>
                     ) : (
                       <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="fullName">Họ và tên</Label>
+                            <Label htmlFor="fullName">{tc.fullName}</Label>
                             <Input
                               id="fullName"
                               value={formData.fullName}
@@ -211,7 +223,7 @@ export default function ContactPage() {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="company">Tên doanh nghiệp</Label>
+                            <Label htmlFor="company">{tc.company}</Label>
                             <Input
                               id="company"
                               value={formData.company}
@@ -224,7 +236,7 @@ export default function ContactPage() {
                         <div className="grid md:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="email">
-                              Email <span className="text-red-500">*</span>
+                              {tc.email} <span className="text-red-500">*</span>
                             </Label>
                             <Input
                               id="email"
@@ -237,29 +249,34 @@ export default function ContactPage() {
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="phone">
-                              Số điện thoại/Zalo <span className="text-red-500">*</span>
+                              {tc.phone} <span className="text-red-500">*</span>
                             </Label>
                             <Input
                               id="phone"
                               type="tel"
                               value={formData.phone}
-                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                              onChange={(e) => handlePhoneChange(e.target.value)}
+                              onBlur={() => setPhoneError(validatePhone(formData.phone))}
                               placeholder="0912345678"
+                              className={phoneError ? 'border-red-400 focus-visible:ring-red-400' : ''}
                               required
                             />
+                            {phoneError && (
+                              <p className="text-xs text-red-500">{phoneError}</p>
+                            )}
                           </div>
                         </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="inquiryType">
-                            Loại yêu cầu <span className="text-red-500">*</span>
+                            {tc.inquiryType} <span className="text-red-500">*</span>
                           </Label>
                           <Select
                             value={formData.inquiryType}
                             onValueChange={(value) => setFormData({ ...formData, inquiryType: value })}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder="Chọn loại yêu cầu" />
+                              <SelectValue placeholder={tc.inquiryPlaceholder} />
                             </SelectTrigger>
                             <SelectContent>
                               {inquiryTypes.map((type) => (
@@ -272,12 +289,12 @@ export default function ContactPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="message">Nội dung chi tiết</Label>
+                          <Label htmlFor="message">{tc.message}</Label>
                           <Textarea
                             id="message"
                             value={formData.message}
                             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                            placeholder="Mô tả chi tiết vấn đề bạn cần hỗ trợ..."
+                            placeholder={tc.messagePlaceholder}
                             rows={4}
                           />
                         </div>
@@ -290,12 +307,12 @@ export default function ContactPage() {
                           {isSubmitting ? (
                             <>
                               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              Đang gửi...
+                              {tc.submitting}
                             </>
                           ) : (
                             <>
                               <Send className="w-4 h-4 mr-2" />
-                              Gửi yêu cầu
+                              {tc.submit}
                             </>
                           )}
                         </Button>
@@ -308,28 +325,28 @@ export default function ContactPage() {
               <div className="lg:col-span-2">
                 <Card className="border-0 shadow-md mb-6">
                   <CardHeader>
-                    <CardTitle className="text-lg">Giờ làm việc</CardTitle>
+                    <CardTitle className="text-lg">{tc.workingHoursTitle}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex items-center gap-3">
                       <Clock className="w-4 h-4 text-cyan-600" />
                       <div>
-                        <p className="text-sm font-medium">Thứ 2 - Thứ 6</p>
+                        <p className="text-sm font-medium">{tc.weekdays}</p>
                         <p className="text-sm text-slate-500">8:00 - 17:00</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <Clock className="w-4 h-4 text-slate-400" />
                       <div>
-                        <p className="text-sm font-medium">Thứ 7</p>
+                        <p className="text-sm font-medium">{tc.saturday}</p>
                         <p className="text-sm text-slate-500">8:00 - 12:00</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <Clock className="w-4 h-4 text-slate-400" />
                       <div>
-                        <p className="text-sm font-medium">Chủ nhật</p>
-                        <p className="text-sm text-slate-500">Nghỉ</p>
+                        <p className="text-sm font-medium">{tc.sunday}</p>
+                        <p className="text-sm text-slate-500">{tc.sundayClosed}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -338,13 +355,11 @@ export default function ContactPage() {
                 <Card className="border-0 shadow-md bg-cyan-50">
                   <CardContent className="p-6 text-center">
                     <MessageCircle className="w-8 h-8 mx-auto mb-3 text-cyan-600" />
-                    <h3 className="font-semibold text-slate-900 mb-2">Chat với AI ngay</h3>
-                    <p className="text-sm text-slate-600 mb-4">
-                      Trợ lý AI sẵn sàng trả lời mọi thắc mắc về Luật Hóa chất 24/7
-                    </p>
+                    <h3 className="font-semibold text-slate-900 mb-2">{tc.aiChatTitle}</h3>
+                    <p className="text-sm text-slate-600 mb-4">{tc.aiChatDesc}</p>
                     <Link href="/#chat">
                       <Button variant="outline" className="w-full border-cyan-600 text-cyan-600 hover:bg-cyan-100">
-                        Mở Chat AI
+                        {tc.openChat}
                       </Button>
                     </Link>
                   </CardContent>
