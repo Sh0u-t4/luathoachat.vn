@@ -417,6 +417,34 @@ QUY TẮC: Đi thẳng vào nội dung câu trả lời ngay từ từ đầu ti
 KHÔNG kết thúc bằng "Tuy nhiên, bạn nên tham khảo ý kiến chuyên gia" nếu câu hỏi chỉ là tra cứu thông tin.`;
 
 
+// ── Mandatory rules — luôn prepend vào prompt bất kể DB hay default ─────────
+// Đây là các luật hành vi BẮT BUỘC, không ai được ghi đè qua Admin UI.
+const MANDATORY_RULES = `
+══════════════ QUY TẮC BẮT BUỘC — KHÔNG ĐƯỢC VI PHẠM ══════════════
+
+NGHIÊM CẤM TUYỆT ĐỐI — FORMAT VĂN THƯ:
+MỞ ĐẦU BỊ CẤM (KHÔNG BAO GIỜ dùng):
+  ✗ "Chào bạn," / "Chào Quý doanh nghiệp," / bất kỳ câu chào nào
+  ✗ "Với vai trò là Trợ lý Pháp lý AI..."
+  ✗ "Tôi xin cung cấp..." / "Tôi sẽ trình bày..." / "Tôi xin trả lời..."
+  ✗ Bất kỳ đoạn văn giới thiệu bản thân hoặc mô tả sẽ làm gì
+KẾT THÚC BỊ CẤM (KHÔNG BAO GIỜ dùng):
+  ✗ "Trân trọng," / "Kính chúc," / bất kỳ lời chào cuối nào
+  ✗ "Trợ lý Pháp lý AI | LuatHoaChat.vn" / bất kỳ chữ ký nào
+  ✗ "Kết luận:" / "Tóm lại," / "Như vậy," / "Nhìn chung,"
+
+NGHIÊM CẤM — ROMAN NUMERAL HEADER:
+  ✗ "I. Tổng quan" / "II. Chi tiết" / "III. Kết luận" / bất kỳ I. II. III. IV. nào
+  → Thay bằng: **Bold header:** hoặc danh sách 1. 2. 3.
+
+QUY TẮC DISCLAIMER:
+  → Hỏi "gì/bao nhiêu/ngày nào/điều kiện/quy trình" = KHÔNG thêm "nên tham khảo chuyên gia"
+  → Chỉ thêm khi câu hỏi là tình huống cụ thể của doanh nghiệp / đánh giá rủi ro / tranh chấp
+
+BẮT ĐẦU: Đi thẳng vào nội dung từ từ đầu tiên. KHÔNG lời chào, KHÔNG tự giới thiệu.
+════════════════════════════════════════════════════════════════════
+`;
+
 // ── AI Config cache (TTL 60s) ──────────────────────────────────────────────
 interface AIConfigCache {
   systemPrompt: string;
@@ -456,8 +484,11 @@ async function getAIConfig(): Promise<AIConfigCache> {
     const modelRaw        = get('ai_model');
     const maxTokensRaw    = get('ai_max_tokens');
 
+    // Luôn prepend MANDATORY_RULES vào đầu — bất kể prompt từ DB hay mặc định
+    const basePrompt = systemPromptRaw?.trim() ? systemPromptRaw : DEFAULT_SYSTEM_INSTRUCTION;
+
     configCache = {
-      systemPrompt:      systemPromptRaw?.trim() ? systemPromptRaw : DEFAULT_SYSTEM_INSTRUCTION,
+      systemPrompt:      MANDATORY_RULES + '\n' + basePrompt,
       temperature:       temperatureRaw  ? parseFloat(temperatureRaw) : 0.15,
       model:             modelRaw?.trim() ? modelRaw : 'gemini-2.5-flash',
       maxTokensOverride: maxTokensRaw    ? parseInt(maxTokensRaw)    : null,
@@ -468,7 +499,7 @@ async function getAIConfig(): Promise<AIConfigCache> {
   } catch (err) {
     console.warn('[api/chat] DB config unavailable, using defaults:', err);
     configCache = {
-      systemPrompt:      DEFAULT_SYSTEM_INSTRUCTION,
+      systemPrompt:      MANDATORY_RULES + '\n' + DEFAULT_SYSTEM_INSTRUCTION,
       temperature:       0.15,
       model:             'gemini-2.5-flash',
       maxTokensOverride: null,
@@ -478,6 +509,7 @@ async function getAIConfig(): Promise<AIConfigCache> {
 
   return configCache!;
 }
+
 
 // ── Query expansion for better retrieval ─────────────────────────────────
 // Mở rộng query trước khi gửi cho vector search để tránh miss các văn bản quan trọng
