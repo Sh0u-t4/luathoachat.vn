@@ -13,13 +13,15 @@ function getSupabase() {
 }
 
 const DEFAULT_CONFIGS = [
-  { key: 'ai_system_prompt', value: 'Ban la Tro ly Phap ly AI chuyen sau ve Luat Hoa chat Viet Nam 2026 cua LuatHoaChat.vn.', description: 'System prompt cho AI' },
+  { key: 'ai_system_prompt', value: '', description: 'System prompt cho AI (để trống = dùng prompt mặc định đầy đủ từ code)' },
   { key: 'ai_match_threshold', value: '0.6', description: 'Ngưỡng similarity tối thiểu để lấy chunk (0.0 - 1.0)' },
   { key: 'ai_match_count', value: '5', description: 'Số chunks tối đa lấy từ Knowledge Base' },
-  { key: 'ai_temperature', value: '0.3', description: 'Nhiệt độ AI (0 = chính xác, 1 = sáng tạo)' },
-  { key: 'ai_max_tokens', value: '3000', description: 'Số token tối đa trong câu trả lời' },
-  { key: 'ai_model', value: 'gemini-2.5-pro', description: 'Model AI được sử dụng' },
+  { key: 'ai_temperature', value: '0.15', description: 'Nhiệt độ AI (0 = chính xác, 1 = sáng tạo)' },
+  // ai_max_tokens: KHÔNG set default — để null = dùng auto-budget theo loại câu hỏi (3000-12000)
+  // Nếu set giá trị cụ thể trong DB sẽ OVERRIDE toàn bộ auto-budget logic
+  { key: 'ai_model', value: 'gemini-2.5-flash', description: 'Model AI được sử dụng' },
 ];
+
 
 export async function GET() {
   try {
