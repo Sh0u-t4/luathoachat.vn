@@ -52,6 +52,7 @@ export function Header() {
   const navLinks = [
     { href: '/', label: t.nav.home },
     // { href: '/msds', label: t.nav.msds }, // Ẩn tính năng MSDS - chưa phát triển
+    { href: '/khai-bao', label: t.nav.declaration },
     { href: '/kiem-tra', label: t.nav.compliance },
     { href: '/giay-phep', label: t.nav.guidance },
     { href: '/lien-he', label: t.nav.contact },
@@ -113,7 +114,7 @@ export function Header() {
                     <div className="w-7 h-7 rounded-full bg-cyan-100 flex items-center justify-center flex-shrink-0">
                       <User className="w-3.5 h-3.5 text-cyan-700" />
                     </div>
-                    <span className="truncate text-sm font-medium">{displayName}</span>
+                    <span className="truncate text-sm font-medium" title={displayName}>{displayName}</span>
                     <ChevronDown className="w-3.5 h-3.5 flex-shrink-0 opacity-60" />
                   </Button>
                 </DropdownMenuTrigger>

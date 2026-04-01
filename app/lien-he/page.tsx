@@ -36,18 +36,21 @@ const contactInfo = [
     icon: Mail,
     title: 'Email Hỗ trợ',
     value: 'info@luathoachat.vn',
+    href: 'mailto:info@luathoachat.vn',
     subtext: 'Phản hồi trong 24h',
   },
   {
     icon: MessageCircle,
     title: 'Zalo OA',
     value: 'LuatHoaChat.vn',
-    subtext: 'Chat trực tuyến',
+    href: 'https://zalo.me/luathoachat',
+    subtext: 'Chat trực tuyến qua Zalo',
   },
   {
     icon: MapPin,
     title: 'Văn phòng',
     value: '65 N4 KDC Phú Mỹ Hiệp, Tân Đông Hiệp, HCM',
+    href: 'https://maps.google.com/?q=65+N4+KDC+Phu+My+Hiep+Tan+Dong+Hiep+HCM',
     subtext: 'Liên hệ để hẹn gặp',
   },
 ];
@@ -152,16 +155,24 @@ export default function ContactPage() {
 
             <div className="grid md:grid-cols-3 gap-4 mb-10">
               {contactInfo.map((info) => (
-                <Card key={info.title} className="border-0 shadow-sm hover:shadow-md transition-shadow">
-                  <CardContent className="p-4 text-center">
-                    <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-cyan-100 flex items-center justify-center">
-                      <info.icon className="w-5 h-5 text-cyan-600" />
-                    </div>
-                    <p className="text-xs text-slate-500 mb-1">{info.title}</p>
-                    <p className="font-semibold text-slate-900">{info.value}</p>
-                    <p className="text-xs text-slate-400 mt-1">{info.subtext}</p>
-                  </CardContent>
-                </Card>
+                <a
+                  key={info.title}
+                  href={info.href}
+                  target={info.href.startsWith('http') ? '_blank' : undefined}
+                  rel={info.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  className="block group"
+                >
+                  <Card className="shadow-sm hover:shadow-md transition-shadow group-hover:border-cyan-200 border border-slate-100">
+                    <CardContent className="p-4 text-center">
+                      <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-cyan-100 group-hover:bg-cyan-200 transition-colors flex items-center justify-center">
+                        <info.icon className="w-5 h-5 text-cyan-600" />
+                      </div>
+                      <p className="text-xs text-slate-500 mb-1">{info.title}</p>
+                      <p className="font-semibold text-slate-900 group-hover:text-cyan-700 transition-colors">{info.value}</p>
+                      <p className="text-xs text-slate-400 mt-1">{info.subtext}</p>
+                    </CardContent>
+                  </Card>
+                </a>
               ))}
             </div>
 

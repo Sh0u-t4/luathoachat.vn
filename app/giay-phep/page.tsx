@@ -128,23 +128,25 @@ export default function PermitGuidancePage() {
 
             <div className="mb-10">
               <h2 className="text-xl font-bold text-slate-900 mb-6">Quy trình cấp phép</h2>
-              <div className="flex flex-wrap gap-2">
-                {timeline.map((item, index) => (
-                  <div key={item.step} className="flex items-center">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg shadow-sm">
-                      <span className="w-6 h-6 rounded-full bg-cyan-600 text-white text-sm flex items-center justify-center">
-                        {item.step}
-                      </span>
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">{item.title}</p>
-                        <p className="text-xs text-slate-500">{item.duration}</p>
+              <div className="overflow-x-auto pb-2 -mx-1">
+                <div className="flex items-center min-w-max px-1 gap-1">
+                  {timeline.map((item, index) => (
+                    <div key={item.step} className="flex items-center">
+                      <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg shadow-sm whitespace-nowrap">
+                        <span className="w-6 h-6 rounded-full bg-cyan-600 text-white text-sm flex items-center justify-center flex-shrink-0">
+                          {item.step}
+                        </span>
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">{item.title}</p>
+                          <p className="text-xs text-slate-500">{item.duration}</p>
+                        </div>
                       </div>
+                      {index < timeline.length - 1 && (
+                        <ArrowRight className="w-4 h-4 mx-1 text-slate-300 flex-shrink-0" />
+                      )}
                     </div>
-                    {index < timeline.length - 1 && (
-                      <ArrowRight className="w-4 h-4 mx-2 text-slate-300" />
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
 
