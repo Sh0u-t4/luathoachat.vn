@@ -441,6 +441,32 @@ QUY TẮC DISCLAIMER:
   → Hỏi "gì/bao nhiêu/ngày nào/điều kiện/quy trình" = KHÔNG thêm "nên tham khảo chuyên gia"
   → Chỉ thêm khi câu hỏi là tình huống cụ thể của doanh nghiệp / đánh giá rủi ro / tranh chấp
 
+══════════════ KIẾN THỨC TĨNH ƯU TIÊN CAO — DÙNG KHI RAG KHÔNG ĐỦ ══════════════
+
+Khi "TÀI LIỆU PHÁP LÝ" không chứa thông tin cụ thể về câu hỏi, PHẢI sử dụng
+các kiến thức tĩnh sau đây (đã được xác minh và nhúng vào system prompt):
+
+[NĐ 24/2026 — 4 PHỤ LỤC DANH MỤC HÓA CHẤT]
+Nghị định 24/2026/NĐ-CP có ĐÚNG 4 Phụ lục, không hơn không kém:
+• Phụ lục I   — Hóa chất SẢN XUẤT/KINH DOANH CÓ ĐIỀU KIỆN (cần GCN đủ điều kiện)
+• Phụ lục II  — Hóa chất CẦN KIỂM SOÁT ĐẶC BIỆT (tiền chất CN + tiền chất thuốc nổ)
+• Phụ lục III — Hóa chất theo CÔNG ƯỚC CẤM VŨ KHÍ HÓA HỌC (Bảng 1, 2, 3 — CWC)
+• Phụ lục IV  — Hóa chất BỊ CẤM hoàn toàn
+Khi hỏi "NĐ 24 có bao nhiêu phụ lục" hoặc "phụ lục của NĐ 24" → PHẢI trả lời đủ 4 phụ lục.
+KHÔNG được chỉ nêu 1 hay 3 phụ lục nếu không có context RAG cụ thể giải thích lý do.
+
+[HC KIỂM SOÁT ĐẶC BIỆT — 4 NHÓM CHÍNH XÁC]
+Khi hỏi về "hóa chất kiểm soát đặc biệt" hoặc "Phụ lục II NĐ 24" → PHẢI nêu ĐỦ 4 NHÓM:
+1. **Tiền chất công nghiệp** (Nhóm I, Phụ lục II): Acetone, Toluene, H₂SO₄, HCl, Acetic anhydride...
+   → Có thể bị lạm dụng sản xuất ma túy tổng hợp
+2. **Tiền chất thuốc nổ** (Nhóm II, Phụ lục II): NH₄NO₃ ≥45%, KNO₃, H₂O₂ ≥12%, HNO₃ ≥3%...
+   → Có thể dùng chế tạo thuốc nổ thô sơ
+3. **Hóa chất Bảng 2** (Phụ lục III NĐ 24 — CWCW): Thiodiglycol, DMMP, Amiton...
+   → Tiền chất vũ khí hóa học, kiểm soát theo Công ước CWCW
+4. **Hóa chất Bảng 3** (Phụ lục III NĐ 24 — CWCW): Phosgene, HCN, Chloropicrin...
+   → Vũ khí hóa học lịch sử, cần khai báo OPCW hàng năm
+NGHIÊM CẤM chỉ nêu 2 nhóm hoặc gộp các nhóm lại. PHẢI nêu đủ 4 nhóm riêng biệt.
+
 BẮT ĐẦU: Đi thẳng vào nội dung từ từ đầu tiên. KHÔNG lời chào, KHÔNG tự giới thiệu.
 ════════════════════════════════════════════════════════════════════
 `;
@@ -519,6 +545,16 @@ function expandQueryForSearch(query: string): string {
   // Câu hỏi về mã HS, mã số hàng hóa, khai báo nhập khẩu → kéo NĐ 24/26 Điều 6
   if (/m[aã] hs|hs.?code|m[aã] s[oố] h[aà]ng h[oó]a|ch[uươ][oở]ng 28|ch[uươ][oở]ng 29|khai b[aá]o nh[aậ]p kh[aẩ]u/i.test(q)) {
     return query + ' nghị định 24 2026 mã HS hóa chất chương 28 chương 29 khai báo nhập khẩu';
+  }
+
+  // Câu hỏi về phụ lục NĐ 24 — bao gồm hỏi chung về phụ lục hoặc hỏi số lượng phụ lục
+  if (/ph[uụ] l[uụ]c|appendix|danh m[uụ]c h[oó]a ch[aấ]t|ngh[iị] đ[iị]nh 24|bao nhi[eê]u ph[uụ]|t[oổ]ng s[oố] ph[uụ]/i.test(q)) {
+    return query + ' nghị định 24 2026 phụ lục I II III IV danh mục hóa chất điều kiện kiểm soát đặc biệt bảng CWCW cấm';
+  }
+
+  // Câu hỏi về HC kiểm soát đặc biệt, tiền chất, HC bảng → kéo Phụ lục II, III NĐ 24
+  if (/ki[eể]m so[aá]t đ[aặ]c bi[eệ]t|ti[eề]n ch[aấ]t|precursor|h[oó]a ch[aấ]t b[aả]ng|cwc|opcw|vũ kh[ií] h[oó]a h[oọ]c/i.test(q)) {
+    return query + ' nghị định 24 2026 phụ lục II tiền chất công nghiệp tiền chất thuốc nổ hóa chất bảng 2 bảng 3 CWCW kiểm soát đặc biệt';
   }
 
   // Câu hỏi về chứng chỉ tư vấn, hạng A1, A2, A3, hạng B, tư vấn viên → kéo NĐ 25 Chương IV
