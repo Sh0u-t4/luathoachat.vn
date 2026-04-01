@@ -219,7 +219,7 @@ export default function ContactPage() {
                               id="fullName"
                               value={formData.fullName}
                               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                              placeholder="Nguyễn Văn A"
+                              placeholder={tc.namePlaceholder}
                             />
                           </div>
                           <div className="space-y-2">
@@ -228,7 +228,7 @@ export default function ContactPage() {
                               id="company"
                               value={formData.company}
                               onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                              placeholder="Công ty TNHH ABC"
+                              placeholder={tc.companyPlaceholder}
                             />
                           </div>
                         </div>
@@ -294,7 +294,7 @@ export default function ContactPage() {
                             id="message"
                             value={formData.message}
                             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                            placeholder={tc.messagePlaceholder}
+                            placeholder={tc.messagePlaceholderText}
                             rows={4}
                           />
                         </div>

@@ -192,6 +192,19 @@ export interface Translation {
     cancel: string;
     profileUpdated: string;
     profileUpdatedDesc: string;
+    loginPanelTitle: string;
+    loginPanelSubtitle: string;
+    loginPanelQuote: string;
+    loginPanelQuoteAuthor: string;
+    registerPanelTitle: string;
+    registerPanelSubtitle: string;
+    registerBenefit1: string;
+    registerBenefit2: string;
+    registerBenefit3: string;
+    registerChatbotTitle: string;
+    registerChatbotDesc: string;
+    registerChatbotEmailNote: string;
+    loginPanelDesc: string;
   };
   admin: {
     title: string;
@@ -380,6 +393,9 @@ export interface Translation {
     aiChatTitle: string;
     aiChatDesc: string;
     openChat: string;
+    namePlaceholder: string;
+    companyPlaceholder: string;
+    messagePlaceholderText: string;
   };
   declaration: {
     pageTitle: string;
@@ -505,6 +521,20 @@ export interface Translation {
     step3: string;
     step4: string;
     step5: string;
+    businessAuthority: string;
+    businessDuration: string;
+    businessFee: string;
+    businessLegalRef: string;
+    precursorAuthority: string;
+    precursorDuration: string;
+    precursorFee: string;
+    precursorLegalRef: string;
+    importAuthority: string;
+    importDuration: string;
+    importFee: string;
+    importLegalRef: string;
+    importantNoticeTitle: string;
+    importantNoticeText: string;
     permits: {
       businessTitle: string;
       businessDesc: string;

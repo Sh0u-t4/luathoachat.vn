@@ -73,16 +73,13 @@ export default function LoginPage() {
           </Link>
 
           <h2 className="text-3xl xl:text-4xl font-bold text-white mb-4 leading-tight">
-            Trợ lý AI
+            {t.auth.loginPanelTitle}
             <br />
-            <span className="text-cyan-400">tư vấn pháp luật</span>
-            <br />
-            hóa chất & môi trường
+            <span className="text-cyan-400">{t.auth.loginPanelSubtitle}</span>
           </h2>
 
           <p className="text-slate-400 text-base mb-10 leading-relaxed max-w-md">
-            Đăng nhập để tiếp tục sử dụng các tính năng tra cứu, AI tư vấn và hỗ trợ tuân thủ quy
-            định pháp luật hóa chất Việt Nam.
+            {t.auth.loginPanelDesc}
           </p>
 
           <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-6">
@@ -92,11 +89,10 @@ export default function LoginPage() {
               </div>
               <div>
                 <p className="text-sm text-slate-300 leading-relaxed italic">
-                  &quot;Hệ thống giúp chúng tôi giảm 80% thời gian tra cứu văn bản pháp luật và đảm bảo
-                  tuân thủ đúng quy định.&quot;
+                  &quot;{t.auth.loginPanelQuote}&quot;
                 </p>
                 <p className="text-xs text-slate-500 mt-3">
-                  -- Trưởng phòng ATMT, Công ty Hóa chất Miền Nam
+                  {t.auth.loginPanelQuoteAuthor}
                 </p>
               </div>
             </div>

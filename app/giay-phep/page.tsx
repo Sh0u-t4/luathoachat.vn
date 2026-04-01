@@ -28,9 +28,9 @@ export default function PermitGuidancePage() {
       id: 'business',
       title: tp.permits.businessTitle,
       description: tp.permits.businessDesc,
-      authority: 'Sở Công Thương tỉnh/TP',
-      duration: '5 năm',
-      fee: '1.000.000 VND',
+      authority: tp.businessAuthority,
+      duration: tp.businessDuration,
+      fee: tp.businessFee,
       requirements: [
         tp.permits.businessR1,
         tp.permits.businessR2,
@@ -38,15 +38,15 @@ export default function PermitGuidancePage() {
         tp.permits.businessR4,
         tp.permits.businessR5,
       ],
-      legalRef: 'Điều 17-21 Nghị định 24/2026/NĐ-CP',
+      legalRef: tp.businessLegalRef,
     },
     {
       id: 'precursor',
       title: tp.permits.precursorTitle,
       description: tp.permits.precursorDesc,
-      authority: 'Bộ Công Thương',
-      duration: '3 năm',
-      fee: '2.000.000 VND',
+      authority: tp.precursorAuthority,
+      duration: tp.precursorDuration,
+      fee: tp.precursorFee,
       requirements: [
         tp.permits.precursorR1,
         tp.permits.precursorR2,
@@ -54,16 +54,16 @@ export default function PermitGuidancePage() {
         tp.permits.precursorR4,
         tp.permits.precursorR5,
       ],
-      legalRef: 'Điều 11 Nghị định 24/2026, Điều 8-10 Nghị định 26/2026',
+      legalRef: tp.precursorLegalRef,
       warning: true,
     },
     {
       id: 'import',
       title: tp.permits.importTitle,
       description: tp.permits.importDesc,
-      authority: 'Bộ Công Thương',
-      duration: 'Theo lô hàng',
-      fee: '500.000 VND/lần',
+      authority: tp.importAuthority,
+      duration: tp.importDuration,
+      fee: tp.importFee,
       requirements: [
         tp.permits.importR1,
         tp.permits.importR2,
@@ -71,7 +71,7 @@ export default function PermitGuidancePage() {
         tp.permits.importR4,
         tp.permits.importR5,
       ],
-      legalRef: 'Điều 6 Nghị định 26/2026/NĐ-CP',
+      legalRef: tp.importLegalRef,
     },
   ];
 
@@ -120,14 +120,8 @@ export default function PermitGuidancePage() {
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
                 <div>
-                  <p className="font-medium text-amber-800">
-                    {language === 'vi' ? 'Lưu ý quan trọng' : 'Important Notice'}
-                  </p>
-                  <p className="text-sm text-amber-700 mt-1">
-                    {language === 'vi'
-                      ? 'Từ 01/01/2026, tất cả hồ sơ cấp phép phải nộp trực tuyến qua Cổng Dịch vụ công Quốc gia. Không tiếp nhận hồ sơ giấy theo cách truyền thống.'
-                      : 'From 01/01/2026, all permit applications must be submitted online via the National Public Service Portal. Paper applications are no longer accepted.'}
-                  </p>
+                  <p className="font-medium text-amber-800">{tp.importantNoticeTitle}</p>
+                  <p className="text-sm text-amber-700 mt-1">{tp.importantNoticeText}</p>
                 </div>
               </div>
             </div>

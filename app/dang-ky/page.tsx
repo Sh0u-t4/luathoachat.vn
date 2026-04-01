@@ -119,9 +119,9 @@ function RegisterForm() {
   };
 
   const benefits = [
-    { icon: Sparkles, text: 'AI tư vấn pháp luật hóa chất 24/7' },
-    { icon: BookOpen, text: 'Tra cứu đầy đủ Nghị định 24, 25, 26/2026' },
-    { icon: Shield, text: 'Cảnh báo vi phạm & mức phạt tự động' },
+    { icon: Sparkles, text: t.auth.registerBenefit1 },
+    { icon: BookOpen, text: t.auth.registerBenefit2 },
+    { icon: Shield, text: t.auth.registerBenefit3 },
   ];
 
   return (
@@ -141,16 +141,11 @@ function RegisterForm() {
           </Link>
 
           <h2 className="text-3xl xl:text-4xl font-bold text-white mb-4 leading-tight">
-            Nền tảng AI
-            <br />
-            <span className="text-cyan-400">Pháp luật Hóa chất</span>
-            <br />
-            Việt Nam 2026
+            {t.auth.registerPanelTitle}
           </h2>
 
           <p className="text-slate-400 text-base mb-10 leading-relaxed max-w-md">
-            Đăng ký để truy cập đầy đủ các tính năng tư vấn thông minh, tra cứu văn bản pháp luật và
-            hỗ trợ tuân thủ quy định.
+            {t.auth.registerPanelSubtitle}
           </p>
 
           <div className="space-y-5">
@@ -189,9 +184,11 @@ function RegisterForm() {
           {isFromChatbotGate && prefilledEmail && (
             <Alert className="mb-6 border-cyan-200 bg-cyan-50">
               <Info className="w-4 h-4 text-cyan-600" />
-              <AlertTitle className="text-cyan-900">Tạo mật khẩu cho {prefilledEmail}</AlertTitle>
+              <AlertTitle className="text-cyan-900">
+                {t.auth.registerChatbotTitle.replace('{email}', prefilledEmail)}
+              </AlertTitle>
               <AlertDescription className="text-cyan-700">
-                Bạn đã sử dụng hết 5 câu hỏi miễn phí. Tạo tài khoản để tiếp tục hỏi không giới hạn!
+                {t.auth.registerChatbotDesc}
               </AlertDescription>
             </Alert>
           )}
@@ -257,7 +254,7 @@ function RegisterForm() {
               </div>
               {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
               {prefilledEmail && (
-                <p className="text-xs text-slate-500">Email đã được điền tự động từ chatbot</p>
+                <p className="text-xs text-slate-500">{t.auth.registerChatbotEmailNote}</p>
               )}
             </div>
 
