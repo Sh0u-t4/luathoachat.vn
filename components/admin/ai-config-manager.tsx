@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Bot, Save, Loader2, Settings2, Zap, GitBranch, ChevronRight, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bot, Save, Loader2, Zap, GitBranch, ChevronRight, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -85,26 +85,7 @@ function CollapsibleSection({
   );
 }
 
-// ─── Slider component ──────────────────────────────────────────────────────
-function SliderField({ label, description, value, min, max, step, onChange }: {
-  label: string; description: string; value: number;
-  min: number; max: number; step: number; onChange: (v: number) => void;
-}) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-slate-700">{label}</label>
-        <span className="text-sm font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-600">{value}</span>
-      </div>
-      <input
-        type="range" min={min} max={max} step={step} value={value}
-        onChange={e => onChange(parseFloat(e.target.value))}
-        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-600"
-      />
-      <p className="text-xs text-slate-400">{description}</p>
-    </div>
-  );
-}
+
 
 // ─── Main Component ────────────────────────────────────────────────────────
 export function AIConfigManager() {
@@ -157,10 +138,7 @@ export function AIConfigManager() {
     </div>
   );
 
-  const threshold = parseFloat(getValue('ai_match_threshold', '0.6'));
-  const matchCount = parseInt(getValue('ai_match_count', '5'));
-  const temperature = parseFloat(getValue('ai_temperature', '0.3'));
-  const maxTokens = parseInt(getValue('ai_max_tokens', '2000'));
+
 
   return (
     <div className="space-y-4">
@@ -221,60 +199,6 @@ export function AIConfigManager() {
         />
       </CollapsibleSection>
 
-      {/* RAG Parameters — collapsible, open by default */}
-      <CollapsibleSection
-        icon={<Settings2 className="w-4 h-4 text-violet-500" />}
-        title="Tham số RAG & Sinh text"
-        defaultOpen={true}
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-3">
-          <SliderField
-            label="Ngưỡng Similarity"
-            description={`Chunk có độ tương đồng < ${threshold} sẽ bị bỏ qua. Tăng = chính xác hơn nhưng ít kết quả hơn.`}
-            value={threshold} min={0.1} max={0.99} step={0.05}
-            onChange={v => updateConfig('ai_match_threshold', v.toFixed(2))}
-          />
-          <SliderField
-            label="Số Chunks lấy"
-            description="Số đoạn văn bản liên quan tối đa đưa vào context AI. Nhiều hơn = đầy đủ hơn nhưng chậm hơn."
-            value={matchCount} min={1} max={15} step={1}
-            onChange={v => updateConfig('ai_match_count', v.toString())}
-          />
-          <SliderField
-            label="Nhiệt độ (Temperature)"
-            description="0 = trả lời chính xác, nhất quán. 1 = sáng tạo, đa dạng hơn. Khuyến nghị: 0.2 - 0.4 cho pháp lý."
-            value={temperature} min={0} max={1} step={0.1}
-            onChange={v => updateConfig('ai_temperature', v.toFixed(1))}
-          />
-          <SliderField
-            label="Max Tokens"
-            description="Độ dài tối đa câu trả lời. 1000 ≈ ngắn gọn, 3000 ≈ rất chi tiết."
-            value={maxTokens} min={500} max={4000} step={100}
-            onChange={v => updateConfig('ai_max_tokens', v.toString())}
-          />
-        </div>
-
-        {/* Model selector */}
-        <div className="mt-5 pt-5 border-t border-slate-100">
-          <label className="block text-sm font-medium text-slate-700 mb-2">Model AI</label>
-          <div className="flex gap-2 flex-wrap">
-            {['gemini-3-pro', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-1.5-pro'].map(model => (
-              <button
-                key={model}
-                onClick={() => updateConfig('ai_model', model)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
-                  getValue('ai_model') === model
-                    ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
-                    : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300'
-                }`}
-              >
-                {model}
-              </button>
-            ))}
-          </div>
-          <p className="text-xs text-slate-400 mt-2">gemini-3-pro: mới nhất | gemini-2.5-pro: chính xác | gemini-2.0-flash: nhanh hơn, rẻ hơn</p>
-        </div>
-      </CollapsibleSection>
 
       {/* Info */}
       <div className="flex gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
