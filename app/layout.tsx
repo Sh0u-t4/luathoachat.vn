@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import { Toaster } from '@/components/ui/sonner';
+import { ClientToaster } from '@/components/client-toaster';
 import { LanguageProvider } from '@/lib/i18n/context';
 import { ChatProvider } from '@/components/chat/chat-context';
 import { AuthProvider } from '@/lib/auth/context';
@@ -298,7 +299,7 @@ export default function RootLayout({
             </LanguageProvider>
           </MobileProvider>
         </ErrorBoundary>
-        <Toaster position="top-center" richColors />
+        <ClientToaster />
         <Analytics />
       </body>
     </html>

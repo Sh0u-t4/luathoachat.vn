@@ -200,7 +200,8 @@ export default function ComplianceCheckPage() {
                         {items.map((item) => (
                           <div
                             key={item.id}
-                            className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                            className="flex items-center gap-3 px-4 py-3 min-h-[52px] bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                            onClick={() => handleCheck(item.id, !checkedItems.has(item.id))}
                           >
                             <Checkbox
                               id={item.id}
@@ -208,15 +209,16 @@ export default function ComplianceCheckPage() {
                               onCheckedChange={(checked) =>
                                 handleCheck(item.id, checked as boolean)
                               }
-                              className="mt-0.5"
+                              className="flex-shrink-0 w-5 h-5"
+                              onClick={(e) => e.stopPropagation()}
                             />
                             <Label
                               htmlFor={item.id}
-                              className="text-sm text-slate-700 cursor-pointer flex-1"
+                              className="text-sm text-slate-700 cursor-pointer flex-1 leading-snug"
                             >
                               {item.question}
                             </Label>
-                            <span className="text-xs text-slate-400">{item.weight}%</span>
+                            <span className="text-xs text-slate-400 flex-shrink-0">{item.weight}%</span>
                           </div>
                         ))}
                       </div>

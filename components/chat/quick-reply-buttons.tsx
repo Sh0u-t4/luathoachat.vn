@@ -1,6 +1,7 @@
 'use client';
 
 import { MessageCircle, ChevronRight } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/context';
 
 interface QuickReplyButtonsProps {
   suggestions: string[];
@@ -9,13 +10,14 @@ interface QuickReplyButtonsProps {
 }
 
 export function QuickReplyButtons({ suggestions, onSelect, className = '' }: QuickReplyButtonsProps) {
+  const { t } = useLanguage();
   if (suggestions.length === 0) return null;
 
   return (
     <div className={`flex flex-col gap-1.5 mt-3 ${className}`}>
       <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-0.5">
         <MessageCircle className="w-3 h-3" />
-        <span>Câu hỏi liên quan</span>
+        <span>{t.chat.relatedQuestions}</span>
       </div>
       <div className="flex flex-col gap-1">
         {suggestions.map((suggestion, index) => (

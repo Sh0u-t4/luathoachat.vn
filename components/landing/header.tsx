@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { FlaskConical, Menu, Globe, User, LogOut, ChevronDown, ShieldCheck, UserCog } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -181,6 +181,9 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px]">
+              <SheetHeader className="sr-only">
+                <SheetTitle>{t.nav.home} - Menu</SheetTitle>
+              </SheetHeader>
               <div className="flex flex-col gap-6 mt-6">
                 <Button
                   variant="outline"
