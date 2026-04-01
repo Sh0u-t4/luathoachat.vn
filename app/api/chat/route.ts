@@ -467,6 +467,22 @@ Khi hỏi về "hóa chất kiểm soát đặc biệt" hoặc "Phụ lục II N
    → Vũ khí hóa học lịch sử, cần khai báo OPCW hàng năm
 NGHIÊM CẤM chỉ nêu 2 nhóm hoặc gộp các nhóm lại. PHẢI nêu đủ 4 nhóm riêng biệt.
 
+[SDS / PHIẾU AN TOÀN HÓA CHẤT — SỐ MỤC VÀ NGUỒN TRÍCH DẪN CHÍNH XÁC]
+SDS theo pháp luật Việt Nam (Thông tư 02/2026/TT-BCT) có ĐÚNG 16 MỤC — không phải 17.
+Nguồn pháp lý DUY NHẤT: Thông tư 02/2026/TT-BCT (Bộ Công Thương), KHÔNG phải TT 01.
+NGHIÊM CẤM:
+  ✗ Nói SDS có 17 mục — SAI HOÀN TOÀN theo luật Việt Nam
+  ✗ Trích nguồn "Thông tư 01" hay "TT 01/2026" cho SDS/nhãn hóa chất — SAI VĂN BẢN
+  ✗ Trích nguồn GHS quốc tế hay ISO không có tên văn bản Việt Nam
+Khi hỏi về SDS / phiếu an toàn → PHẢI trả lời: "16 mục theo Thông tư 02/2026/TT-BCT"
+16 mục đúng theo thứ tự:
+1. Nhận dạng hóa chất  2. Nhận dạng đặc tính nguy hiểm  3. Thành phần/thông tin về các chất
+4. Biện pháp sơ cứu  5. Biện pháp chữa cháy  6. Biện pháp xử lý khi phát tán ngẫu nhiên
+7. Yêu cầu bảo quản và sử dụng  8. Kiểm soát phơi nhiễm/PTBVCN  9. Tính chất lý hóa
+10. Độ ổn định và khả năng phản ứng  11. Thông tin độc học  12. Thông tin sinh thái học
+13. Xem xét thải bỏ  14. Thông tin vận chuyển  15. Thông tin quy định pháp luật
+16. Thông tin khác
+
 BẮT ĐẦU: Đi thẳng vào nội dung từ từ đầu tiên. KHÔNG lời chào, KHÔNG tự giới thiệu.
 ════════════════════════════════════════════════════════════════════
 `;
@@ -481,7 +497,13 @@ interface AIConfigCache {
 }
 
 let configCache: AIConfigCache | null = null;
-const CONFIG_CACHE_TTL_MS = 5 * 60 * 1000; // 5 phút (tăng từ 60s để giảm roundtrip DB)
+const CONFIG_CACHE_TTL_MS = 5 * 60 * 1000; // 5 phút
+
+// Force-invalidate cache khi MANDATORY_RULES thay đổi (bump version để reset)
+const RULES_VERSION = 'v4-sds16-tt02'; // ← tăng khi sửa MANDATORY_RULES
+if (configCache && (configCache as any).__rulesVersion !== RULES_VERSION) {
+  configCache = null;
+}
 
 function getSupabaseAdmin() {
   return createClient(
