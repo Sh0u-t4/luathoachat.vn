@@ -301,6 +301,10 @@ export interface Translation {
     ratingSuccess: string;
     ratingError: string;
     headerOnline: string;
+    aiTyping: string;
+    sendButton: string;
+    sendButtonMobile: string;
+    inputPlaceholderChat: string;
   };
   promptLibrary: {
     sectionBadge: string;

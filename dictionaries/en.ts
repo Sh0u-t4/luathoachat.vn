@@ -272,6 +272,10 @@ export const en: Translation = {
     ratingSuccess: 'Thanks for your feedback!',
     ratingError: 'Could not save rating. Please try again.',
     headerOnline: 'Online • Ready to help',
+    aiTyping: 'AI is responding...',
+    sendButton: 'Ask AI',
+    sendButtonMobile: 'Send',
+    inputPlaceholderChat: 'Ask about Chemical Law, declarations, permits...',
   },
   admin: {
     title: 'User Management',

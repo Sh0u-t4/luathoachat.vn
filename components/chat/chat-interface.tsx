@@ -51,6 +51,7 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevMessagesLengthRef = useRef(0);
   const wasCleared = useRef(false);
+  const suppressAutoScrollRef = useRef(false); // Suppress ResizeObserver after history load
   const router = useRouter();
 
   // Smart Auto-Scroll States
@@ -236,22 +237,15 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
   // Smart Auto-scroll: Scroll when new message arrives OR content changes (typing effect)
   useEffect(() => {
     const hasNewMessage = messages.length > prevMessagesLengthRef.current;
-    const isLoadingHistory = wasCleared.current && messages.length > 0;
 
-    if (isLoadingHistory) {
-      setTimeout(() => {
-        if (chatContainerRef.current) {
-          chatContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-          wasCleared.current = false;
-        }
-      }, 100);
+    // Skip scroll logic when history load is in progress (handled by event listener)
+    if (wasCleared.current && messages.length > 0) {
       prevMessagesLengthRef.current = messages.length;
       return;
     }
 
     if ((hasNewMessage || isTyping) && autoScrollEnabledRef.current) {
       const timer = setTimeout(() => {
-        // Prefer scrolling the anchor into view for accuracy
         if (messagesEndRef.current) {
           messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
         } else {
@@ -270,15 +264,14 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
     const container = chatContainerRef.current;
     if (!container) return;
 
-    // Create ResizeObserver to watch content changes
     resizeObserverRef.current = new ResizeObserver(() => {
-      // Only auto-scroll if user is near bottom
+      // Suppressed after history load to avoid overriding scroll-to-top
+      if (suppressAutoScrollRef.current) return;
       if (autoScrollEnabledRef.current && isAnyTyping) {
-        scrollToBottom('auto'); // Use 'auto' for smooth typing experience
+        scrollToBottom('auto');
       }
     });
 
-    // Observe the container's content changes
     resizeObserverRef.current.observe(container);
 
     return () => {
@@ -287,6 +280,36 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
       }
     };
   }, [isAnyTyping, scrollToBottom]);
+
+  // Listen for history-loaded event to reliably scroll to top
+  // This avoids the race condition where ResizeObserver fires after scroll-to-top
+  useEffect(() => {
+    const handleHistoryLoaded = () => {
+      const container = chatContainerRef.current;
+      if (!container) return;
+
+      // Suppress ResizeObserver auto-scroll temporarily
+      suppressAutoScrollRef.current = true;
+      autoScrollEnabledRef.current = false;
+
+      // Use requestAnimationFrame to ensure DOM has updated before scrolling
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          container.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+          wasCleared.current = false;
+
+          // Re-enable after 800ms (enough time for content to fully render)
+          setTimeout(() => {
+            suppressAutoScrollRef.current = false;
+            autoScrollEnabledRef.current = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
+          }, 800);
+        });
+      });
+    };
+
+    window.addEventListener('chat:history-loaded', handleHistoryLoaded);
+    return () => window.removeEventListener('chat:history-loaded', handleHistoryLoaded);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -514,7 +537,7 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
             <div className="px-4 py-2 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
               <div className="flex items-center justify-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
-                <span className="text-sm font-medium text-cyan-400">AI đang trả lời...</span>
+                <span className="text-sm font-medium text-cyan-400">{t.chat.aiTyping}</span>
               </div>
             </div>
           )}
@@ -708,7 +731,7 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
             <div className="px-6 py-2 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-t border-slate-700">
               <div className="flex items-center justify-center gap-2 max-w-5xl mx-auto">
                 <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
-                <span className="text-sm font-medium text-cyan-400">AI đang trả lời...</span>
+                <span className="text-sm font-medium text-cyan-400">{t.chat.aiTyping}</span>
               </div>
             </div>
           )}
@@ -727,7 +750,7 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
                   ref={inputRef}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Hỏi về Luật Hóa chất, khai báo, giấy phép..."
+                  placeholder={t.chat.inputPlaceholderChat}
                   aria-label="Message input"
                   aria-describedby="chat-input-hint"
                   className="h-14 px-6 text-base bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-400 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 transition-all"
@@ -743,8 +766,8 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
                 className="h-14 px-8 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-700 hover:to-cyan-600 text-white font-semibold rounded-xl shadow-lg shadow-cyan-500/30 transition-all duration-300 hover:shadow-cyan-500/50 disabled:opacity-50 disabled:shadow-none flex items-center gap-2"
               >
                 <Send className="w-5 h-5" />
-                <span className="hidden sm:inline">Tư vấn ngay</span>
-                <span className="sm:hidden">Gửi</span>
+                <span className="hidden sm:inline">{t.chat.sendButton}</span>
+                <span className="sm:hidden">{t.chat.sendButtonMobile}</span>
               </Button>
             </div>
             {!hideDisclaimer && (

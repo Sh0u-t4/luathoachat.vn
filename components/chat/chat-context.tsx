@@ -28,6 +28,7 @@ interface ChatContextType {
   setShowEmailGate: (show: boolean) => void;
   setShowLoginGate: (show: boolean) => void;
   saveGuestEmail: (email: string, currentQuestion: string) => Promise<void>;
+  activeSessionId: string | null;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -129,6 +130,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [currentQuery, setCurrentQuery] = useState('');
   const [chatSessions, setChatSessions] = useState<Array<{ session_id: string; message_id: string; first_message: string; created_at: string }>>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   // Freemium gate states
   const [questionCount, setQuestionCount] = useState(0);
@@ -344,8 +346,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       console.log('✅ Mapped messages:', loadedMessages);
       console.log('Setting messages to state...');
 
-      // Force update bằng cách tạo mảng mới hoàn toàn
+      // Set active session so sidebar & interface know which session is displayed
+      setActiveSessionId(targetSession);
+
+      // Force update with completely new array
       setMessages([...loadedMessages]);
+
+      // Dispatch custom event so chat-interface can scroll-to-top reliably
+      // (avoids race condition between scroll-to-top and ResizeObserver)
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('chat:history-loaded'));
+      }
 
       console.log('=== LOAD CHAT HISTORY END ===');
     } catch (error) {
@@ -741,6 +752,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setShowEmailGate,
         setShowLoginGate,
         saveGuestEmail,
+        activeSessionId,
       }}
     >
       {children}

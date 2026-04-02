@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth/context';
 
 export function ChatHistorySidebar() {
-  const { chatSessions, loadChatHistory, isAuthenticated, clearMessages, deleteSession } = useChat();
+  const { chatSessions, loadChatHistory, isAuthenticated, clearMessages, deleteSession, activeSessionId } = useChat();
   const { user } = useAuth();
   const { openChat } = useChatUI();
   const { t, language } = useLanguage();
@@ -68,13 +68,21 @@ export function ChatHistorySidebar() {
   };
 
   const handleDeleteSession = (e: React.MouseEvent, messageId: string, firstMessage: string) => {
-    e.stopPropagation(); // Prevent triggering loadSession
+    e.stopPropagation();
     deleteSession(messageId);
     toast.success(`Đã ẩn cuộc trò chuyện`, {
       description: firstMessage.slice(0, 50) + (firstMessage.length > 50 ? '...' : ''),
     });
-    // If deleting the currently selected session, clear chat
-    if (selectedSession) {
+
+    // Find the session_id of the hidden message
+    const hiddenSession = chatSessions.find(s => s.message_id === messageId);
+
+    // Clear chat window if the hidden session is currently displayed,
+    // or if currently selected in this sidebar
+    if (
+      (hiddenSession && hiddenSession.session_id === activeSessionId) ||
+      selectedSession === messageId
+    ) {
       clearMessages();
       setSelectedSession(null);
     }

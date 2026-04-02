@@ -272,6 +272,10 @@ export const vi: Translation = {
     ratingSuccess: 'Cảm ơn phản hồi của bạn!',
     ratingError: 'Không thể lưu đánh giá. Vui lòng thử lại.',
     headerOnline: 'Online • Sẵn sàng hỗ trợ',
+    aiTyping: 'AI đang trả lời...',
+    sendButton: 'Tư vấn ngay',
+    sendButtonMobile: 'Gửi',
+    inputPlaceholderChat: 'Hỏi về Luật Hóa chất, khai báo, giấy phép...',
   },
   admin: {
     title: 'Quản trị người dùng',
