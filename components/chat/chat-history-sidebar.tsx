@@ -37,15 +37,15 @@ export function ChatHistorySidebar() {
       clearMessages();
       await new Promise(resolve => setTimeout(resolve, 100));
       await loadChatHistory(sessionId);
+
+      // Open the chat window first, then dispatch scroll-to-top event
+      // after the window's CSS transition (300ms) + React render have completed
       openChat();
       setIsOpen(false);
 
       setTimeout(() => {
-        const chatInterface = document.getElementById('chat-interface');
-        if (chatInterface) {
-          chatInterface.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 200);
+        window.dispatchEvent(new CustomEvent('chat:history-loaded'));
+      }, 400); // 300ms for CSS open transition + 100ms render buffer
     } catch (error) {
       console.error('handleLoadSession ERROR:', error);
     } finally {

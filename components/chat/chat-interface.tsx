@@ -281,30 +281,45 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
     };
   }, [isAnyTyping, scrollToBottom]);
 
-  // Listen for history-loaded event to reliably scroll to top
-  // This avoids the race condition where ResizeObserver fires after scroll-to-top
+  // Listen for history-loaded event to reliably scroll to top.
+  // Dispatched AFTER openChat() from the sidebar so the window is already opening,
+  // but the ChatInterface may still be mounting — retry until chatContainerRef is ready.
   useEffect(() => {
-    const handleHistoryLoaded = () => {
+    const scrollToTopWhenReady = (attemptsLeft: number) => {
       const container = chatContainerRef.current;
-      if (!container) return;
+
+      if (!container) {
+        // Container not mounted yet — wait and retry
+        if (attemptsLeft > 0) {
+          setTimeout(() => scrollToTopWhenReady(attemptsLeft - 1), 50);
+        }
+        return;
+      }
 
       // Suppress ResizeObserver auto-scroll temporarily
       suppressAutoScrollRef.current = true;
       autoScrollEnabledRef.current = false;
 
-      // Use requestAnimationFrame to ensure DOM has updated before scrolling
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           container.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
           wasCleared.current = false;
 
-          // Re-enable after 800ms (enough time for content to fully render)
+          // Re-enable after 800ms
           setTimeout(() => {
             suppressAutoScrollRef.current = false;
-            autoScrollEnabledRef.current = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
+            const c = chatContainerRef.current;
+            if (c) {
+              autoScrollEnabledRef.current = c.scrollHeight - c.scrollTop - c.clientHeight < 150;
+            }
           }, 800);
         });
       });
+    };
+
+    const handleHistoryLoaded = () => {
+      // Start polling immediately — up to 20 retries × 50ms = 1s max wait
+      scrollToTopWhenReady(20);
     };
 
     window.addEventListener('chat:history-loaded', handleHistoryLoaded);

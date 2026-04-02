@@ -352,12 +352,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       // Force update with completely new array
       setMessages([...loadedMessages]);
 
-      // Dispatch custom event so chat-interface can scroll-to-top reliably
-      // (avoids race condition between scroll-to-top and ResizeObserver)
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('chat:history-loaded'));
-      }
-
       console.log('=== LOAD CHAT HISTORY END ===');
     } catch (error) {
       console.error('❌ Failed to load chat history:', error);
