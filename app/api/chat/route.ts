@@ -523,6 +523,165 @@ if (configCache && (configCache as any).__rulesVersion !== RULES_VERSION) {
   configCache = null;
 }
 
+// ── Build targeted static knowledge for injection into userMessage ────────────
+// Injects critical facts CLOSE to the question so the model prioritizes them.
+// Accepts lang param: when 'en', outputs English content so the model treats it
+// as authoritative data rather than ignoring Vietnamese-only text.
+function buildStaticKnowledge(query: string, lang: 'vi' | 'en' = 'vi'): string {
+  const q = query.toLowerCase()
+    // Normalize Vietnamese for simple matching
+    .replace(/[àáảãạăắằẳẵặâấầẩẫậ]/g, 'a')
+    .replace(/[èéẻẽẹêếềểễệ]/g, 'e')
+    .replace(/[ìíỉĩị]/g, 'i')
+    .replace(/[òóỏõọôốồổỗộơớờởỡợ]/g, 'o')
+    .replace(/[ùúủũụưứừửữự]/g, 'u')
+    .replace(/[ỳýỷỹỵ]/g, 'y')
+    .replace(/[đ]/g, 'd');
+
+  const isEN = lang === 'en';
+  const parts: string[] = [];
+
+  // Phụ lục NĐ 24
+  if (/phu luc|appendix|annex|danh muc.*(hoa|h.a) chat|n[dg].*24|decree.*24|bao nhieu phu|tong so phu|how many.*(annex|appendix)/i.test(q)) {
+    parts.push(isEN
+      ? `[DECREE 24/2026 ANNEXES — EXACTLY 4 ANNEXES]
+• Annex I — Chemicals requiring conditional production/trading license (GCN)
+• Annex II — Specially controlled chemicals (industrial precursors + explosive precursors)
+• Annex III — CWC Schedule chemicals (Schedules 1, 2, 3)
+• Annex IV — Completely banned chemicals
+[Source: Decree 24/2026/ND-CP, Article 3]`
+      : `[PHU LUC ND 24/2026 - DUNG 4 PHU LUC]
+• Phu luc I   — HC san xuat/kinh doanh co dieu kien (can GCN)
+• Phu luc II  — HC can kiem soat dac biet (tien chat CN + tien chat thuoc no)
+• Phu luc III — HC bang CWC (Bang 1, 2, 3)
+• Phu luc IV  — HC bi cam hoan toan
+[Nguon: ND 24/2026/ND-CP, Dieu 3]`);
+  }
+
+  // HC kiểm soát đặc biệt
+  if (/kiem soat dac biet|tien chat|precursor|controlled|restricted|hoa chat bang|cwc|opcw|vu khi hoa hoc|chemical weapon/i.test(q)) {
+    parts.push(isEN
+      ? `[SPECIALLY CONTROLLED CHEMICALS — 4 GROUPS]
+1. Industrial precursors (Group I, Annex II): Acetone, Toluene, H2SO4, HCl, Acetic anhydride...
+2. Explosive precursors (Group II, Annex II): NH4NO3 >=45%, KNO3, H2O2 >=12%, HNO3 >=3%...
+3. CWC Schedule 2 (Annex III): Thiodiglycol, DMMP, Amiton...
+4. CWC Schedule 3 (Annex III): Phosgene, HCN, Chloropicrin...
+[Source: Decree 24/2026, Annexes II and III]`
+      : `[HOA CHAT KIEM SOAT DAC BIET - DUNG 4 NHOM]
+1. Tien chat cong nghiep (Nhom I Phu luc II): Acetone, Toluene, H2SO4, HCl, Acetic anhydride...
+2. Tien chat thuoc no (Nhom II Phu luc II): NH4NO3 >=45%, KNO3, H2O2 >=12%, HNO3 >=3%...
+3. HC Bang 2 (Phu luc III - CWC): Thiodiglycol, DMMP, Amiton...
+4. HC Bang 3 (Phu luc III - CWC): Phosgene, HCN, Chloropicrin...
+[Nguon: ND 24/2026, Phu luc II va III]`);
+  }
+
+  // SDS / phiếu an toàn
+  if (/sds|phieu an toan|safety data|muc.*bat buoc|16 muc|17 muc|section/i.test(q)) {
+    parts.push(isEN
+      ? `[SDS — EXACTLY 16 SECTIONS UNDER VIETNAMESE LAW]
+SDS has EXACTLY 16 sections (NOT 17). Source: Circular 02/2026/TT-BCT (not Circular 01).
+1.Chemical identification 2.Hazard identification 3.Composition 4.First aid
+5.Fire-fighting 6.Accidental release 7.Storage 8.Exposure controls
+9.Physical/Chemical properties 10.Stability/Reactivity 11.Toxicology 12.Ecology
+13.Disposal 14.Transport 15.Regulatory info 16.Other information
+[Source: Circular 02/2026/TT-BCT]`
+      : `[SDS - 16 MUC DUNG THEO PHAP LUAT VIET NAM]
+SDS co DUNG 16 muc (khong phai 17). Nguon: Thong tu 02/2026/TT-BCT (khong phai TT 01).
+1.Nhan dang hoa chat 2.Dac tinh nguy hiem 3.Thanh phan 4.So cuu
+5.Chua chay 6.Phat tan ngau nhien 7.Bao quan 8.Kiem soat phoi nhiem
+9.Tinh chat ly hoa 10.On dinh/phan ung 11.Doc hoc 12.Sinh thai hoc
+13.Thai bo 14.Van chuyen 15.Quy dinh phap luat 16.Thong tin khac
+[Nguon: Thong tu 02/2026/TT-BCT]`);
+  }
+
+  // Mức phạt
+  if (/muc phat|xu phat|tien phat|che tai|vi pham hanh chinh|fine|penalt|sanction|punish|violat/i.test(q)) {
+    parts.push(isEN
+      ? `[ADMINISTRATIVE PENALTIES FOR CHEMICAL VIOLATIONS — Decree 144/2021]
+IMPORTANT: Organization fines = DOUBLE the individual fines.
+• Manufacturing Annex I chemicals without license (GCN): Individual 20-30M VND, Organization 40-60M VND
+• Trading industrial precursors without permit: Organization 50-80M VND + confiscation + license revocation 6-12 months
+• Failure to declare first-time chemical import: Individual 10-20M VND, Organization 20-40M VND
+• Incorrect/incomplete SDS: 5-10M VND (Organization)
+• BANNED chemicals (Annex IV): 100-150M VND + criminal prosecution
+[Source: Decree 144/2021/ND-CP]`
+      : `[MUC PHAT VI PHAM HANH CHINH - ND 144/2021]
+TO CHUC = gap doi CA NHAN.
+• SX HC Phu luc I khong GCN: CN 20-30trieu, TC 40-60trieu
+• KD tien chat CN khong giay phep: TC 50-80trieu + tich thu + tuoc phep 6-12 thang
+• Khong khai bao HC nhap khau lan dau: CN 10-20trieu, TC 20-40trieu
+• SDS lap sai/thieu muc: 5-10trieu (TC)
+• HC CAM (Phu luc IV): 100-150trieu + hinh su
+[Nguon: ND 144/2021/ND-CP]`);
+  }
+
+  // Mã HS
+  if (/ma hs|hs.?code|tariff|ma so hang|khai bao.*nhap khau|import.*declar/i.test(q)) {
+    parts.push(isEN
+      ? `[HS CODES FOR COMMON CHEMICALS — Chapters 28/29]
+H2SO4>=95%: 2807.00.10 | HCl: 2806.10.00 | HNO3: 2808.00.00 | H2O2: 2847.00.00
+NaOH solid: 2815.11.00 | NH4NO3: 3102.30.00 | KMnO4: 2841.61.00
+Acetone: 2914.11.00 | Methanol: 2905.11.00 | Toluene: 2902.30.00
+Acetic acid: 2915.21.00 | Acetic anhydride: 2915.24.00 | Formaldehyde: 2912.11.00
+Diethyl ether: 2909.11.00
+[Source: Circular 31/2022/TT-BTC]`
+      : `[MA HS HOA CHAT - CHUONG 28/29]
+H2SO4>=95%: 2807.00.10 | HCl: 2806.10.00 | HNO3: 2808.00.00 | H2O2: 2847.00.00
+NaOH ran: 2815.11.00 | NH4NO3: 3102.30.00 | KMnO4: 2841.61.00
+Acetone: 2914.11.00 | Methanol: 2905.11.00 | Toluene: 2902.30.00
+Acetic acid: 2915.21.00 | Acetic anhydride: 2915.24.00 | Formaldehyde: 2912.11.00
+Diethyl ether: 2909.11.00
+[Nguon: TT 31/2022/TT-BTC]`);
+  }
+
+  // GHS chất độc tiêu chí
+  if (/chat doc|tieu chi|phan loai.*doc|ld50|lc50|doc cap|toxic|poison|carcinogen|acute.*(category|class)/i.test(q)) {
+    parts.push(isEN
+      ? `[GHS TOXICITY CRITERIA — Decree 26/2026, Article 2, Clause 4]
+A chemical is classified as TOXIC if it meets ANY ONE of:
+a) Acute toxicity Category 1 b) Serious eye damage Category 1
+c) Skin corrosion Category 1A d) Carcinogenicity Category 1A
+e) Germ cell mutagenicity Category 1A f) Reproductive toxicity Category 1A g) Aquatic toxicity Category 1
+[Source: Decree 26/2026, Article 2, Clause 4]`
+      : `[TIEU CHI CHAT DOC GHS - ND 26/2026 Dieu 2 Khoan 4]
+Hoa chat la chat doc khi co MOT trong:
+a) Doc cap tinh cap 1 b) Ton thuong/kich ung mat cap 1
+c) An mon/kich ung da cap 1A d) Ung thu cap 1A
+d) Dot bien te bao mam cap 1A e) Doc tinh sinh san cap 1A g) Nguy hai MT cap 1
+[Nguon: ND 26/2026, Dieu 2, Khoan 4]`);
+  }
+
+  // ND 25 — metadata chính xác: 56 điều, không phải 41
+  if (/nd.*25|decree.*25|nghi dinh 25|tu van|consult|chung chi|certification|hang a|hang b/i.test(q)) {
+    parts.push(isEN
+      ? `[DECREE 25/2026 — ACCURATE METADATA]
+Decree 25/2026/ND-CP on chemical safety has EXACTLY 56 ARTICLES (NOT 41).
+Structure:
+- Chapter I (Articles 1-4): General provisions
+- Chapter II (Articles 5-10): Licensing procedures
+- Chapter III (Articles 11-15): Production/trading conditions
+- Chapter IV (Articles 16-30): Chemical consultant certification (Grades A1, A2, A3, Grade B)
+- Chapter V (Articles 31-45): State management
+- Chapter VI (Articles 46-56): Implementation provisions
+MUST state EXACTLY 56 ARTICLES when asked. NEVER say it ends at Article 41 or any other number.
+[Source: Decree 25/2026/ND-CP]`
+      : `[ND 25/2026 - METADATA CHINH XAC]
+Nghi dinh 25/2026/ND-CP ve an toan hoa chat co DUNG 56 DIEU (khong phai 41).
+Cau truc:
+- Chuong I (Dieu 1-4): Quy dinh chung
+- Chuong II (Dieu 5-10): Ho so, thu tuc cap phep
+- Chuong III (Dieu 11-15): Dieu kien san xuat kinh doanh
+- Chuong IV (Dieu 16-30): Chung chi tu van vien hoa chat (hang A1, A2, A3, hang B)
+- Chuong V (Dieu 31-45): Quan ly nha nuoc
+- Chuong VI (Dieu 46-56): Dieu khoan thi hanh
+KHI HOI ve so dieu/chuong cua ND 25: PHAI noi DUNG 56 DIEU.
+NGHIEM CAM noi ND 25 ket thuc o Dieu 41 hay bat ky so nao khac ngoai 56.
+[Nguon: ND 25/2026/ND-CP]`);
+  }
+
+  return parts.join('\n\n');
+}
+
 function getSupabaseAdmin() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -585,7 +744,7 @@ function expandQueryForSearch(query: string): string {
   // ── EN → VN keyword translation for KB search ──────────────────────────────
   // When the user writes in English, the KB only has Vietnamese content.
   // We append VN equivalents so the vector search can find relevant chunks.
-  const isEN = /[a-z]{4,}/.test(q) && !/[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/.test(q);
+  const isEN = /[a-z]{4,}/.test(q) && !/[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửựỳýỷỹỵđ]/.test(q);
   if (isEN) {
     let vnAppend = '';
 
@@ -702,115 +861,6 @@ function getTokenBudget(query: string, scenario: ScenarioType): number {
   return 6000;
 }
 
-
-// ── Build targeted static knowledge for injection into userMessage ────────────
-// Injects critical facts CLOSE to the question so the model prioritizes them.
-// Uses ASCII-only/simple patterns since query is already lowercased.
-function buildStaticKnowledge(query: string): string {
-  const q = query.toLowerCase()
-    // Normalize Vietnamese for simple matching
-    .replace(/[àáảãạăắằẳẵặâấầẩẫậ]/g, 'a')
-    .replace(/[èéẻẽẹêếềểễệ]/g, 'e')
-    .replace(/[ìíỉĩị]/g, 'i')
-    .replace(/[òóỏõọôốồổỗộơớờởỡợ]/g, 'o')
-    .replace(/[ùúủũụưứừửữự]/g, 'u')
-    .replace(/[ỳýỷỹỵ]/g, 'y')
-    .replace(/[đ]/g, 'd');
-
-  const parts: string[] = [];
-
-  // Phụ lục NĐ 24
-  if (/phu luc|appendix|annex|danh muc.*(hoa|h.a) chat|n[dg].*24|decree.*24|bao nhieu phu|tong so phu|how many.*(annex|appendix)/i.test(q)) {
-    parts.push(
-`[PHU LUC ND 24/2026 - DUNG 4 PHU LUC]
-• Phu luc I   — HC san xuat/kinh doanh co dieu kien (can GCN)
-• Phu luc II  — HC can kiem soat dac biet (tien chat CN + tien chat thuoc no)
-• Phu luc III — HC bang CWC (Bang 1, 2, 3)
-• Phu luc IV  — HC bi cam hoan toan
-[Nguon: ND 24/2026/ND-CP, Dieu 3]`);
-  }
-
-  // HC kiểm soát đặc biệt
-  if (/kiem soat dac biet|tien chat|precursor|controlled|restricted|hoa chat bang|cwc|opcw|vu khi hoa hoc|chemical weapon/i.test(q)) {
-    parts.push(
-`[HOA CHAT KIEM SOAT DAC BIET - DUNG 4 NHOM]
-1. Tien chat cong nghiep (Nhom I Phu luc II): Acetone, Toluene, H2SO4, HCl, Acetic anhydride...
-2. Tien chat thuoc no (Nhom II Phu luc II): NH4NO3 >=45%, KNO3, H2O2 >=12%, HNO3 >=3%...
-3. HC Bang 2 (Phu luc III - CWC): Thiodiglycol, DMMP, Amiton...
-4. HC Bang 3 (Phu luc III - CWC): Phosgene, HCN, Chloropicrin...
-[Nguon: ND 24/2026, Phu luc II va III]`);
-  }
-
-  // SDS / phiếu an toàn
-  if (/sds|phieu an toan|safety data|muc.*bat buoc|16 muc|17 muc/i.test(q)) {
-    parts.push(
-`[SDS - 16 MUC DUNG THEO PHAP LUAT VIET NAM]
-SDS co DUNG 16 muc (khong phai 17). Nguon: Thong tu 02/2026/TT-BCT (khong phai TT 01).
-1.Nhan dang hoa chat 2.Dac tinh nguy hiem 3.Thanh phan 4.So cuu
-5.Chua chay 6.Phat tan ngau nhien 7.Bao quan 8.Kiem soat phoi nhiem
-9.Tinh chat ly hoa 10.On dinh/phan ung 11.Doc hoc 12.Sinh thai hoc
-13.Thai bo 14.Van chuyen 15.Quy dinh phap luat 16.Thong tin khac
-[Nguon: Thong tu 02/2026/TT-BCT]`);
-  }
-
-  // Mức phạt
-  if (/muc phat|xu phat|tien phat|che tai|vi pham hanh chinh|fine|penalt|sanction|punish|violat/i.test(q)) {
-    parts.push(
-`[MUC PHAT VI PHAM HANH CHINH - ND 144/2021]
-TO CHUC = gap doi CA NHAN.
-• SX HC Phu luc I khong GCN: CN 20-30trieu, TC 40-60trieu
-• KD tien chat CN khong giay phep: TC 50-80trieu + tich thu + tuoc phep 6-12 thang
-• Khong khai bao HC nhap khau lan dau: CN 10-20trieu, TC 20-40trieu
-• SDS lap sai/thieu muc: 5-10trieu (TC)
-• HC CAM (Phu luc IV): 100-150trieu + hinh su
-[Nguon: ND 144/2021/ND-CP]`);
-  }
-
-  // Mã HS
-  if (/ma hs|hs.?code|tariff|ma so hang|khai bao.*nhap khau|import.*declar/i.test(q)) {
-    parts.push(
-`[MA HS HOA CHAT - CHUONG 28/29]
-H2SO4>=95%: 2807.00.10 | HCl: 2806.10.00 | HNO3: 2808.00.00 | H2O2: 2847.00.00
-NaOH ran: 2815.11.00 | NH4NO3: 3102.30.00 | KMnO4: 2841.61.00
-Acetone: 2914.11.00 | Methanol: 2905.11.00 | Toluene: 2902.30.00
-Acetic acid: 2915.21.00 | Acetic anhydride: 2915.24.00 | Formaldehyde: 2912.11.00
-Diethyl ether: 2909.11.00
-[Nguon: TT 31/2022/TT-BTC]`);
-  }
-
-  // GHS chất độc tiêu chí
-  if (/chat doc|tieu chi|phan loai.*doc|ld50|lc50|doc cap|toxic|poison|carcinogen|acute.*(category|class)/i.test(q)) {
-    parts.push(
-`[TIEU CHI CHAT DOC GHS - ND 26/2026 Dieu 2 Khoan 4]
-Hoa chat la chat doc khi co MOT trong:
-a) Doc cap tinh cap 1 b) Ton thuong/kich ung mat cap 1
-c) An mon/kich ung da cap 1A d) Ung thu cap 1A
-d) Dot bien te bao mam cap 1A e) Doc tinh sinh san cap 1A g) Nguy hai MT cap 1
-[Nguon: ND 26/2026, Dieu 2, Khoan 4]`);
-  }
-
-  // ND 25 — metadata chính xác: 56 điều, không phải 41
-  if (/nd.*25|decree.*25|nghi dinh 25|tu van|consult|chung chi|certification|hang a|hang b/i.test(q)) {
-    parts.push(
-`[ND 25/2026 - METADATA CHINH XAC]
-Nghị định 25/2026/ND-CP ve an toan hoa chat co DUNG 56 DIEU (khong phai 41).
-Cau truc:
-- Chuong I (Dieu 1-4): Quy dinh chung
-- Chuong II (Dieu 5-10): Ho so, thu tuc cap phep
-- Chuong III (Dieu 11-15): Dieu kien san xuat kinh doanh
-- Chuong IV (Dieu 16-30): Chung chi tu van vien hoa chat (hang A1, A2, A3, hang B)
-- Chuong V (Dieu 31-45): Quan ly nha nuoc
-- Chuong VI (Dieu 46-56): Dieu khoan thi hanh
-KHI HOI ve so dieu/chuong cua ND 25: PHAI noi DUNG 56 DIEU.
-NGHIEM CAM noi ND 25 ket thuc o Dieu 41 hay bat ky so nao khac ngoai 56.
-[Nguon: ND 25/2026/ND-CP]`);
-  }
-
-  return parts.join('\n\n');
-}
-
-
-
 // ── Streaming Gemini call ──────────────────────────────────────────────────
 async function streamGemini(
   systemInstruction: string,
@@ -878,9 +928,10 @@ export async function POST(request: NextRequest) {
     // Dùng max_tokens từ DB nếu có, ngược lại tự tính theo loại câu hỏi
     const maxTokens = aiConfig.maxTokensOverride ?? getTokenBudget(query, scenario);
 
-    // 3. Language prefix
+    // 3. Language prefix — also instructs model to treat VERIFIED FACTS as authoritative
     const langPrefix = lang === 'en'
-      ? '[LANGUAGE: Respond entirely in English. Use [Source: Decree 26/2026, Article 9] for citations.]\n'
+      ? `[LANGUAGE: Respond entirely in English. Use [Source: Decree 26/2026, Article 9] format for citations.]
+[CRITICAL: The VERIFIED FACTS section below contains authoritative legal data extracted from official Vietnamese decrees. You MUST use these facts in your answer. Do NOT say "not in provided materials" if the data appears in VERIFIED FACTS.]\n`
       : '';
 
     // 4. Query expansion hint (passed to context when no RAG results)
@@ -898,12 +949,17 @@ export async function POST(request: NextRequest) {
 
     // Inject topic-specific static facts directly into userMessage so they sit
     // right before the question — much more reliable than burying them in system prompt.
-    const staticKnowledge = buildStaticKnowledge(query);
+    const staticKnowledge = buildStaticKnowledge(query, lang);
+
+    // Use language-appropriate headers so the model treats them as authoritative
+    const staticHeader = lang === 'en'
+      ? '# VERIFIED FACTS (HIGHEST PRIORITY — Use these facts BEFORE any other source):'
+      : '# KIẾN THỨC TĨNH (ƯU TIÊN CAO NHẤT — Kiểm tra phần này TRƯỚC khi trả lời):';
 
     const userMessage = [
       langPrefix,
       staticKnowledge
-        ? `# KIẾN THỨC TĨNH (ƯU TIÊN CAO NHẤT — Kiểm tra phần này TRƯỚC khi trả lời):\n${staticKnowledge}`
+        ? `${staticHeader}\n${staticKnowledge}`
         : '',
       contextSection,
       chemicalContext,
