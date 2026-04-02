@@ -46,6 +46,10 @@ export const en: Translation = {
     chatButton: 'Ask AI',
     chatButtonMobile: 'Send',
     recentSearches: 'Recent searches',
+    searchTitle: 'AI Assistant for',
+    searchTitleHighlight: 'Chemical Law',
+    searchTagline: 'Expert answers • Chemical Law 69/2025 & Decrees 24, 25, 26/2026',
+    searchDescription: 'Ask anything about chemical classification, import declarations, permits, and compliance procedures. AI answers based on official legal texts.',
   },
   features: {
     penalties: {

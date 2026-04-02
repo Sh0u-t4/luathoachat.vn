@@ -1,5 +1,6 @@
 'use client';
 
+import { useLanguage } from '@/lib/i18n/context';
 import { SmartSearchBar } from '@/components/chat/smart-search-bar';
 
 interface HeroSectionSearchProps {
@@ -7,10 +8,11 @@ interface HeroSectionSearchProps {
 }
 
 /**
- * Hero Section mới với Smart Search Bar
- * Thay thế HeroSectionWithChat (không có chat embedded nữa)
+ * Hero Section với Smart Search Bar - Fully bilingual (VI/EN)
  */
 export function HeroSectionSearch({ onSearch }: HeroSectionSearchProps) {
+  const { t } = useLanguage();
+
   return (
     <section className="relative min-h-[72vh] flex items-center justify-center px-4 overflow-hidden">
       {/* Dark Gradient Background */}
@@ -25,21 +27,21 @@ export function HeroSectionSearch({ onSearch }: HeroSectionSearchProps) {
       {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto text-center w-full space-y-8">
 
-        {/* Main Heading với hiệu ứng gradient */}
+        {/* Main Heading */}
         <div>
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-5 leading-tight tracking-tight">
-            Trợ lý AI{' '}
+            {t.hero.searchTitle}{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-400 animate-gradient">
-              Luật Hóa chất
+              {t.hero.searchTitleHighlight}
             </span>
           </h1>
 
           <p className="text-xl md:text-2xl text-slate-300 mb-3 font-light">
-            Giải đáp chuyên sâu • Luật 69/2025 & Nghị định 24, 25, 26/2026
+            {t.hero.searchTagline}
           </p>
 
           <p className="text-base md:text-lg text-slate-400 max-w-3xl mx-auto">
-            Hỏi bất kỳ điều gì về phân loại hóa chất, khai báo, giấy phép, quy trình tuân thủ. AI sẽ trả lời dựa trên văn bản pháp luật chính thức.
+            {t.hero.searchDescription}
           </p>
         </div>
 

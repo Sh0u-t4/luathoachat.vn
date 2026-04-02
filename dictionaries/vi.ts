@@ -46,6 +46,10 @@ export const vi: Translation = {
     chatButton: 'Tư vấn ngay',
     chatButtonMobile: 'Gửi',
     recentSearches: 'Tìm kiếm gần đây',
+    searchTitle: 'Trợ lý AI',
+    searchTitleHighlight: 'Luật Hóa chất',
+    searchTagline: 'Giải đáp chuyên sâu • Luật 69/2025 & Nghị định 24, 25, 26/2026',
+    searchDescription: 'Hỏi bất kỳ điều gì về phân loại hóa chất, khai báo, giấy phép, quy trình tuân thủ. AI sẽ trả lời dựa trên văn bản pháp luật chính thức.',
   },
   features: {
     penalties: {

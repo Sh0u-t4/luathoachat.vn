@@ -4,29 +4,36 @@ import { useState, useRef, useEffect } from 'react';
 import { Search, Sparkles, TrendingUp, FileText, Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { hapticFeedback, HapticPatterns } from '@/lib/mobile/utils';
+import { useLanguage } from '@/lib/i18n/context';
 
 interface SmartSearchBarProps {
   onSearch: (query: string) => void;
   placeholder?: string;
 }
 
-const SUGGESTED_TOPICS = [
-  { icon: FileText, text: 'Nghị định 24/2026/NĐ-CP - Phân loại hóa chất', category: 'Phân loại' },
-  { icon: FileText, text: 'Nghị định 25/2026/NĐ-CP - Sản xuất, kinh doanh', category: 'Kinh doanh' },
-  { icon: FileText, text: 'Nghị định 26/2026/NĐ-CP - Quản lý hóa chất nguy hiểm', category: 'Quản lý' },
-  { icon: Scale, text: 'Luật Hóa chất số 69/2025/QH15', category: 'Luật' },
-  { icon: FileText, text: 'Thông tư 01/2026/TT-BCT - Hướng dẫn luật hóa chất', category: 'Thông tư' },
-  { icon: FileText, text: 'Thông tư 02/2026/TT-BCT - Quy định mới', category: 'Thông tư' },
-  { icon: Scale, text: 'Hóa chất nào cần giấy phép kinh doanh?', category: 'Câu hỏi' },
-  { icon: Scale, text: 'Quy trình cấp phép sản xuất hóa chất', category: 'Câu hỏi' },
-  { icon: Scale, text: 'Hóa chất tiền chất là gì?', category: 'Câu hỏi' },
-  { icon: Scale, text: 'Mức phạt vi phạm về hóa chất', category: 'Câu hỏi' },
+interface SuggestedTopic {
+  icon: React.ElementType;
+  text: string;
+  textEn: string;
+  category: string;
+  categoryEn: string;
+}
+
+const SUGGESTED_TOPICS: SuggestedTopic[] = [
+  { icon: FileText, text: 'Nghị định 24/2026/NĐ-CP - Phân loại hóa chất', textEn: 'Decree 24/2026/ND-CP - Chemical Classification', category: 'Phân loại', categoryEn: 'Classification' },
+  { icon: FileText, text: 'Nghị định 25/2026/NĐ-CP - Sản xuất, kinh doanh', textEn: 'Decree 25/2026/ND-CP - Production & Trading', category: 'Kinh doanh', categoryEn: 'Trading' },
+  { icon: FileText, text: 'Nghị định 26/2026/NĐ-CP - Quản lý hóa chất nguy hiểm', textEn: 'Decree 26/2026/ND-CP - Hazardous Chemical Management', category: 'Quản lý', categoryEn: 'Management' },
+  { icon: Scale, text: 'Luật Hóa chất số 69/2025/QH15', textEn: 'Chemical Law No. 69/2025/QH15', category: 'Luật', categoryEn: 'Law' },
+  { icon: FileText, text: 'Thông tư 01/2026/TT-BCT - Hướng dẫn luật hóa chất', textEn: 'Circular 01/2026/TT-BCT - Chemical Law Guidance', category: 'Thông tư', categoryEn: 'Circular' },
+  { icon: FileText, text: 'Thông tư 02/2026/TT-BCT - Quy định mới', textEn: 'Circular 02/2026/TT-BCT - New Regulations', category: 'Thông tư', categoryEn: 'Circular' },
+  { icon: Scale, text: 'Hóa chất nào cần giấy phép kinh doanh?', textEn: 'Which chemicals require a business license?', category: 'Câu hỏi', categoryEn: 'Question' },
+  { icon: Scale, text: 'Quy trình cấp phép sản xuất hóa chất', textEn: 'Chemical production licensing procedure', category: 'Câu hỏi', categoryEn: 'Question' },
+  { icon: Scale, text: 'Hóa chất tiền chất là gì?', textEn: 'What are precursor chemicals?', category: 'Câu hỏi', categoryEn: 'Question' },
+  { icon: Scale, text: 'Mức phạt vi phạm về hóa chất', textEn: 'Penalties for chemical violations', category: 'Câu hỏi', categoryEn: 'Question' },
 ];
 
 /**
- * Smart Search Bar - Thanh tìm kiếm thông minh cho Hero Section
- * Hiển thị suggestions, trending topics
- * Khi Enter -> Mở chat window với query
+ * Smart Search Bar - Bilingual (VI/EN)
  */
 export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
   const [query, setQuery] = useState('');
@@ -34,6 +41,7 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [mounted, setMounted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     setMounted(true);
@@ -55,8 +63,9 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
     inputRef.current?.blur();
   };
 
-  const handleSuggestionClick = (text: string) => {
+  const handleSuggestionClick = (topic: SuggestedTopic) => {
     hapticFeedback(HapticPatterns.light);
+    const text = language === 'en' ? topic.textEn : topic.text;
     onSearch(text);
     setQuery('');
     setShowSuggestions(false);
@@ -90,11 +99,11 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-            placeholder=""
+            placeholder={placeholder || t.common.searchPlaceholder}
             className="flex-1 py-4 md:py-5 pr-16 sm:pr-32 md:pr-40 text-base md:text-lg text-slate-900 placeholder:text-slate-400 bg-transparent outline-none"
           />
 
-          {/* Submit Button - Position absolute */}
+          {/* Submit Button */}
           <Button
             type="submit"
             disabled={!query.trim()}
@@ -111,7 +120,7 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
             "
           >
             <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span>Hỏi AI</span>
+            <span>{language === 'en' ? 'Ask AI' : 'Hỏi AI'}</span>
           </Button>
         </div>
       </form>
@@ -122,15 +131,17 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
           {/* Header */}
           <div className="px-4 sm:px-6 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-shrink-0">
             <TrendingUp className="w-4 h-4 text-cyan-600" />
-            <span className="text-sm font-semibold text-slate-700">Chủ đề phổ biến</span>
+            <span className="text-sm font-semibold text-slate-700">
+              {language === 'en' ? 'Popular topics' : 'Chủ đề phổ biến'}
+            </span>
           </div>
 
-          {/* Suggestions List - Scrollable */}
+          {/* Suggestions List */}
           <div className="py-2 overflow-y-auto">
             {SUGGESTED_TOPICS.map((topic, index) => (
               <button
                 key={index}
-                onClick={() => handleSuggestionClick(topic.text)}
+                onClick={() => handleSuggestionClick(topic)}
                 className="w-full px-4 sm:px-6 py-3 flex items-center gap-3 sm:gap-4 hover:bg-slate-50 transition-colors group"
               >
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center group-hover:from-cyan-100 group-hover:to-blue-100 transition-colors flex-shrink-0">
@@ -138,9 +149,11 @@ export function SmartSearchBar({ onSearch, placeholder }: SmartSearchBarProps) {
                 </div>
                 <div className="flex-1 text-left min-w-0">
                   <div className="text-xs sm:text-sm font-medium text-slate-900 group-hover:text-cyan-700 transition-colors line-clamp-2 sm:truncate">
-                    {topic.text}
+                    {language === 'en' ? topic.textEn : topic.text}
                   </div>
-                  <div className="text-xs text-slate-500">{topic.category}</div>
+                  <div className="text-xs text-slate-500">
+                    {language === 'en' ? topic.categoryEn : topic.category}
+                  </div>
                 </div>
                 <Search className="w-4 h-4 text-slate-300 group-hover:text-cyan-500 transition-colors flex-shrink-0" />
               </button>

@@ -46,6 +46,10 @@ export interface Translation {
     chatButton: string;
     chatButtonMobile: string;
     recentSearches: string;
+    searchTitle: string;
+    searchTitleHighlight: string;
+    searchTagline: string;
+    searchDescription: string;
   };
   features: {
     penalties: {
