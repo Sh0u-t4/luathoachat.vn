@@ -422,6 +422,24 @@ KHÔNG kết thúc bằng "Tuy nhiên, bạn nên tham khảo ý kiến chuyên 
 const MANDATORY_RULES = `
 ══════════════ QUY TẮC BẮT BUỘC — KHÔNG ĐƯỢC VI PHẠM ══════════════
 
+╔ ƯU TIÊN #1 — KIẾN THỨC TĨNH BẮT BUỘC ╗
+TRƯỚC KHI trả lời bất kỳ câu hỏi nào, PHẢI thực hiện theo thứ tự:
+  B1. Kiểm tra phần [KIẾN THỨC TĨNH] trong user message — nếu có đáp án ở đó, dùng ngay,
+      KHÔNG cần suy luận thêm, KHÔNG hỏi lại, KHÔNG nói "không có thông tin".
+  B2. Kiểm tra phần [TÀI LIỆU PHÁP LÝ] — RAG context từ Knowledge Base.
+  B3. Nếu cả 2 không đủ — mới dùng kiến thức nền (và ghi rõ: "kiến thức nền, chưa kiểm tra văn bản gốc").
+
+ƯU TIÊN KHI CÓ [KIẾN THỨC TĨNH]:
+  ✓ Hỏi về số phụ lục NĐ 24 → 4 phụ lục (I, II, III, IV)
+  ✓ Hỏi về nhóm HC kiểm soát đặc biệt → 4 nhóm chính xác
+  ✓ Hỏi về số mục SDS → 16 mục, Thông tư 02/2026/TT-BCT
+  ✓ Hỏi về mức phạt → con số cụ thể đã liệt kê
+  ✓ Hỏi về mã HS → bảng mã HS đã liệt kê
+  ✓ Hỏi về tiêu chí chất độc GHS → 7 tiêu chí cụ thể
+NGHIÊM CẤM:
+  ✗ Bỏ qua [KIẾN THỨC TĨNH] khi RAG context không có thông tin → PHẢI dùng kiến thức tĩnh
+  ✗ Trả lời "không có thông tin" khi kiến thức tĩnh đã có đáp án rõ ràng
+
 NGHIÊM CẤM TUYỆT ĐỐI — FORMAT VĂN THƯ:
 MỞ ĐẦU BỊ CẤM (KHÔNG BAO GIỜ dùng):
   ✗ "Chào bạn," / "Chào Quý doanh nghiệp," / bất kỳ câu chào nào
@@ -625,6 +643,95 @@ function getTokenBudget(query: string, scenario: ScenarioType): number {
 }
 
 
+// ── Build targeted static knowledge for injection into userMessage ────────────
+// Injects critical facts CLOSE to the question so the model prioritizes them.
+// Uses ASCII-only/simple patterns since query is already lowercased.
+function buildStaticKnowledge(query: string): string {
+  const q = query.toLowerCase()
+    // Normalize Vietnamese for simple matching
+    .replace(/[àáảãạăắằẳẵặâấầẩẫậ]/g, 'a')
+    .replace(/[èéẻẽẹêếềểễệ]/g, 'e')
+    .replace(/[ìíỉĩị]/g, 'i')
+    .replace(/[òóỏõọôốồổỗộơớờởỡợ]/g, 'o')
+    .replace(/[ùúủũụưứừửữự]/g, 'u')
+    .replace(/[ỳýỷỹỵ]/g, 'y')
+    .replace(/[đ]/g, 'd');
+
+  const parts: string[] = [];
+
+  // Phụ lục NĐ 24
+  if (/phu luc|appendix|danh muc.*(hoa|h.a) chat|n[dg].*24|bao nhieu phu|tong so phu/i.test(q)) {
+    parts.push(
+`[PHU LUC ND 24/2026 - DUNG 4 PHU LUC]
+• Phu luc I   — HC san xuat/kinh doanh co dieu kien (can GCN)
+• Phu luc II  — HC can kiem soat dac biet (tien chat CN + tien chat thuoc no)
+• Phu luc III — HC bang CWC (Bang 1, 2, 3)
+• Phu luc IV  — HC bi cam hoan toan
+[Nguon: ND 24/2026/ND-CP, Dieu 3]`);
+  }
+
+  // HC kiểm soát đặc biệt
+  if (/kiem soat dac biet|tien chat|precursor|hoa chat bang|cwc|opcw|vu khi hoa hoc/i.test(q)) {
+    parts.push(
+`[HOA CHAT KIEM SOAT DAC BIET - DUNG 4 NHOM]
+1. Tien chat cong nghiep (Nhom I Phu luc II): Acetone, Toluene, H2SO4, HCl, Acetic anhydride...
+2. Tien chat thuoc no (Nhom II Phu luc II): NH4NO3 >=45%, KNO3, H2O2 >=12%, HNO3 >=3%...
+3. HC Bang 2 (Phu luc III - CWC): Thiodiglycol, DMMP, Amiton...
+4. HC Bang 3 (Phu luc III - CWC): Phosgene, HCN, Chloropicrin...
+[Nguon: ND 24/2026, Phu luc II va III]`);
+  }
+
+  // SDS / phiếu an toàn
+  if (/sds|phieu an toan|safety data|muc.*bat buoc|16 muc|17 muc/i.test(q)) {
+    parts.push(
+`[SDS - 16 MUC DUNG THEO PHAP LUAT VIET NAM]
+SDS co DUNG 16 muc (khong phai 17). Nguon: Thong tu 02/2026/TT-BCT (khong phai TT 01).
+1.Nhan dang hoa chat 2.Dac tinh nguy hiem 3.Thanh phan 4.So cuu
+5.Chua chay 6.Phat tan ngau nhien 7.Bao quan 8.Kiem soat phoi nhiem
+9.Tinh chat ly hoa 10.On dinh/phan ung 11.Doc hoc 12.Sinh thai hoc
+13.Thai bo 14.Van chuyen 15.Quy dinh phap luat 16.Thong tin khac
+[Nguon: Thong tu 02/2026/TT-BCT]`);
+  }
+
+  // Mức phạt
+  if (/muc phat|xu phat|tien phat|che tai|vi pham hanh chinh/i.test(q)) {
+    parts.push(
+`[MUC PHAT VI PHAM HANH CHINH - ND 144/2021]
+TO CHUC = gap doi CA NHAN.
+• SX HC Phu luc I khong GCN: CN 20-30trieu, TC 40-60trieu
+• KD tien chat CN khong giay phep: TC 50-80trieu + tich thu + tuoc phep 6-12 thang
+• Khong khai bao HC nhap khau lan dau: CN 10-20trieu, TC 20-40trieu
+• SDS lap sai/thieu muc: 5-10trieu (TC)
+• HC CAM (Phu luc IV): 100-150trieu + hinh su
+[Nguon: ND 144/2021/ND-CP]`);
+  }
+
+  // Mã HS
+  if (/ma hs|hs.?code|ma so hang|khai bao.*nhap khau/i.test(q)) {
+    parts.push(
+`[MA HS HOA CHAT - CHUONG 28/29]
+H2SO4>=95%: 2807.00.10 | HCl: 2806.10.00 | HNO3: 2808.00.00 | H2O2: 2847.00.00
+NaOH ran: 2815.11.00 | NH4NO3: 3102.30.00 | KMnO4: 2841.61.00
+Acetone: 2914.11.00 | Methanol: 2905.11.00 | Toluene: 2902.30.00
+Acetic acid: 2915.21.00 | Acetic anhydride: 2915.24.00 | Formaldehyde: 2912.11.00
+Diethyl ether: 2909.11.00
+[Nguon: TT 31/2022/TT-BTC]`);
+  }
+
+  // GHS chất độc tiêu chí
+  if (/chat doc|tieu chi|phan loai.*doc|ld50|lc50|doc cap|toxic/i.test(q)) {
+    parts.push(
+`[TIEU CHI CHAT DOC GHS - ND 26/2026 Dieu 2 Khoan 4]
+Hoa chat la chat doc khi co MOT trong:
+a) Doc cap tinh cap 1 b) Ton thuong/kich ung mat cap 1
+c) An mon/kich ung da cap 1A d) Ung thu cap 1A
+d) Dot bien te bao mam cap 1A e) Doc tinh sinh san cap 1A g) Nguy hai MT cap 1
+[Nguon: ND 26/2026, Dieu 2, Khoan 4]`);
+  }
+
+  return parts.join('\n\n');
+}
+
 
 
 // ── Streaming Gemini call ──────────────────────────────────────────────────
@@ -712,8 +819,15 @@ export async function POST(request: NextRequest) {
       ? `# TÀI LIỆU PHÁP LÝ:\n${knowledge_context}`
       : `# TÀI LIỆU PHÁP LÝ: Không tìm thấy thông tin liên quan trong Knowledge Base.`;
 
+    // Inject topic-specific static facts directly into userMessage so they sit
+    // right before the question — much more reliable than burying them in system prompt.
+    const staticKnowledge = buildStaticKnowledge(query);
+
     const userMessage = [
       langPrefix,
+      staticKnowledge
+        ? `# KIẾN THỨC TĨNH (ƯU TIÊN CAO NHẤT — Kiểm tra phần này TRƯỚC khi trả lời):\n${staticKnowledge}`
+        : '',
       contextSection,
       chemicalContext,
       scenarioChecklist,
