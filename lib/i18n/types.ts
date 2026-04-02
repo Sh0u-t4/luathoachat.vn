@@ -305,6 +305,19 @@ export interface Translation {
     sendButton: string;
     sendButtonMobile: string;
     inputPlaceholderChat: string;
+    tablePreviewTitle: string;
+    tablePreviewRows: string;
+    tablePreviewCols: string;
+    tablePreviewMore: string;
+    tablePreviewHint: string;
+    expandDetails: string;
+    collapseDetails: string;
+    lockedContentLabel: string;
+    savingMessage: string;
+    ratingRemoved: string;
+    ratingPositiveToast: string;
+    ratingNegativeToast: string;
+    ratingSubmitError: string;
   };
   promptLibrary: {
     sectionBadge: string;

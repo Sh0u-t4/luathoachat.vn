@@ -37,111 +37,181 @@ export function QuickReplyButtons({ suggestions, onSelect, className = '' }: Qui
 
 
 // ── Suggestion deduplication pool ─────────────────────────────────────────
-// Track suggestions shown globally per session to avoid repetition
 const shownSuggestions = new Set<string>();
 
 /**
  * Generate smart, context-aware and non-repeating follow-up suggestions.
+ * Accepts a language parameter ('vi' | 'en') to return bilingual results.
  * Priority: (1) Go deeper on same topic, (2) Related expansion, (3) Next action/procedure
  */
-export function generateQuickReplies(messageContent: string, maxSuggestions = 3): string[] {
+export function generateQuickReplies(
+  messageContent: string,
+  maxSuggestions = 3,
+  language: 'vi' | 'en' = 'vi'
+): string[] {
   const text = messageContent;
   const lower = text.toLowerCase();
+  const isEN = language === 'en';
 
   const candidates: string[] = [];
 
   // ── Extract specific entities for deeper follow-ups ──────────────────
-  // Extract Điều numbers mentioned → "deeper" follow-up
   const articleMatches = text.match(/Điều\s+(\d+[a-z]?)/gi) ?? [];
   const articles = Array.from(new Set(articleMatches.map(m => m.trim())));
   if (articles.length > 0) {
-    candidates.push(`${articles[0]} quy định chi tiết những gì?`);
+    candidates.push(isEN
+      ? `What does ${articles[0]} specify in detail?`
+      : `${articles[0]} quy định chi tiết những gì?`);
   }
 
-  // Extract document names → comparison follow-up
   const docMatches = text.match(/Nghị định\s+\d+\/\d+\/NĐ-CP|Luật\s+(?:Hóa chất|số)\s*\d+/gi) ?? [];
   const docs = Array.from(new Set(docMatches.map(m => m.trim())));
   if (docs.length >= 2) {
-    candidates.push(`So sánh chi tiết ${docs[0]} và ${docs[1]}?`);
+    candidates.push(isEN
+      ? `Compare ${docs[0]} and ${docs[1]} in detail?`
+      : `So sánh chi tiết ${docs[0]} và ${docs[1]}?`);
   } else if (docs.length === 1) {
-    candidates.push(`${docs[0]} còn quy định gì khác liên quan?`);
+    candidates.push(isEN
+      ? `What else does ${docs[0]} regulate?`
+      : `${docs[0]} còn quy định gì khác liên quan?`);
   }
 
   // ── Topic-specific deep dives ─────────────────────────────────────────
-  if (/giấy (chứng nhận|phép)|gcn|giấy phép/i.test(lower)) {
-    candidates.push('Thủ tục gia hạn Giấy chứng nhận như thế nào?');
-    candidates.push('Mức xử phạt nếu kinh doanh khi GCN hết hạn?');
-    candidates.push('Điều kiện cấp Giấy chứng nhận đủ điều kiện?');
+  if (/giấy (chứng nhận|phép)|gcn|giấy phép|certificate|license/i.test(lower)) {
+    candidates.push(isEN
+      ? 'What is the procedure for renewing a certificate?'
+      : 'Thủ tục gia hạn Giấy chứng nhận như thế nào?');
+    candidates.push(isEN
+      ? 'What are the penalties for operating with an expired certificate?'
+      : 'Mức xử phạt nếu kinh doanh khi GCN hết hạn?');
+    candidates.push(isEN
+      ? 'What are the conditions for obtaining an operating certificate?'
+      : 'Điều kiện cấp Giấy chứng nhận đủ điều kiện?');
   }
 
-  if (/khoảng cách an toàn|vùng ảnh hưởng|bảo vệ|buffer zone/i.test(lower)) {
-    candidates.push('Phương pháp tính khoảng cách an toàn chi tiết?');
-    candidates.push('Ngoại lệ và trường hợp được miễn khoảng cách?');
+  if (/khoảng cách an toàn|vùng ảnh hưởng|safety distance|buffer zone/i.test(lower)) {
+    candidates.push(isEN
+      ? 'What is the detailed method for calculating safety distances?'
+      : 'Phương pháp tính khoảng cách an toàn chi tiết?');
+    candidates.push(isEN
+      ? 'What are the exemptions from safety distance requirements?'
+      : 'Ngoại lệ và trường hợp được miễn khoảng cách?');
   }
 
-  if (/khai báo|khai báo hóa chất|inventory/i.test(lower)) {
-    candidates.push('Ngưỡng khai báo tối thiểu là bao nhiêu kg?');
-    candidates.push('Hồ sơ khai báo hóa chất gồm những gì?');
-    candidates.push('Thủ tục khai báo nhập khẩu hóa chất lần đầu?');
+  if (/khai báo|khai báo hóa chất|declaration|inventory/i.test(lower)) {
+    candidates.push(isEN
+      ? 'What is the minimum declaration threshold in kg?'
+      : 'Ngưỡng khai báo tối thiểu là bao nhiêu kg?');
+    candidates.push(isEN
+      ? 'What documents are required for a chemical declaration?'
+      : 'Hồ sơ khai báo hóa chất gồm những gì?');
+    candidates.push(isEN
+      ? 'What is the procedure for first-time import declaration?'
+      : 'Thủ tục khai báo nhập khẩu hóa chất lần đầu?');
   }
 
-  if (/kiểm soát đặc biệt|hóa chất ksđb|tiền chất|precursor/i.test(lower)) {
-    candidates.push('Danh mục hóa chất kiểm soát đặc biệt gồm những gì?');
-    candidates.push('Điều kiện kinh doanh hóa chất kiểm soát đặc biệt?');
+  if (/kiểm soát đặc biệt|hóa chất ksđb|tiền chất|precursor|controlled/i.test(lower)) {
+    candidates.push(isEN
+      ? 'What chemicals are on the specially controlled list?'
+      : 'Danh mục hóa chất kiểm soát đặc biệt gồm những gì?');
+    candidates.push(isEN
+      ? 'What are the conditions for trading specially controlled chemicals?'
+      : 'Điều kiện kinh doanh hóa chất kiểm soát đặc biệt?');
   }
 
-  if (/mức phạt|xử phạt|vi phạm|phạt tiền|chế tài/i.test(lower)) {
-    candidates.push('Ngoài phạt tiền có hình thức xử phạt bổ sung nào?');
-    candidates.push('Trường hợp nào được giảm nhẹ mức phạt?');
+  if (/mức phạt|xử phạt|vi phạm|phạt tiền|chế tài|penalty|fine|violation/i.test(lower)) {
+    candidates.push(isEN
+      ? 'Are there additional penalties besides fines?'
+      : 'Ngoài phạt tiền có hình thức xử phạt bổ sung nào?');
+    candidates.push(isEN
+      ? 'In what cases can penalties be reduced?'
+      : 'Trường hợp nào được giảm nhẹ mức phạt?');
   }
 
-  if (/sản xuất|manufacturing|sx\b/i.test(lower) && /kinh doanh|kd\b|thương mại/i.test(lower)) {
-    candidates.push('DN vừa SX vừa KD hóa chất cần những giấy phép gì?');
+  if (/sản xuất|manufacturing|sx\b/i.test(lower) && /kinh doanh|kd\b|thương mại|trading/i.test(lower)) {
+    candidates.push(isEN
+      ? 'What permits are needed for companies both producing and trading chemicals?'
+      : 'DN vừa SX vừa KD hóa chất cần những giấy phép gì?');
   } else if (/sản xuất|manufacturing/i.test(lower)) {
-    candidates.push('Điều kiện cơ sở vật chất cho sản xuất hóa chất?');
-    candidates.push('Tiêu chuẩn nhân sự kỹ thuật trong sản xuất hóa chất?');
-  } else if (/kinh doanh|buôn bán|phân phối/i.test(lower)) {
-    candidates.push('Điều kiện kho chứa hóa chất nguy hiểm?');
-    candidates.push('Yêu cầu về nhãn mác khi kinh doanh hóa chất?');
+    candidates.push(isEN
+      ? 'What physical facility conditions are required for chemical manufacturing?'
+      : 'Điều kiện cơ sở vật chất cho sản xuất hóa chất?');
+    candidates.push(isEN
+      ? 'What are the technical personnel standards for chemical manufacturing?'
+      : 'Tiêu chuẩn nhân sự kỹ thuật trong sản xuất hóa chất?');
+  } else if (/kinh doanh|buôn bán|phân phối|trading|distribution/i.test(lower)) {
+    candidates.push(isEN
+      ? 'What are the storage conditions for hazardous chemicals?'
+      : 'Điều kiện kho chứa hóa chất nguy hiểm?');
+    candidates.push(isEN
+      ? 'What labeling requirements apply when trading chemicals?'
+      : 'Yêu cầu về nhãn mác khi kinh doanh hóa chất?');
   }
 
   if (/nhập khẩu|xuất khẩu|import|export/i.test(lower)) {
-    candidates.push('Danh mục hóa chất cấm nhập khẩu?');
-    candidates.push('Thủ tục xin phép nhập khẩu hóa chất có điều kiện?');
+    candidates.push(isEN
+      ? 'What is the list of prohibited import chemicals?'
+      : 'Danh mục hóa chất cấm nhập khẩu?');
+    candidates.push(isEN
+      ? 'What is the procedure for importing conditional chemicals?'
+      : 'Thủ tục xin phép nhập khẩu hóa chất có điều kiện?');
   }
 
   if (/phòng cháy|pccc|chữa cháy|fire/i.test(lower)) {
-    candidates.push('Yêu cầu PCCC đối với kho chứa hóa chất?');
-    candidates.push('Thiết bị PCCC bắt buộc cho cơ sở hóa chất?');
+    candidates.push(isEN
+      ? 'What fire prevention requirements apply to chemical storage?'
+      : 'Yêu cầu PCCC đối với kho chứa hóa chất?');
+    candidates.push(isEN
+      ? 'What fire suppression equipment is mandatory for chemical facilities?'
+      : 'Thiết bị PCCC bắt buộc cho cơ sở hóa chất?');
   }
 
-  if (/thời hạn|hiệu lực|deadline|expire/i.test(lower)) {
-    candidates.push('Thủ tục gia hạn trước khi hết hạn?');
-    candidates.push('Điều khoản chuyển tiếp cho GCN cũ?');
+  if (/thời hạn|hiệu lực|deadline|expire|validity/i.test(lower)) {
+    candidates.push(isEN
+      ? 'What is the renewal procedure before expiry?'
+      : 'Thủ tục gia hạn trước khi hết hạn?');
+    candidates.push(isEN
+      ? 'What transitional provisions apply to old certificates?'
+      : 'Điều khoản chuyển tiếp cho GCN cũ?');
   }
 
   if (/nghị định 24|nđ 24|nd 24/i.test(lower)) {
-    candidates.push('NĐ 24/2026 so sánh với quy định cũ NĐ 113/2017 như thế nào?');
+    candidates.push(isEN
+      ? 'How does Decree 24/2026 compare with the old Decree 113/2017?'
+      : 'NĐ 24/2026 so sánh với quy định cũ NĐ 113/2017 như thế nào?');
   }
   if (/nghị định 25|nđ 25|nd 25/i.test(lower)) {
-    candidates.push('Phương pháp đánh giá rủi ro theo NĐ 25/2026?');
+    candidates.push(isEN
+      ? 'What risk assessment methodology does Decree 25/2026 require?'
+      : 'Phương pháp đánh giá rủi ro theo NĐ 25/2026?');
   }
   if (/nghị định 26|nđ 26|nd 26/i.test(lower)) {
-    candidates.push('Thủ tục xin GCN đủ điều kiện theo NĐ 26/2026?');
+    candidates.push(isEN
+      ? 'What is the certificate application procedure under Decree 26/2026?'
+      : 'Thủ tục xin GCN đủ điều kiện theo NĐ 26/2026?');
   }
 
   // ── Generic action-oriented suggestions (fallback) ────────────────────
-  const genericSuggestions = [
-    'Mức phạt vi phạm cụ thể là bao nhiêu?',
-    'Văn bản pháp luật nào quy định vấn đề này?',
-    'Thủ tục thực hiện step-by-step?',
-    'Ví dụ thực tế trong doanh nghiệp?',
-    'Điều khoản chuyển tiếp và thời điểm áp dụng?',
-    'Cơ quan nào có thẩm quyền cấp phép?',
-    'Hồ sơ cần chuẩn bị đầy đủ là gì?',
-  ];
+  const genericSuggestions = isEN
+    ? [
+        'What are the specific penalty amounts for violations?',
+        'Which legal documents regulate this matter?',
+        'What is the step-by-step procedure?',
+        'What are real-world examples for businesses?',
+        'What are the transitional provisions and effective dates?',
+        'Which authority has licensing jurisdiction?',
+        'What documents need to be prepared?',
+      ]
+    : [
+        'Mức phạt vi phạm cụ thể là bao nhiêu?',
+        'Văn bản pháp luật nào quy định vấn đề này?',
+        'Thủ tục thực hiện step-by-step?',
+        'Ví dụ thực tế trong doanh nghiệp?',
+        'Điều khoản chuyển tiếp và thời điểm áp dụng?',
+        'Cơ quan nào có thẩm quyền cấp phép?',
+        'Hồ sơ cần chuẩn bị đầy đủ là gì?',
+      ];
 
-  // Add generic suggestions not yet in candidates
   for (const g of genericSuggestions) {
     if (!candidates.some(c => c.toLowerCase().includes(g.toLowerCase().slice(0, 20)))) {
       candidates.push(g);
@@ -152,10 +222,8 @@ export function generateQuickReplies(messageContent: string, maxSuggestions = 3)
   const fresh = candidates.filter(s => !shownSuggestions.has(s));
   const result = fresh.slice(0, maxSuggestions);
 
-  // Register shown suggestions to avoid future repetition
   result.forEach(s => shownSuggestions.add(s));
 
-  // If all suggestions have been shown (long session), reset pool
   if (shownSuggestions.size > 50) shownSuggestions.clear();
 
   return result.length > 0 ? result : candidates.slice(0, maxSuggestions);

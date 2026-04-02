@@ -42,7 +42,7 @@ export function AssistantMessage({
   isFullscreen = false,
   onQuickReply,
 }: AssistantMessageProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   // Rating state - quick like/dislike
   const [userRating, setUserRating] = useState<'like' | 'dislike' | null>(null);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
@@ -128,7 +128,7 @@ export function AssistantMessage({
 
   // Generate quick reply suggestions based on content
   const quickReplySuggestions = shouldShowUnblurred && !isLatest
-    ? generateQuickReplies(fullContent)
+    ? generateQuickReplies(fullContent, 3, language as 'vi' | 'en')
     : [];
 
   // Load existing rating when component mounts
@@ -203,10 +203,10 @@ export function AssistantMessage({
 
         console.log('[Rating] Successfully removed rating');
         setUserRating(null);
-        toast.success('Đã xóa đánh giá');
+        toast.success(t.chat.ratingRemoved);
       } catch (error: any) {
         console.error('[Rating] Error removing rating:', error);
-        toast.error('Không thể xóa đánh giá');
+        toast.error(t.chat.ratingSubmitError);
       } finally {
         setIsSubmittingRating(false);
       }
@@ -255,7 +255,7 @@ export function AssistantMessage({
 
       console.log('[Rating] Successfully inserted rating:', insertData);
       setUserRating(ratingType);
-      toast.success(ratingType === 'like' ? 'Cảm ơn phản hồi tích cực!' : 'Cảm ơn phản hồi của bạn!');
+      toast.success(ratingType === 'like' ? t.chat.ratingPositiveToast : t.chat.ratingNegativeToast);
     } catch (error: any) {
       console.error('[Rating] Rating submission error:', error);
       console.error('[Rating] Error details:', {
@@ -264,7 +264,7 @@ export function AssistantMessage({
         details: error.details,
         hint: error.hint
       });
-      toast.error('Không thể gửi đánh giá: ' + (error.message || 'Lỗi không xác định'));
+      toast.error(t.chat.ratingSubmitError);
     } finally {
       setIsSubmittingRating(false);
     }
@@ -383,9 +383,9 @@ export function AssistantMessage({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold text-cyan-800 text-sm">Bảng so sánh</span>
+                  <span className="font-semibold text-cyan-800 text-sm">{t.chat.tablePreviewTitle}</span>
                   <span className="text-xs text-cyan-600 bg-cyan-100 px-2 py-0.5 rounded-full">
-                    {bodyRows.length} hàng · {dataCols} cột
+                    {bodyRows.length} {t.chat.tablePreviewRows} · {dataCols} {t.chat.tablePreviewCols}
                   </span>
                 </div>
                 {/* Preview 3 row đầu */}
@@ -397,13 +397,15 @@ export function AssistantMessage({
                       </div>
                     ))}
                     {bodyRows.length > 3 && (
-                      <div className="text-xs text-cyan-500 italic">và {bodyRows.length - 3} hàng khác...</div>
+                      <div className="text-xs text-cyan-500 italic">
+                        {t.chat.tablePreviewMore.replace('{n}', String(bodyRows.length - 3))}
+                      </div>
                     )}
                   </div>
                 )}
                 <div className="mt-2 flex items-center gap-1 text-xs text-cyan-600">
                   <Maximize2 className="w-3 h-3" />
-                  <span>Nhấn <strong>↗</strong> góc trên phải để xem bảng đầy đủ</span>
+                  <span>{t.chat.tablePreviewHint}</span>
                 </div>
               </div>
             </div>
@@ -554,7 +556,7 @@ export function AssistantMessage({
                   className="flex items-center gap-1.5 text-xs text-cyan-600 hover:text-cyan-800 font-medium mt-1 transition-colors"
                 >
                   <span className={`inline-block transition-transform duration-200 ${isDetailExpanded ? 'rotate-180' : ''}`}>▾</span>
-                  {isDetailExpanded ? 'Thu gọn' : 'Xem thêm chi tiết'}
+                  {isDetailExpanded ? t.chat.collapseDetails : t.chat.expandDetails}
                 </button>
               </>
             ) : (
@@ -562,7 +564,7 @@ export function AssistantMessage({
               <>
                 <div className="flex items-center gap-2 mb-3">
                   <Lock className="w-4 h-4 text-slate-400" />
-                  <span className="text-sm font-medium text-slate-700">Chi tiết trích dẫn luật &amp; Mức phạt</span>
+                  <span className="text-sm font-medium text-slate-700">{t.chat.lockedContentLabel}</span>
                 </div>
                 <div className="relative">
                   <div className="text-slate-700 blur-content">
@@ -615,7 +617,7 @@ export function AssistantMessage({
                       ? 'bg-green-600 hover:bg-green-700 text-white'
                       : 'hover:bg-green-50 hover:text-green-700 hover:border-green-300'
                   }`}
-                  title={!hasValidMessageId ? 'Đang lưu tin nhắn...' : ''}
+                  title={!hasValidMessageId ? t.chat.savingMessage : ''}
                 >
                   <ThumbsUp className="w-4 h-4 mr-1.5" />
                   {t.chat.helpful}
@@ -630,7 +632,7 @@ export function AssistantMessage({
                       ? 'bg-red-600 hover:bg-red-700 text-white'
                       : 'hover:bg-red-50 hover:text-red-700 hover:border-red-300'
                   }`}
-                  title={!hasValidMessageId ? 'Đang lưu tin nhắn...' : ''}
+                  title={!hasValidMessageId ? t.chat.savingMessage : ''}
                 >
                   <ThumbsDown className="w-4 h-4 mr-1.5" />
                   {t.chat.notHelpful}
@@ -663,7 +665,7 @@ export function AssistantMessage({
                   onClick={() => setShowFeedbackDialog(true)}
                   disabled={!hasValidMessageId}
                   className="text-cyan-700 border-cyan-300 hover:bg-cyan-50 hover:text-cyan-800"
-                  title={!hasValidMessageId ? 'Đang lưu tin nhắn...' : ''}
+                  title={!hasValidMessageId ? t.chat.savingMessage : ''}
                 >
                   <MessageSquare className="w-4 h-4 mr-1.5" />
                   {t.chat.detailedFeedback}
