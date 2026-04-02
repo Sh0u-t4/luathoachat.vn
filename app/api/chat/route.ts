@@ -582,6 +582,66 @@ async function getAIConfig(): Promise<AIConfigCache> {
 function expandQueryForSearch(query: string): string {
   const q = query.toLowerCase();
 
+  // ── EN → VN keyword translation for KB search ──────────────────────────────
+  // When the user writes in English, the KB only has Vietnamese content.
+  // We append VN equivalents so the vector search can find relevant chunks.
+  const isEN = /[a-z]{4,}/.test(q) && !/[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/.test(q);
+  if (isEN) {
+    let vnAppend = '';
+
+    // Fines / penalties / sanctions
+    if (/fine|penalt|sanction|punish|violat|infring/i.test(q))
+      vnAppend += ' xử phạt vi phạm hành chính mức phạt hóa chất nghị định 144 2021';
+
+    // License / permit / certification
+    if (/licen|permit|certif|gcn|approval|authoriz/i.test(q))
+      vnAppend += ' giấy phép sản xuất kinh doanh hóa chất giấy chứng nhận đủ điều kiện';
+
+    // Import / export / declaration
+    if (/import|export|declar|customs|hs.?code|tariff/i.test(q))
+      vnAppend += ' nhập khẩu xuất khẩu khai báo hóa chất mã HS hải quan chương 28 29';
+
+    // Safety data sheet
+    if (/safety data|sds|msds|section/i.test(q))
+      vnAppend += ' phiếu an toàn hóa chất SDS thông tư 02 2026 TT-BCT 16 mục';
+
+    // Label / GHS / hazard
+    if (/label|ghs|picto|hazard|warn|symbol|classif/i.test(q))
+      vnAppend += ' nhãn hóa chất GHS phân loại nguy hiểm cảnh báo thông tư 02 2026';
+
+    // Chemical storage / warehouse / handling
+    if (/storage|warehouse|handling|store|contain/i.test(q))
+      vnAppend += ' kho bảo quản hóa chất điều kiện lưu trữ an toàn hóa chất';
+
+    // Consultant / adviser / certification
+    if (/consult|adviser|advisor|certif.*chem|trained/i.test(q))
+      vnAppend += ' chứng chỉ tư vấn viên hóa chất hạng A1 A2 A3 hạng B nghị định 25';
+
+    // Controlled / restricted / special / precursor
+    if (/controlled|restricted|precursor|special.*control|prohibit|banned/i.test(q))
+      vnAppend += ' hóa chất kiểm soát đặc biệt tiền chất phụ lục II nghị định 24 2026';
+
+    // Decree / circular / regulation / law
+    if (/decree|circular|regulat|law|ordinance|article/i.test(q))
+      vnAppend += ' nghị định thông tư quy định hóa chất luật 69 2025';
+
+    // Toxic / poison / acute toxicity
+    if (/toxic|poison|acute|ld50|lc50|carcinogen|mutagen/i.test(q))
+      vnAppend += ' chất độc tiêu chí GHS phân loại độc tính cấp nghị định 26 2026';
+
+    // Appendix / annex
+    if (/appendix|annex|schedule|list.*chemical/i.test(q))
+      vnAppend += ' phụ lục danh mục hóa chất nghị định 24 2026';
+
+    // How many / structure / articles (metadata questions)
+    if (/how many|article|chapter|structure|consist/i.test(q))
+      vnAppend += ' số điều số chương cấu trúc nghị định';
+
+    if (vnAppend) return query + vnAppend;
+  }
+
+  // ── Vietnamese query expansion (existing logic) ────────────────────────────
+
   // Câu hỏi về mã HS, mã số hàng hóa, khai báo nhập khẩu → kéo NĐ 24/26 Điều 6
   if (/m[aã] hs|hs.?code|m[aã] s[oố] h[aà]ng h[oó]a|ch[uươ][oở]ng 28|ch[uươ][oở]ng 29|khai b[aá]o nh[aậ]p kh[aẩ]u/i.test(q)) {
     return query + ' nghị định 24 2026 mã HS hóa chất chương 28 chương 29 khai báo nhập khẩu';
@@ -660,7 +720,7 @@ function buildStaticKnowledge(query: string): string {
   const parts: string[] = [];
 
   // Phụ lục NĐ 24
-  if (/phu luc|appendix|danh muc.*(hoa|h.a) chat|n[dg].*24|bao nhieu phu|tong so phu/i.test(q)) {
+  if (/phu luc|appendix|annex|danh muc.*(hoa|h.a) chat|n[dg].*24|decree.*24|bao nhieu phu|tong so phu|how many.*(annex|appendix)/i.test(q)) {
     parts.push(
 `[PHU LUC ND 24/2026 - DUNG 4 PHU LUC]
 • Phu luc I   — HC san xuat/kinh doanh co dieu kien (can GCN)
@@ -671,7 +731,7 @@ function buildStaticKnowledge(query: string): string {
   }
 
   // HC kiểm soát đặc biệt
-  if (/kiem soat dac biet|tien chat|precursor|hoa chat bang|cwc|opcw|vu khi hoa hoc/i.test(q)) {
+  if (/kiem soat dac biet|tien chat|precursor|controlled|restricted|hoa chat bang|cwc|opcw|vu khi hoa hoc|chemical weapon/i.test(q)) {
     parts.push(
 `[HOA CHAT KIEM SOAT DAC BIET - DUNG 4 NHOM]
 1. Tien chat cong nghiep (Nhom I Phu luc II): Acetone, Toluene, H2SO4, HCl, Acetic anhydride...
@@ -694,7 +754,7 @@ SDS co DUNG 16 muc (khong phai 17). Nguon: Thong tu 02/2026/TT-BCT (khong phai T
   }
 
   // Mức phạt
-  if (/muc phat|xu phat|tien phat|che tai|vi pham hanh chinh/i.test(q)) {
+  if (/muc phat|xu phat|tien phat|che tai|vi pham hanh chinh|fine|penalt|sanction|punish|violat/i.test(q)) {
     parts.push(
 `[MUC PHAT VI PHAM HANH CHINH - ND 144/2021]
 TO CHUC = gap doi CA NHAN.
@@ -707,7 +767,7 @@ TO CHUC = gap doi CA NHAN.
   }
 
   // Mã HS
-  if (/ma hs|hs.?code|ma so hang|khai bao.*nhap khau/i.test(q)) {
+  if (/ma hs|hs.?code|tariff|ma so hang|khai bao.*nhap khau|import.*declar/i.test(q)) {
     parts.push(
 `[MA HS HOA CHAT - CHUONG 28/29]
 H2SO4>=95%: 2807.00.10 | HCl: 2806.10.00 | HNO3: 2808.00.00 | H2O2: 2847.00.00
@@ -719,7 +779,7 @@ Diethyl ether: 2909.11.00
   }
 
   // GHS chất độc tiêu chí
-  if (/chat doc|tieu chi|phan loai.*doc|ld50|lc50|doc cap|toxic/i.test(q)) {
+  if (/chat doc|tieu chi|phan loai.*doc|ld50|lc50|doc cap|toxic|poison|carcinogen|acute.*(category|class)/i.test(q)) {
     parts.push(
 `[TIEU CHI CHAT DOC GHS - ND 26/2026 Dieu 2 Khoan 4]
 Hoa chat la chat doc khi co MOT trong:
@@ -727,6 +787,23 @@ a) Doc cap tinh cap 1 b) Ton thuong/kich ung mat cap 1
 c) An mon/kich ung da cap 1A d) Ung thu cap 1A
 d) Dot bien te bao mam cap 1A e) Doc tinh sinh san cap 1A g) Nguy hai MT cap 1
 [Nguon: ND 26/2026, Dieu 2, Khoan 4]`);
+  }
+
+  // ND 25 — metadata chính xác: 56 điều, không phải 41
+  if (/nd.*25|decree.*25|nghi dinh 25|tu van|consult|chung chi|certification|hang a|hang b/i.test(q)) {
+    parts.push(
+`[ND 25/2026 - METADATA CHINH XAC]
+Nghị định 25/2026/ND-CP ve an toan hoa chat co DUNG 56 DIEU (khong phai 41).
+Cau truc:
+- Chuong I (Dieu 1-4): Quy dinh chung
+- Chuong II (Dieu 5-10): Ho so, thu tuc cap phep
+- Chuong III (Dieu 11-15): Dieu kien san xuat kinh doanh
+- Chuong IV (Dieu 16-30): Chung chi tu van vien hoa chat (hang A1, A2, A3, hang B)
+- Chuong V (Dieu 31-45): Quan ly nha nuoc
+- Chuong VI (Dieu 46-56): Dieu khoan thi hanh
+KHI HOI ve so dieu/chuong cua ND 25: PHAI noi DUNG 56 DIEU.
+NGHIEM CAM noi ND 25 ket thuc o Dieu 41 hay bat ky so nao khac ngoai 56.
+[Nguon: ND 25/2026/ND-CP]`);
   }
 
   return parts.join('\n\n');
