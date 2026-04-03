@@ -307,11 +307,6 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
             const targetEl = container.querySelector(`[data-message-id="${messageId}"]`);
             if (targetEl) {
               targetEl.scrollIntoView({ behavior: 'instant' as ScrollBehavior, block: 'start' });
-              // Add a brief highlight effect
-              targetEl.classList.add('ring-2', 'ring-cyan-400', 'ring-offset-2');
-              setTimeout(() => {
-                targetEl.classList.remove('ring-2', 'ring-cyan-400', 'ring-offset-2');
-              }, 2000);
               wasCleared.current = false;
             } else {
               // Fallback: if message element not found, scroll to top
