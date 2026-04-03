@@ -25,6 +25,7 @@ interface ChatContextType {
   loadChatHistory: (sessionId?: string) => Promise<void>;
   chatSessions: Array<{ session_id: string; message_id: string; first_message: string; created_at: string }>;
   deleteSession: (messageId: string) => void;
+  removeMessagePair: (messageId: string) => void;
   setShowEmailGate: (show: boolean) => void;
   setShowLoginGate: (show: boolean) => void;
   saveGuestEmail: (email: string, currentQuestion: string) => Promise<void>;
@@ -667,6 +668,20 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setCurrentQuery('');
   }, []);
 
+  // Remove a specific user message + its following assistant response from the chat box
+  const removeMessagePair = useCallback((messageId: string) => {
+    setMessages((prev) => {
+      const idx = prev.findIndex((m) => m.id === messageId);
+      if (idx === -1) return prev;
+
+      // Remove the user message and its following assistant response (if exists)
+      const next = [...prev];
+      const removeCount = (idx + 1 < next.length && next[idx + 1].role === 'assistant') ? 2 : 1;
+      next.splice(idx, removeCount);
+      return next;
+    });
+  }, []);
+
   const clearCurrentQuery = useCallback(() => {
     setCurrentQuery('');
   }, []);
@@ -743,6 +758,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         loadChatHistory,
         chatSessions,
         deleteSession,
+        removeMessagePair,
         setShowEmailGate,
         setShowLoginGate,
         saveGuestEmail,

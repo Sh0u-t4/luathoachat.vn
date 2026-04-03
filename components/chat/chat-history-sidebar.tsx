@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth/context';
 
 export function ChatHistorySidebar() {
-  const { chatSessions, loadChatHistory, isAuthenticated, clearMessages, deleteSession, activeSessionId } = useChat();
+  const { chatSessions, loadChatHistory, isAuthenticated, clearMessages, deleteSession, removeMessagePair, activeSessionId } = useChat();
   const { user } = useAuth();
   const { openChat } = useChatUI();
   const { t, language } = useLanguage();
@@ -69,24 +69,16 @@ export function ChatHistorySidebar() {
     }, 200);
   };
 
-  const handleDeleteSession = (e: React.MouseEvent, messageId: string, firstMessage: string) => {
+  const handleDeleteSession = (e: React.MouseEvent, messageId: string, sessionId: string, firstMessage: string) => {
     e.stopPropagation();
     deleteSession(messageId);
     toast.success(`Đã ẩn cuộc trò chuyện`, {
       description: firstMessage.slice(0, 50) + (firstMessage.length > 50 ? '...' : ''),
     });
 
-    // Find the session_id of the hidden message
-    const hiddenSession = chatSessions.find(s => s.message_id === messageId);
-
-    // Clear chat window if the hidden session is currently displayed,
-    // or if currently selected in this sidebar
-    if (
-      (hiddenSession && hiddenSession.session_id === activeSessionId) ||
-      selectedSession === messageId
-    ) {
-      clearMessages();
-      setSelectedSession(null);
+    // If this session is currently displayed, remove just the deleted Q&A pair
+    if (sessionId === activeSessionId || selectedSession === sessionId) {
+      removeMessagePair(messageId);
     }
   };
 
@@ -208,7 +200,7 @@ export function ChatHistorySidebar() {
                         {/* Delete button — pure CSS group-hover, always rendered */}
                         {!isLoading && (
                           <button
-                            onClick={(e) => handleDeleteSession(e, session.message_id, session.first_message)}
+                            onClick={(e) => handleDeleteSession(e, session.message_id, session.session_id, session.first_message)}
                             className="absolute top-2 right-2 p-1.5 rounded-md bg-red-50 hover:bg-red-100 text-red-500 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100"
                             title="Ẩn cuộc trò chuyện này"
                           >
