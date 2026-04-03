@@ -261,16 +261,27 @@ export function lookupChemical(name: string): ChemicalInfo | null {
  * Detect chemical names in a query and return their classifications.
  * Returns an array of found chemicals with their info.
  */
+// Common Vietnamese words that happen to be chemical keys — require word boundary
+const REQUIRE_WORD_BOUNDARY = new Set(['nước', 'muoi', 'clo']);
+
 export function detectChemicalsInQuery(query: string): Array<{ name: string; info: ChemicalInfo }> {
   const lower = query.toLowerCase();
   const found: Array<{ name: string; info: ChemicalInfo }> = [];
   const seen = new Set<string>();
 
   for (const [key, info] of Object.entries(CHEMICAL_DB)) {
-    if (lower.includes(key) && !seen.has(info.canonicalName)) {
-      found.push({ name: key, info });
-      seen.add(info.canonicalName);
+    // Skip common words that only match as substrings (e.g. "nước" in "nước ngoài")
+    if (REQUIRE_WORD_BOUNDARY.has(key)) {
+      // Use regex word boundary: the key must be a standalone word
+      const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(`(?:^|[\\s,;.!?"'()\\[\\]{}])${escaped}(?:$|[\\s,;.!?"'()\\[\\]{}])`, 'i');
+      if (!re.test(lower) || seen.has(info.canonicalName)) continue;
+    } else {
+      if (!lower.includes(key) || seen.has(info.canonicalName)) continue;
     }
+
+    found.push({ name: key, info });
+    seen.add(info.canonicalName);
   }
 
   return found;
@@ -281,9 +292,12 @@ export function detectChemicalsInQuery(query: string): Array<{ name: string; inf
  * Gives the AI authoritative data to cite directly.
  */
 export function buildChemicalContext(chemicals: Array<{ name: string; info: ChemicalInfo }>): string {
-  if (chemicals.length === 0) return '';
+  // Filter out THUONG (ordinary) chemicals — they add no legal value and cause
+  // noise like "Nước (H₂O)" appearing before actual answers
+  const relevant = chemicals.filter(c => c.info.classification !== 'THUONG');
+  if (relevant.length === 0) return '';
 
-  const cards = chemicals.map(({ info }) => {
+  const cards = relevant.map(({ info }) => {
     const classLabel = CLASS_LABELS[info.classification];
     const permitStr = info.requiresPermit
       ? '✅ CẦN Giấy chứng nhận đủ điều kiện SX/KD'

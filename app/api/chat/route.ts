@@ -1022,7 +1022,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Transform Gemini SSE → our streaming format
-    const detected = foundChemicals.map(c => c.info.canonicalName);
+    const detected = foundChemicals
+      .filter(c => c.info.classification !== 'THUONG')
+      .map(c => c.info.canonicalName);
 
     const transformedStream = new ReadableStream({
       async start(controller) {
