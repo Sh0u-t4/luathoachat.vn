@@ -473,6 +473,16 @@ Nghị định 24/2026/NĐ-CP có ĐÚNG 4 Phụ lục, không hơn không kém:
 Khi hỏi "NĐ 24 có bao nhiêu phụ lục" hoặc "phụ lục của NĐ 24" → PHẢI trả lời đủ 4 phụ lục.
 KHÔNG được chỉ nêu 1 hay 3 phụ lục nếu không có context RAG cụ thể giải thích lý do.
 
+[HÓA CHẤT CẤM = PHỤ LỤC IV NĐ 24/2026 — BẮT BUỘC NHỚ]
+Khi hỏi về "hóa chất cấm" hoặc "HC bị cấm" → PHẢI trả lời:
+  ✓ Hóa chất cấm được quy định tại PHỤ LỤC IV, Nghị định 24/2026/NĐ-CP.
+  ✓ Phụ lục IV NĐ 24 CHÍNH LÀ danh mục hóa chất bị cấm hoàn toàn tại Việt Nam.
+NGHIÊM CẤM TUYỆT ĐỐI nói bất kỳ câu nào mang ý:
+  ✗ "Hóa chất cấm không nằm trong Phụ lục NĐ 24" — SAI HOÀN TOÀN
+  ✗ "NĐ 24 không có danh mục hóa chất cấm" — SAI HOÀN TOÀN
+  ✗ "Hóa chất cấm không thuộc NĐ 24" — SAI HOÀN TOÀN
+→ Mức phạt sản xuất/tàng trữ HC cấm: 100–150 triệu đ (hành chính) + hình sự theo Điều 232 BLHS 2015
+
 [HC KIỂM SOÁT ĐẶC BIỆT — 4 NHÓM CHÍNH XÁC]
 Khi hỏi về "hóa chất kiểm soát đặc biệt" hoặc "Phụ lục II NĐ 24" → PHẢI nêu ĐỦ 4 NHÓM:
 1. **Tiền chất công nghiệp** (Nhóm I, Phụ lục II): Acetone, Toluene, H₂SO₄, HCl, Acetic anhydride...
@@ -518,7 +528,7 @@ let configCache: AIConfigCache | null = null;
 const CONFIG_CACHE_TTL_MS = 5 * 60 * 1000; // 5 phút
 
 // Force-invalidate cache khi MANDATORY_RULES thay đổi (bump version để reset)
-const RULES_VERSION = 'v4-sds16-tt02'; // ← tăng khi sửa MANDATORY_RULES
+const RULES_VERSION = 'v5-hc-cam-fix'; // ← tăng khi sửa MANDATORY_RULES
 if (configCache && (configCache as any).__rulesVersion !== RULES_VERSION) {
   configCache = null;
 }
@@ -541,21 +551,42 @@ function buildStaticKnowledge(query: string, lang: 'vi' | 'en' = 'vi'): string {
   const isEN = lang === 'en';
   const parts: string[] = [];
 
-  // Phụ lục NĐ 24
-  if (/phu luc|appendix|annex|danh muc.*(hoa|h.a) chat|n[dg].*24|decree.*24|bao nhieu phu|tong so phu|how many.*(annex|appendix)/i.test(q)) {
+  // Phụ lục NĐ 24 — also triggers on "cấm/banned" to prevent hallucination
+  if (/phu luc|appendix|annex|danh muc.*(hoa|h.a) chat|n[dg].*24|decree.*24|bao nhieu phu|tong so phu|how many.*(annex|appendix)|hoa.*chat.*cam|cam.*hoa.*chat|banned.*chem|prohibit.*chem|chem.*banned|chem.*prohibit/i.test(q)) {
     parts.push(isEN
       ? `[DECREE 24/2026 ANNEXES — EXACTLY 4 ANNEXES]
 • Annex I — Chemicals requiring conditional production/trading license (GCN)
 • Annex II — Specially controlled chemicals (industrial precursors + explosive precursors)
 • Annex III — CWC Schedule chemicals (Schedules 1, 2, 3)
-• Annex IV — Completely banned chemicals
+• Annex IV — Completely BANNED chemicals (hóa chất cấm)
+IMPORTANT: Annex IV of Decree 24/2026 IS the list of banned chemicals. Do NOT say "banned chemicals are not in the Annex of Decree 24" — that is COMPLETELY WRONG.
 [Source: Decree 24/2026/ND-CP, Article 3]`
       : `[PHU LUC ND 24/2026 - DUNG 4 PHU LUC]
 • Phu luc I   — HC san xuat/kinh doanh co dieu kien (can GCN)
 • Phu luc II  — HC can kiem soat dac biet (tien chat CN + tien chat thuoc no)
 • Phu luc III — HC bang CWC (Bang 1, 2, 3)
-• Phu luc IV  — HC bi cam hoan toan
+• Phu luc IV  — HOA CHAT CAM (danh muc hoa chat bi cam hoan toan)
+QUAN TRONG: Phu luc IV cua ND 24/2026 CHINH LA danh muc hoa chat cam. KHONG DUOC noi "hoa chat cam khong nam trong Phu luc ND 24" — dieu nay SAI HOAN TOAN.
 [Nguon: ND 24/2026/ND-CP, Dieu 3]`);
+  }
+
+  // Hóa chất cấm — dedicated trigger to prevent "HC cấm không nằm trong Phụ lục NĐ 24"
+  if (/\bcam\b|bi cam|hoa chat cam|cam su dung|cam san xuat|cam kinh doanh|banned|prohibit|forbidden/i.test(q)) {
+    parts.push(isEN
+      ? `[BANNED CHEMICALS — ANNEX IV OF DECREE 24/2026]
+CRITICAL FACT: Banned chemicals (hóa chất cấm) ARE regulated by Decree 24/2026/ND-CP.
+Specifically: ANNEX IV (Phụ lục IV) of Decree 24/2026 = the official list of BANNED chemicals in Vietnam.
+• Manufacturing, trading, storing, or using banned chemicals (Annex IV) is STRICTLY PROHIBITED.
+• Penalties: 100-150 million VND (administrative) + criminal prosecution under Article 232 of the Penal Code 2015 (up to 7 years imprisonment).
+DO NOT say "banned chemicals are not in Decree 24" or "not in the Annex" — Annex IV IS the banned chemicals list.
+[Source: Decree 24/2026/ND-CP, Annex IV; Decree 144/2021, Article 232 BLHS 2015]`
+      : `[HOA CHAT CAM — PHU LUC IV NGHI DINH 24/2026]
+SU THAT QUAN TRONG: Hoa chat cam DUOC quy dinh trong Nghi dinh 24/2026/ND-CP.
+Cu the: PHU LUC IV cua ND 24/2026 = DANH MUC HOA CHAT BI CAM tai Viet Nam.
+• San xuat, kinh doanh, tang tru, su dung hoa chat cam (Phu luc IV) la BI CAM HOAN TOAN.
+• Muc phat: 100-150 trieu dong (hanh chinh) + truy cuu hinh su theo Dieu 232 BLHS 2015 (phat tu den 7 nam).
+NGHIEM CAM noi "hoa chat cam khong nam trong Phu luc ND 24" hoac "khong co trong ND 24" — Phu luc IV CHINH LA danh muc hoa chat cam.
+[Nguon: ND 24/2026/ND-CP, Phu luc IV; ND 144/2021, Dieu 232 BLHS 2015]`);
   }
 
   // HC kiểm soát đặc biệt
@@ -776,9 +807,9 @@ function expandQueryForSearch(query: string): string {
     if (/consult|adviser|advisor|certif.*chem|trained/i.test(q))
       vnAppend += ' chứng chỉ tư vấn viên hóa chất hạng A1 A2 A3 hạng B nghị định 25';
 
-    // Controlled / restricted / special / precursor
-    if (/controlled|restricted|precursor|special.*control|prohibit|banned/i.test(q))
-      vnAppend += ' hóa chất kiểm soát đặc biệt tiền chất phụ lục II nghị định 24 2026';
+    // Controlled / restricted / special / precursor / banned
+    if (/controlled|restricted|precursor|special.*control|prohibit|banned|forbidden/i.test(q))
+      vnAppend += ' hóa chất kiểm soát đặc biệt tiền chất phụ lục II phụ lục IV hóa chất cấm nghị định 24 2026';
 
     // Decree / circular / regulation / law
     if (/decree|circular|regulat|law|ordinance|article/i.test(q))
@@ -814,6 +845,11 @@ function expandQueryForSearch(query: string): string {
   // Câu hỏi về HC kiểm soát đặc biệt, tiền chất, HC bảng → kéo Phụ lục II, III NĐ 24
   if (/ki[eể]m so[aá]t đ[aặ]c bi[eệ]t|ti[eề]n ch[aấ]t|precursor|h[oó]a ch[aấ]t b[aả]ng|cwc|opcw|vũ kh[ií] h[oó]a h[oọ]c/i.test(q)) {
     return query + ' nghị định 24 2026 phụ lục II tiền chất công nghiệp tiền chất thuốc nổ hóa chất bảng 2 bảng 3 CWCW kiểm soát đặc biệt';
+  }
+
+  // Câu hỏi về hóa chất cấm, bị cấm → kéo Phụ lục IV NĐ 24
+  if (/c[aấ]m|b[iị] c[aấ]m|h[oó]a ch[aấ]t c[aấ]m|c[aấ]m s[ửử] d[uụ]ng|c[aấ]m s[aả]n xu[aấ]t|kh[oô]ng đ[uư][ợo]c ph[eé]p/i.test(q)) {
+    return query + ' nghị định 24 2026 phụ lục IV hóa chất cấm hoàn toàn danh mục cấm mức phạt hình sự';
   }
 
   // Câu hỏi về chứng chỉ tư vấn, hạng A1, A2, A3, hạng B, tư vấn viên → kéo NĐ 25 Chương IV
