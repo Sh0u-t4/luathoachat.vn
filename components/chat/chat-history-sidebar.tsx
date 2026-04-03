@@ -29,7 +29,7 @@ export function ChatHistorySidebar() {
     return null;
   }
 
-  const handleLoadSession = async (sessionId: string) => {
+  const handleLoadSession = async (sessionId: string, messageId: string) => {
     setLoadingSession(sessionId);
     setSelectedSession(sessionId);
 
@@ -44,7 +44,9 @@ export function ChatHistorySidebar() {
       setIsOpen(false);
 
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('chat:history-loaded'));
+        window.dispatchEvent(new CustomEvent('chat:history-loaded', {
+          detail: { messageId },
+        }));
       }, 400); // 300ms for CSS open transition + 100ms render buffer
     } catch (error) {
       console.error('handleLoadSession ERROR:', error);
@@ -175,7 +177,7 @@ export function ChatHistorySidebar() {
                         className="relative group"
                       >
                         <button
-                          onClick={() => handleLoadSession(session.session_id)}
+                          onClick={() => handleLoadSession(session.session_id, session.message_id)}
                           disabled={isLoading}
                           className={`w-full text-left p-3 rounded-lg border transition-all hover:shadow-md hover:border-cyan-300 disabled:opacity-60 disabled:cursor-not-allowed pr-10 ${
                             isSelected

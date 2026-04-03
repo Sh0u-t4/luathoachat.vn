@@ -281,17 +281,17 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
     };
   }, [isAnyTyping, scrollToBottom]);
 
-  // Listen for history-loaded event to reliably scroll to top.
-  // Dispatched AFTER openChat() from the sidebar so the window is already opening,
-  // but the ChatInterface may still be mounting — retry until chatContainerRef is ready.
+  // Listen for history-loaded event to reliably scroll to the target message.
+  // If a messageId is provided in the event detail, scroll to that specific message.
+  // Otherwise, fall back to scrolling to top (first message in the session).
   useEffect(() => {
-    const scrollToTopWhenReady = (attemptsLeft: number) => {
+    const scrollToMessageWhenReady = (messageId: string | null, attemptsLeft: number) => {
       const container = chatContainerRef.current;
 
       if (!container) {
         // Container not mounted yet — wait and retry
         if (attemptsLeft > 0) {
-          setTimeout(() => scrollToTopWhenReady(attemptsLeft - 1), 50);
+          setTimeout(() => scrollToMessageWhenReady(messageId, attemptsLeft - 1), 50);
         }
         return;
       }
@@ -302,8 +302,27 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          container.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
-          wasCleared.current = false;
+          // Try to scroll to specific message if messageId provided
+          if (messageId) {
+            const targetEl = container.querySelector(`[data-message-id="${messageId}"]`);
+            if (targetEl) {
+              targetEl.scrollIntoView({ behavior: 'instant' as ScrollBehavior, block: 'start' });
+              // Add a brief highlight effect
+              targetEl.classList.add('ring-2', 'ring-cyan-400', 'ring-offset-2');
+              setTimeout(() => {
+                targetEl.classList.remove('ring-2', 'ring-cyan-400', 'ring-offset-2');
+              }, 2000);
+              wasCleared.current = false;
+            } else {
+              // Fallback: if message element not found, scroll to top
+              container.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+              wasCleared.current = false;
+            }
+          } else {
+            // No specific message — scroll to top
+            container.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+            wasCleared.current = false;
+          }
 
           // Re-enable after 800ms
           setTimeout(() => {
@@ -317,9 +336,10 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
       });
     };
 
-    const handleHistoryLoaded = () => {
+    const handleHistoryLoaded = (e: Event) => {
+      const messageId = (e as CustomEvent)?.detail?.messageId || null;
       // Start polling immediately — up to 20 retries × 50ms = 1s max wait
-      scrollToTopWhenReady(20);
+      scrollToMessageWhenReady(messageId, 20);
     };
 
     window.addEventListener('chat:history-loaded', handleHistoryLoaded);
@@ -458,7 +478,8 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
                 return (
                   <div
                     key={`${message.id}-${index}`}
-                    className={`flex gap-3 animate-slide-up ${
+                    data-message-id={message.id}
+                    className={`flex gap-3 animate-slide-up transition-all duration-500 rounded-lg ${
                       message.role === 'user' ? 'justify-end' : 'justify-start'
                     }`}
                   >
@@ -652,7 +673,8 @@ export function ChatInterface({ initialMessage, hideDisclaimer = false, hideHead
                 return (
                   <div
                     key={`${message.id}-${index}`}
-                    className={`flex gap-3 animate-slide-up ${
+                    data-message-id={message.id}
+                    className={`flex gap-3 animate-slide-up transition-all duration-500 rounded-lg ${
                       message.role === 'user' ? 'justify-end' : 'justify-start'
                     }`}
                   >

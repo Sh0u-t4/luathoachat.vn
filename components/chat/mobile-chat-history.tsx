@@ -47,7 +47,7 @@ export function MobileChatHistory({ onSessionSelect }: MobileChatHistoryProps) {
     },
   });
 
-  const handleLoadSession = async (sessionId: string) => {
+  const handleLoadSession = async (sessionId: string, messageId: string) => {
     hapticFeedback(HapticPatterns.light);
     setLoadingSession(sessionId);
     setSelectedSession(sessionId);
@@ -57,6 +57,13 @@ export function MobileChatHistory({ onSessionSelect }: MobileChatHistoryProps) {
       await new Promise(resolve => setTimeout(resolve, 100));
       await loadChatHistory(sessionId);
       onSessionSelect?.();
+
+      // Dispatch scroll-to-message event after drawer closes
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('chat:history-loaded', {
+          detail: { messageId },
+        }));
+      }, 400);
     } catch (error) {
       console.error('Failed to load session:', error);
     } finally {
@@ -133,7 +140,7 @@ export function MobileChatHistory({ onSessionSelect }: MobileChatHistoryProps) {
             return (
               <button
                 key={session.message_id}
-                onClick={() => handleLoadSession(session.session_id)}
+                onClick={() => handleLoadSession(session.session_id, session.message_id)}
                 disabled={isLoading}
                 className={`
                   w-full text-left p-4 rounded-xl border
