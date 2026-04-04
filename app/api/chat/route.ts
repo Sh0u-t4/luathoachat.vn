@@ -7,13 +7,55 @@ export const dynamic = 'force-dynamic';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_BASE_URL = `https://generativelanguage.googleapis.com/v1beta/models`;
 
+// ── Vietnamese no-diacritics keyword list ────────────────────────────────
+// Common Vietnamese words/phrases (without diacritics) that are NEVER valid English.
+// Used to detect Vietnamese input typed without diacritics.
+const VI_NO_DIACRITICS_KEYWORDS = [
+  // Legal / domain terms
+  'luat', 'nghi dinh', 'thong tu', 'dieu', 'khoan', 'phu luc',
+  'hoa chat', 'muc phat', 'xu phat', 'xu ly', 'vi pham',
+  'cap phep', 'giay phep', 'dang ky', 'khai bao',
+  'san xuat', 'kinh doanh', 'nhap khau', 'xuat khau',
+  'an toan', 'su co', 'phong ngua', 'bao quan', 'luu tru',
+  'nhan hoa chat', 'phan loai', 'tieu chi',
+  'chat doc', 'doc hai', 'nguy hiem', 'han che',
+  'tien chat', 'kiem soat', 'dac biet',
+  'chung chi', 'tu van', 'dao tao', 'huan luyen',
+  'doanh nghiep', 'to chuc', 'ca nhan', 'co so',
+  'bao cao', 'ho so', 'thu tuc', 'quy trinh',
+  'phieu an toan', 'danh muc',
+  'nguon', 'hieu luc', 'chuong', 'mau', 'don',
+  // Common Vietnamese words
+  'la gi', 'nhu the nao', 'bao nhieu', 'the nao', 'o dau',
+  'phai', 'duoc', 'khong', 'nhung', 'cua', 'cho',
+  'trong', 'ngoai', 'tren', 'duoi',
+  'nhu', 'cac', 'mot', 'theo', 'khi', 'neu', 'hoac',
+  'vi sao', 'tai sao', 'bang cach nao',
+  'toi', 'chung toi', 'cong ty',
+  'xin', 'vui long', 'lam on',
+  'hoi', 'tra loi', 'giai thich',
+];
+
 // ── Language detection ─────────────────────────────────────────────────────
 function detectLanguage(query: string): 'vi' | 'en' {
-  const viDiacritics = (query.match(/[\u00C0-\u024F\u1EA0-\u1EFF]/g) || []).length;
-  const ascii = (query.match(/[a-zA-Z]/g) || []).length;
-  const total = query.replace(/\s/g, '').length;
+  const q = query.toLowerCase().trim();
+  if (!q) return 'vi';
+
+  // Step 1: Has Vietnamese diacritics → definitely Vietnamese
+  const viDiacritics = (q.match(/[\u00C0-\u024F\u1EA0-\u1EFF]/g) || []).length;
+  if (viDiacritics > 0) return 'vi';
+
+  // Step 2: Check for Vietnamese no-diacritics keywords
+  for (const kw of VI_NO_DIACRITICS_KEYWORDS) {
+    if (q.includes(kw)) return 'vi';
+  }
+
+  // Step 3: Heuristic — if mostly ASCII and no VN keywords → likely English
+  const ascii = (q.match(/[a-zA-Z]/g) || []).length;
+  const total = q.replace(/\s/g, '').length;
   if (total === 0) return 'vi';
-  if (viDiacritics === 0 && ascii / total > 0.45) return 'en';
+  if (ascii / total > 0.45) return 'en';
+
   return 'vi';
 }
 
@@ -968,7 +1010,7 @@ export async function POST(request: NextRequest) {
     const langPrefix = lang === 'en'
       ? `[LANGUAGE: Respond entirely in English. Use [Source: Decree 26/2026, Article 9] format for citations.]
 [CRITICAL: The VERIFIED FACTS section below contains authoritative legal data extracted from official Vietnamese decrees. You MUST use these facts in your answer. Do NOT say "not in provided materials" if the data appears in VERIFIED FACTS.]\n`
-      : '';
+      : `[NGÔN NGỮ: LUÔN trả lời bằng TIẾNG VIỆT có dấu đầy đủ. Ngay cả khi câu hỏi được viết không dấu (ví dụ: "muc phat", "hoa chat cam"), vẫn PHẢI trả lời bằng tiếng Việt.]\n`;
 
     // 4. Query expansion hint (passed to context when no RAG results)
     const expandedQuery = expandQueryForSearch(query);

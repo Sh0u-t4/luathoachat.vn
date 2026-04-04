@@ -25,6 +25,7 @@ interface ChatContextType {
   loadChatHistory: (sessionId?: string) => Promise<void>;
   chatSessions: Array<{ session_id: string; message_id: string; first_message: string; created_at: string }>;
   deleteSession: (messageId: string) => void;
+  deleteSessionGroup: (sessionId: string) => void;
   removeMessagePair: (messageId: string) => void;
   setShowEmailGate: (show: boolean) => void;
   setShowLoginGate: (show: boolean) => void;
@@ -736,6 +737,54 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
+  // Delete all messages in a session group at once
+  const deleteSessionGroup = useCallback(async (sessionId: string) => {
+    if (typeof window === 'undefined') return;
+
+    // Find all message_ids belonging to this session
+    const messageIds = chatSessions
+      .filter(s => s.session_id === sessionId)
+      .map(s => s.message_id);
+
+    // 1. Remove from state immediately
+    setChatSessions(prev => prev.filter(s => s.session_id !== sessionId));
+
+    // 2. Clear chat box if this session is displayed
+    if (sessionId === activeSessionId) {
+      setMessages([]);
+      setCurrentQuery('');
+      setActiveSessionId(null);
+    }
+
+    // 3. Persist to localStorage + Supabase
+    if (user) {
+      const hiddenKey = `hidden_chats_${user.id}`;
+      const localHidden: string[] = JSON.parse(localStorage.getItem(hiddenKey) || '[]');
+      const updated = Array.from(new Set(localHidden.concat(messageIds)));
+      localStorage.setItem(hiddenKey, JSON.stringify(updated));
+
+      // Mark all in Supabase
+      for (const msgId of messageIds) {
+        try {
+          const { data: existing } = await supabase
+            .from('chat_messages')
+            .select('metadata')
+            .eq('id', msgId)
+            .eq('user_id', user.id)
+            .single();
+
+          await supabase
+            .from('chat_messages')
+            .update({ metadata: { ...(existing?.metadata || {}), hidden: true, hidden_at: new Date().toISOString() } })
+            .eq('id', msgId)
+            .eq('user_id', user.id);
+        } catch (err) {
+          console.warn('[deleteSessionGroup] Supabase update failed for', msgId, err);
+        }
+      }
+    }
+  }, [user, chatSessions, activeSessionId]);
+
 
   return (
     <ChatContext.Provider
@@ -758,6 +807,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         loadChatHistory,
         chatSessions,
         deleteSession,
+        deleteSessionGroup,
         removeMessagePair,
         setShowEmailGate,
         setShowLoginGate,

@@ -6,17 +6,45 @@
 export type ChatLang = 'vi' | 'en';
 
 /**
+ * Vietnamese no-diacritics keywords for frontend language detection.
+ * Subset of backend list — covers most common terms.
+ */
+const VI_KEYWORDS = [
+  'luat', 'nghi dinh', 'thong tu', 'dieu', 'khoan', 'phu luc',
+  'hoa chat', 'muc phat', 'xu phat', 'vi pham', 'cap phep',
+  'giay phep', 'san xuat', 'kinh doanh', 'nhap khau', 'xuat khau',
+  'an toan', 'su co', 'kiem soat', 'chat doc',
+  'chung chi', 'doanh nghiep', 'bao cao', 'thu tuc', 'quy trinh',
+  'danh muc', 'phieu an toan', 'tien chat', 'phan loai',
+  'la gi', 'nhu the nao', 'bao nhieu', 'the nao',
+  'phai', 'duoc', 'khong', 'cua', 'cho', 'theo',
+  'toi', 'chung toi', 'cong ty',
+  'hoi', 'tra loi', 'giai thich',
+];
+
+/**
  * Detect whether the input text is English or Vietnamese.
- * Returns 'en' when there are no Vietnamese diacritics and enough ASCII letters.
- * Defaults to 'vi' in all other cases.
+ * Checks for Vietnamese diacritics first, then Vietnamese no-diacritics keywords,
+ * then falls back to ASCII heuristic. Defaults to 'vi' in ambiguous cases.
  */
 export function detectChatLanguage(text: string): ChatLang {
   if (!text || text.trim().length === 0) return 'vi';
-  const viDiacritics = (text.match(/[\u00C0-\u024F\u1EA0-\u1EFF]/g) || []).length;
-  const asciiLetters = (text.match(/[a-zA-Z]/g) || []).length;
-  const total = text.replace(/\s/g, '').length;
+  const q = text.toLowerCase();
+
+  // Step 1: Has Vietnamese diacritics → definitely Vietnamese
+  const viDiacritics = (q.match(/[\u00C0-\u024F\u1EA0-\u1EFF]/g) || []).length;
+  if (viDiacritics > 0) return 'vi';
+
+  // Step 2: Check for Vietnamese no-diacritics keywords
+  for (const kw of VI_KEYWORDS) {
+    if (q.includes(kw)) return 'vi';
+  }
+
+  // Step 3: Heuristic fallback
+  const asciiLetters = (q.match(/[a-zA-Z]/g) || []).length;
+  const total = q.replace(/\s/g, '').length;
   if (total === 0) return 'vi';
-  if (viDiacritics === 0 && asciiLetters / total > 0.45) return 'en';
+  if (asciiLetters / total > 0.45) return 'en';
   return 'vi';
 }
 

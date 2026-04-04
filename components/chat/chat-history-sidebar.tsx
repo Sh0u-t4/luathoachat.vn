@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { History, MessageSquare, Trash2, ChevronRight, Loader2, Plus, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -13,8 +13,16 @@ import { vi, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth/context';
 
+interface SessionGroup {
+  session_id: string;
+  first_message: string;
+  created_at: string;
+  questionCount: number;
+  message_ids: string[];
+}
+
 export function ChatHistorySidebar() {
-  const { chatSessions, loadChatHistory, isAuthenticated, clearMessages, deleteSession, removeMessagePair, activeSessionId } = useChat();
+  const { chatSessions, loadChatHistory, isAuthenticated, clearMessages, deleteSessionGroup, activeSessionId } = useChat();
   const { user } = useAuth();
   const { openChat } = useChatUI();
   const { t, language } = useLanguage();
@@ -25,11 +33,42 @@ export function ChatHistorySidebar() {
   // Get date-fns locale based on current language
   const dateLocale = language === 'vi' ? vi : enUS;
 
+  // Group chatSessions by session_id
+  const groupedSessions = useMemo<SessionGroup[]>(() => {
+    const map = new Map<string, SessionGroup>();
+
+    for (const s of chatSessions) {
+      const existing = map.get(s.session_id);
+      if (existing) {
+        existing.questionCount += 1;
+        existing.message_ids.push(s.message_id);
+        // Keep the earliest created_at
+        if (new Date(s.created_at) < new Date(existing.created_at)) {
+          existing.created_at = s.created_at;
+          existing.first_message = s.first_message;
+        }
+      } else {
+        map.set(s.session_id, {
+          session_id: s.session_id,
+          first_message: s.first_message,
+          created_at: s.created_at,
+          questionCount: 1,
+          message_ids: [s.message_id],
+        });
+      }
+    }
+
+    // Sort by most recent first
+    return Array.from(map.values()).sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  }, [chatSessions]);
+
   if (!isAuthenticated) {
     return null;
   }
 
-  const handleLoadSession = async (sessionId: string, messageId: string) => {
+  const handleLoadSession = async (sessionId: string) => {
     setLoadingSession(sessionId);
     setSelectedSession(sessionId);
 
@@ -38,16 +77,12 @@ export function ChatHistorySidebar() {
       await new Promise(resolve => setTimeout(resolve, 100));
       await loadChatHistory(sessionId);
 
-      // Open the chat window first, then dispatch scroll-to-top event
-      // after the window's CSS transition (300ms) + React render have completed
       openChat();
       setIsOpen(false);
 
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('chat:history-loaded', {
-          detail: { messageId },
-        }));
-      }, 400); // 300ms for CSS open transition + 100ms render buffer
+        window.dispatchEvent(new CustomEvent('chat:history-loaded'));
+      }, 400);
     } catch (error) {
       console.error('handleLoadSession ERROR:', error);
     } finally {
@@ -69,30 +104,30 @@ export function ChatHistorySidebar() {
     }, 200);
   };
 
-  const handleDeleteSession = (e: React.MouseEvent, messageId: string, sessionId: string, firstMessage: string) => {
+  const handleDeleteGroup = (e: React.MouseEvent, group: SessionGroup) => {
     e.stopPropagation();
-    deleteSession(messageId);
+    deleteSessionGroup(group.session_id);
     toast.success(`Đã ẩn cuộc trò chuyện`, {
-      description: firstMessage.slice(0, 50) + (firstMessage.length > 50 ? '...' : ''),
+      description: group.first_message.slice(0, 50) + (group.first_message.length > 50 ? '...' : ''),
     });
 
-    // If this session is currently displayed, remove just the deleted Q&A pair
-    if (sessionId === activeSessionId || selectedSession === sessionId) {
-      removeMessagePair(messageId);
+    if (selectedSession === group.session_id) {
+      setSelectedSession(null);
     }
   };
 
   const handleRestoreAll = () => {
     if (typeof window !== 'undefined') {
-      // Clear legacy shared key
       localStorage.removeItem('hidden_chat_message_ids');
-      // Clear new user-scoped key
       if (user?.id) {
         localStorage.removeItem(`hidden_chats_${user.id}`);
       }
     }
     window.location.reload();
   };
+
+  // Count total unique sessions for the toggle button
+  const totalSessions = groupedSessions.length;
 
   return (
     <>
@@ -104,7 +139,7 @@ export function ChatHistorySidebar() {
         className="fixed top-20 left-4 z-40 shadow-lg bg-white"
       >
         <History className="w-4 h-4 mr-2" />
-        {t.chat.historyButton} ({chatSessions.length})
+        {t.chat.historyButton} ({totalSessions})
       </Button>
 
       {/* Sidebar */}
@@ -135,7 +170,7 @@ export function ChatHistorySidebar() {
               </div>
               <div className="flex items-center justify-between">
                 <p className="text-sm text-slate-300">
-                  {chatSessions.length} {t.chat.historyCount}
+                  {totalSessions} {t.chat.historyCount}
                 </p>
                 <Button
                   variant="outline"
@@ -151,7 +186,7 @@ export function ChatHistorySidebar() {
 
             <ScrollArea className="h-[calc(100vh-130px)]">
               <div className="p-3 space-y-2">
-                {chatSessions.length === 0 ? (
+                {groupedSessions.length === 0 ? (
                   <div className="text-center py-12 px-4">
                     <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                     <p className="text-slate-500 text-sm">
@@ -159,17 +194,17 @@ export function ChatHistorySidebar() {
                     </p>
                   </div>
                 ) : (
-                  chatSessions.map((session) => {
-                    const isLoading = loadingSession === session.session_id;
-                    const isSelected = selectedSession === session.session_id;
+                  groupedSessions.map((group) => {
+                    const isLoading = loadingSession === group.session_id;
+                    const isSelected = selectedSession === group.session_id;
 
                     return (
                       <div
-                        key={session.message_id}
+                        key={group.session_id}
                         className="relative group"
                       >
                         <button
-                          onClick={() => handleLoadSession(session.session_id, session.message_id)}
+                          onClick={() => handleLoadSession(group.session_id)}
                           disabled={isLoading}
                           className={`w-full text-left p-3 rounded-lg border transition-all hover:shadow-md hover:border-cyan-300 disabled:opacity-60 disabled:cursor-not-allowed pr-10 ${
                             isSelected
@@ -180,14 +215,20 @@ export function ChatHistorySidebar() {
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-slate-800 line-clamp-2 mb-1">
-                                {session.first_message}
+                                {group.first_message}
                               </p>
-                              <p className="text-xs text-slate-500">
-                                {formatDistanceToNow(new Date(session.created_at), {
-                                  addSuffix: true,
-                                  locale: dateLocale,
-                                })}
-                              </p>
+                              <div className="flex items-center gap-2">
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-cyan-100 text-cyan-700 text-[10px] font-medium">
+                                  <MessageSquare className="w-2.5 h-2.5" />
+                                  {group.questionCount} câu hỏi
+                                </span>
+                                <p className="text-xs text-slate-500">
+                                  {formatDistanceToNow(new Date(group.created_at), {
+                                    addSuffix: true,
+                                    locale: dateLocale,
+                                  })}
+                                </p>
+                              </div>
                             </div>
                             {isLoading ? (
                               <Loader2 className="w-4 h-4 text-cyan-500 animate-spin flex-shrink-0" />
@@ -197,10 +238,10 @@ export function ChatHistorySidebar() {
                           </div>
                         </button>
 
-                        {/* Delete button — pure CSS group-hover, always rendered */}
+                        {/* Delete button — hover to show */}
                         {!isLoading && (
                           <button
-                            onClick={(e) => handleDeleteSession(e, session.message_id, session.session_id, session.first_message)}
+                            onClick={(e) => handleDeleteGroup(e, group)}
                             className="absolute top-2 right-2 p-1.5 rounded-md bg-red-50 hover:bg-red-100 text-red-500 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100"
                             title="Ẩn cuộc trò chuyện này"
                           >

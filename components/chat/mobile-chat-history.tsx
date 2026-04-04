@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { MessageSquare, Plus, Loader2, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChat } from './chat-context';
@@ -13,6 +13,13 @@ import { vi, enUS } from 'date-fns/locale';
 
 interface MobileChatHistoryProps {
   onSessionSelect?: () => void;
+}
+
+interface SessionGroup {
+  session_id: string;
+  first_message: string;
+  created_at: string;
+  questionCount: number;
 }
 
 /**
@@ -30,6 +37,33 @@ export function MobileChatHistory({ onSessionSelect }: MobileChatHistoryProps) {
   // Get date-fns locale
   const dateLocale = language === 'vi' ? vi : enUS;
 
+  // Group chatSessions by session_id
+  const groupedSessions = useMemo<SessionGroup[]>(() => {
+    const map = new Map<string, SessionGroup>();
+
+    for (const s of chatSessions) {
+      const existing = map.get(s.session_id);
+      if (existing) {
+        existing.questionCount += 1;
+        if (new Date(s.created_at) < new Date(existing.created_at)) {
+          existing.created_at = s.created_at;
+          existing.first_message = s.first_message;
+        }
+      } else {
+        map.set(s.session_id, {
+          session_id: s.session_id,
+          first_message: s.first_message,
+          created_at: s.created_at,
+          questionCount: 1,
+        });
+      }
+    }
+
+    return Array.from(map.values()).sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  }, [chatSessions]);
+
   // Pull-to-refresh
   const {
     pullDistance,
@@ -40,14 +74,12 @@ export function MobileChatHistory({ onSessionSelect }: MobileChatHistoryProps) {
   } = usePullToRefresh(containerRef, {
     threshold: 80,
     onRefresh: async () => {
-      // Simulate refresh delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      // In production, this would reload chat sessions from server
       hapticFeedback(HapticPatterns.success);
     },
   });
 
-  const handleLoadSession = async (sessionId: string, messageId: string) => {
+  const handleLoadSession = async (sessionId: string) => {
     hapticFeedback(HapticPatterns.light);
     setLoadingSession(sessionId);
     setSelectedSession(sessionId);
@@ -58,11 +90,8 @@ export function MobileChatHistory({ onSessionSelect }: MobileChatHistoryProps) {
       await loadChatHistory(sessionId);
       onSessionSelect?.();
 
-      // Dispatch scroll-to-message event after drawer closes
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('chat:history-loaded', {
-          detail: { messageId },
-        }));
+        window.dispatchEvent(new CustomEvent('chat:history-loaded'));
       }, 400);
     } catch (error) {
       console.error('Failed to load session:', error);
@@ -121,26 +150,26 @@ export function MobileChatHistory({ onSessionSelect }: MobileChatHistoryProps) {
           {t.chat.newChatButton}
         </Button>
         <p className="text-xs text-slate-500 mt-2 text-center">
-          {chatSessions.length} {t.chat.historyCount}
+          {groupedSessions.length} {t.chat.historyCount}
         </p>
       </div>
 
-      {/* Chat Sessions List */}
+      {/* Chat Sessions List — Grouped */}
       <div className="p-3 space-y-2">
-        {chatSessions.length === 0 ? (
+        {groupedSessions.length === 0 ? (
           <div className="text-center py-12 px-4">
             <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-3" />
             <p className="text-slate-500 text-sm">{t.chat.emptyHistory}</p>
           </div>
         ) : (
-          chatSessions.map((session) => {
-            const isLoading = loadingSession === session.session_id;
-            const isSelected = selectedSession === session.session_id;
+          groupedSessions.map((group) => {
+            const isLoading = loadingSession === group.session_id;
+            const isSelected = selectedSession === group.session_id;
 
             return (
               <button
-                key={session.message_id}
-                onClick={() => handleLoadSession(session.session_id, session.message_id)}
+                key={group.session_id}
+                onClick={() => handleLoadSession(group.session_id)}
                 disabled={isLoading}
                 className={`
                   w-full text-left p-4 rounded-xl border
@@ -157,14 +186,20 @@ export function MobileChatHistory({ onSessionSelect }: MobileChatHistoryProps) {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-slate-800 line-clamp-2 mb-1.5">
-                      {session.first_message}
+                      {group.first_message}
                     </p>
-                    <p className="text-xs text-slate-500">
-                      {formatDistanceToNow(new Date(session.created_at), {
-                        addSuffix: true,
-                        locale: dateLocale,
-                      })}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-cyan-100 text-cyan-700 text-[10px] font-medium">
+                        <MessageSquare className="w-2.5 h-2.5" />
+                        {group.questionCount} câu hỏi
+                      </span>
+                      <p className="text-xs text-slate-500">
+                        {formatDistanceToNow(new Date(group.created_at), {
+                          addSuffix: true,
+                          locale: dateLocale,
+                        })}
+                      </p>
+                    </div>
                   </div>
                   {isLoading ? (
                     <Loader2 className="w-5 h-5 text-cyan-500 animate-spin flex-shrink-0 mt-0.5" />
