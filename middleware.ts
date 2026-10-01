@@ -95,7 +95,16 @@ async function isAdminUser(userId: string): Promise<boolean> {
   }
 }
 
+/** true = mọi đường dẫn hiển thị trang rao bán tên miền (public/ban-ten-mien.html) */
+const DOMAIN_FOR_SALE = true;
+
 export async function middleware(request: NextRequest) {
+  if (DOMAIN_FOR_SALE) {
+    const { pathname } = request.nextUrl;
+    if (pathname === '/ban-ten-mien.html' || pathname === '/favicon.ico') return NextResponse.next();
+    return NextResponse.rewrite(new URL('/ban-ten-mien.html', request.url));
+  }
+
   // Nếu không bật bảo trì — cho qua hết
   if (!MAINTENANCE_MODE) {
     return NextResponse.next();
