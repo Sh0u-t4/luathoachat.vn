@@ -4,29 +4,83 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>luathoachat.vn đang được rao bán</title>
-<meta name="description" content="Tên miền luathoachat.vn đang được rao bán. Liên hệ để đưa ra đề nghị.">
+<meta name="description" content="Tên miền luathoachat.vn đang được rao bán. Tên miền .vn chứa đúng từ khóa “luật hóa chất”. Gửi đề nghị giá ngay.">
+<meta property="og:title" content="luathoachat.vn đang được rao bán">
+<meta property="og:description" content="Tên miền .vn chứa đúng từ khóa “luật hóa chất”. Gửi đề nghị giá ngay.">
 <link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#f6f7f9; --card:#fff; --fg:#111827; --muted:#6b7280; --accent:#0f766e; --border:#e5e7eb; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#0b0f14; --card:#121821; --fg:#f3f4f6; --muted:#9ca3af; --accent:#2dd4bf; --border:#1f2937; } }
+  :root { --bg:#070b14; --fg:#f8fafc; --muted:#94a3b8; --a:#22d3ee; --b:#a3e635; --hot:#f59e0b; --line:rgba(255,255,255,.1); }
   * { box-sizing:border-box; }
-  body { margin:0; min-height:100vh; display:grid; place-items:center; padding:16px; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
-  main { width:100%; max-width:560px; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:40px 28px; text-align:center; }
-  .tag { display:inline-block; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); border:1px solid currentColor; border-radius:999px; padding:2px 12px; }
-  h1 { margin:20px 0 8px; font-size:clamp(30px,8vw,44px); line-height:1.1; word-break:break-word; }
-  p { margin:0 0 24px; color:var(--muted); }
-  a.btn { display:inline-block; background:var(--accent); color:var(--bg); text-decoration:none; font-weight:600; padding:12px 24px; border-radius:10px; }
-  a.btn:focus-visible { outline:3px solid var(--fg); outline-offset:2px; }
-  .mail { margin-top:16px; font-size:14px; color:var(--muted); word-break:break-all; }
+  body { margin:0; min-height:100vh; background:var(--bg); color:var(--fg); font:16px/1.6 "Be Vietnam Pro",system-ui,sans-serif; overflow-x:hidden; }
+  body::before { content:""; position:fixed; inset:-20%; z-index:-1;
+    background: radial-gradient(40% 40% at 20% 20%, rgba(34,211,238,.25), transparent 70%),
+                radial-gradient(35% 35% at 85% 30%, rgba(163,230,53,.18), transparent 70%),
+                radial-gradient(40% 40% at 50% 100%, rgba(245,158,11,.15), transparent 70%); }
+  main { max-width:880px; margin:0 auto; padding:64px 16px 40px; text-align:center; }
+  .badge { display:inline-flex; align-items:center; gap:10px; font-weight:800; font-size:14px; letter-spacing:.12em; text-transform:uppercase;
+    color:#1a1200; background:var(--hot); border-radius:999px; padding:8px 18px; box-shadow:0 0 32px rgba(245,158,11,.45); }
+  .dot { width:10px; height:10px; border-radius:50%; background:#dc2626; animation:pulse 1.4s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(220,38,38,.7)} 100%{box-shadow:0 0 0 12px rgba(220,38,38,0)} }
+  h1 { margin:28px 0 12px; font-size:clamp(42px,11vw,96px); font-weight:800; line-height:1; letter-spacing:-.03em; word-break:break-word;
+    background:linear-gradient(90deg,var(--a),var(--b)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .lead { margin:0 auto 32px; max-width:620px; font-size:clamp(17px,2.6vw,21px); color:#cbd5e1; }
+  .lead strong { color:var(--fg); }
+  .cta { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; }
+  .btn { font:inherit; font-weight:800; font-size:18px; border-radius:14px; padding:16px 30px; cursor:pointer; text-decoration:none; border:0; transition:transform .15s; }
+  .btn:hover { transform:translateY(-2px); }
+  .btn:focus-visible { outline:3px solid var(--fg); outline-offset:3px; }
+  .primary { color:#04121a; background:linear-gradient(90deg,var(--a),var(--b)); box-shadow:0 10px 40px rgba(34,211,238,.35); }
+  .ghost { color:var(--fg); background:rgba(255,255,255,.06); border:1px solid var(--line); }
+  .email { margin-top:14px; color:var(--muted); font-size:15px; word-break:break-all; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px; margin:56px 0 0; text-align:left; }
+  .card { background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:16px; padding:20px; }
+  .card b { display:block; font-size:17px; margin-bottom:4px; }
+  .card span { color:var(--muted); font-size:15px; }
+  h2 { margin:56px 0 16px; font-size:22px; }
+  .tags { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
+  .tags span { border:1px solid var(--line); border-radius:999px; padding:6px 16px; color:#cbd5e1; font-size:15px; }
+  footer { margin-top:56px; color:var(--muted); font-size:14px; }
+  @media (prefers-reduced-motion: reduce) { .dot { animation:none; } .btn { transition:none; } }
 </style>
 </head>
 <body>
 <main>
-  <span class="tag">Tên miền đang rao bán</span>
+  <span class="badge"><span class="dot" aria-hidden="true"></span>Tên miền đang rao bán</span>
   <h1>luathoachat.vn</h1>
-  <p>Tên miền .vn ngắn gọn, dễ nhớ cho lĩnh vực luật hóa chất, an toàn hóa chất và tư vấn pháp lý. Nhận đề nghị giá hợp lý.</p>
-  <a class="btn" href="mailto:ctydtpt.locthien@gmail.com?subject=Mua%20t%C3%AAn%20mi%E1%BB%81n%20luathoachat.vn">Gửi đề nghị giá</a>
-  <div class="mail">ctydtpt.locthien@gmail.com</div>
+  <p class="lead">Sở hữu ngay tên miền <strong>.vn</strong> chứa đúng từ khóa <strong>“luật hóa chất”</strong>, tài sản số cho doanh nghiệp trong lĩnh vực hóa chất và pháp lý.</p>
+
+  <div class="cta">
+    <a class="btn primary" href="mailto:ctydtpt.locthien@gmail.com?subject=%C4%90%E1%BB%81%20ngh%E1%BB%8B%20mua%20t%C3%AAn%20mi%E1%BB%81n%20luathoachat.vn">Gửi đề nghị giá</a>
+    <button class="btn ghost" id="copy" type="button">Sao chép email</button>
+  </div>
+  <div class="email">ctydtpt.locthien@gmail.com</div>
+
+  <div class="grid">
+    <div class="card"><b>🇻🇳 Tên miền quốc gia</b><span>Đuôi .vn tạo niềm tin với khách hàng Việt Nam.</span></div>
+    <div class="card"><b>🔎 Đúng từ khóa ngành</b><span>“Luật hóa chất”, cụm từ khách hàng thực sự tìm kiếm.</span></div>
+    <div class="card"><b>✍️ Ngắn, dễ nhớ</b><span>Dễ đọc, dễ gõ, dễ in lên danh thiếp và tài liệu.</span></div>
+    <div class="card"><b>🤝 Hỗ trợ chuyển nhượng</b><span>Hỗ trợ trọn thủ tục chuyển quyền sở hữu tên miền.</span></div>
+  </div>
+
+  <h2>Phù hợp cho</h2>
+  <div class="tags">
+    <span>Tư vấn an toàn hóa chất</span><span>Văn phòng luật</span><span>Phần mềm quản lý hóa chất</span>
+    <span>Cổng thông tin pháp luật</span><span>Đào tạo, huấn luyện</span><span>Kinh doanh hóa chất</span>
+  </div>
+
+  <footer>Nhận mọi đề nghị giá hợp lý</footer>
 </main>
+<script>
+  document.getElementById('copy').onclick = function () {
+    var b = this;
+    navigator.clipboard.writeText('ctydtpt.locthien@gmail.com').then(function () {
+      b.textContent = 'Đã sao chép ✓';
+      setTimeout(function () { b.textContent = 'Sao chép email'; }, 2000);
+    });
+  };
+</script>
 </body>
 </html>
